@@ -1,0 +1,35 @@
+use crate::api::api_config::api_config;
+use crate::app_data::db_app_data::DbAppData;
+use crate::config::WebServerConfig;
+use crate::db::get_conn;
+use actix_web::dev::Server;
+use actix_web::{web, App, HttpServer};
+use web::Data;
+
+pub struct WebServer {
+    pub server: Server,
+}
+
+impl WebServer {
+    pub async fn new(web_server_config: WebServerConfig) -> Self {
+        let port = web_server_config.port.unwrap();
+        let db = get_conn().await;
+        let app_data = Data::new(DbAppData { db });
+        let mut server =
+            HttpServer::new(move || App::new().app_data(app_data.clone()).configure(api_config));
+
+        // 绑定IP地址
+        for bind in web_server_config.bind {
+            server = server.bind((bind, port)).unwrap();
+        }
+
+        // 启动服务器
+        let server = server.run();
+
+        Self { server }
+    }
+
+    pub async fn run(self) {
+        self.server.await.expect("服务器启动失败");
+    }
+}

@@ -1,0 +1,4 @@
+[source,bash]
+----
+sea-orm-cli generate entity --with-serde both --database-url postgres://oss:oss@127.0.0.1/oss -o src/model
+----
