@@ -14,5 +14,5 @@ serde_yaml = "0.9.34-deprecated"
 humantime = "2.3.0"
 tokio = { version = "1.47.1", features = ["rt", "rt-multi-thread", "macros", "signal"] }
 actix-web = "4.11.0"
-sea-orm = { version = "1.1.16", features = ["sqlx-postgres", "runtime-actix-native-tls"] }
+sea-orm = { version = "1.1.16", features = ["sqlx-postgres", "runtime-actix-rustls"] }
 thiserror = "2.0.16"
