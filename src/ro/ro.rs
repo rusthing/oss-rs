@@ -1,15 +1,17 @@
 use crate::ro::ro_result::RoResult;
+use chrono::Utc;
 use serde::Serialize;
 
 #[derive(Serialize)]
 pub struct Ro<T> {
     pub result: RoResult,
     pub msg: String,
-    #[serde(default)]
+    pub timestamp: u64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub extra: Option<T>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub detail: Option<String>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub code: Option<String>,
 }
 
@@ -18,6 +20,7 @@ impl<T> Ro<T> {
         Ro {
             result,
             msg,
+            timestamp: Utc::now().timestamp_millis() as u64,
             extra: None,
             detail: None,
             code: None,
@@ -35,16 +38,16 @@ impl<T> Ro<T> {
     pub fn fail(msg: String) -> Self {
         Self::new(RoResult::Fail, msg)
     }
-    pub fn extra(mut self, extra: T) -> Self {
-        self.extra = Some(extra);
+    pub fn extra(mut self, extra: Option<T>) -> Self {
+        self.extra = extra;
         self
     }
-    pub fn detail(mut self, detail: String) -> Self {
-        self.detail = Some(detail);
+    pub fn detail(mut self, detail: Option<String>) -> Self {
+        self.detail = detail;
         self
     }
-    pub fn code(mut self, code: String) -> Self {
-        self.code = Some(code);
+    pub fn code(mut self, code: Option<String>) -> Self {
+        self.code = code;
         self
     }
 }
