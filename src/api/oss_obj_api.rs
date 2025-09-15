@@ -23,8 +23,5 @@ pub async fn get_by_id(
         }
     };
     let ro = oss_obj_svc::get_by_id(&data.db, id).await?;
-    if ro.extra == None {
-        return Err(ApiError::NotFound());
-    }
     Ok(HttpResponse::Ok().json(ro))
 }
