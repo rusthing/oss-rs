@@ -6,6 +6,8 @@ use crate::svc::svc_error::SvcError;
 use chrono::Utc;
 use sea_orm::{DatabaseConnection, TransactionTrait};
 use std::fs;
+use std::fs::File;
+use std::io::Read;
 use tempfile::NamedTempFile;
 
 /// 根据id获取对象信息
@@ -73,4 +75,25 @@ pub async fn upload(
     // 提交事务
     txn.commit().await?;
     Ok(Ro::success("上传成功".to_string()))
+}
+
+pub async fn download(
+    db: &DatabaseConnection,
+    obj_id: u64,
+    ext: String,
+) -> Result<(String, Vec<u8>), SvcError> {
+    let ro = get_by_id(db, obj_id).await?;
+
+    // 获取文件路径
+    let model = ro.extra.unwrap();
+
+
+    let file_path = model.path.unwrap();
+
+    // 读取文件内容
+    let mut file = File::open(&file_path)?;
+
+    let mut content = Vec::new();
+    file.read_to_end(&mut content)?;
+    Ok((model.name, content))
 }

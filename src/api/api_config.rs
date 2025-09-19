@@ -1,4 +1,4 @@
-use crate::api::oss_obj_api::{get_by_id, upload};
+use crate::api::oss_obj_api::{download, get_by_id, upload};
 use crate::config::CONFIG;
 use actix_multipart::form::MultipartFormConfig;
 use actix_web::web;
@@ -10,6 +10,7 @@ pub fn api_config(cfg: &mut web::ServiceConfig) {
         web::scope("/oss")
             .app_data(MultipartFormConfig::default().total_limit(total_limit))
             .service(get_by_id) // 根据id查询
-            .service(upload), // 上传
+            .service(upload) // 上传
+            .service(download), // 下载
     );
 }

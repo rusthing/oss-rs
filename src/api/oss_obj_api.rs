@@ -4,6 +4,7 @@ use crate::svc::oss_obj_svc;
 use crate::utils::upload::UploadForm;
 use actix_multipart::form::MultipartForm;
 use actix_web::{get, post, web, HttpResponse, Responder, Result};
+use regex::Regex;
 use std::collections::HashMap;
 
 #[get("/obj/get-by-id")]
@@ -50,23 +51,32 @@ pub async fn upload(
     Ok(HttpResponse::Ok().json(ro))
 }
 
-// #[get("/obj/download/{obj_id}")]
-// pub async fn download(
-//     data: web::Data<DbAppData>,
-//     obj_id: web::Path<String>,
-// ) -> Result<HttpResponse, ApiError> {
-//     let obj_id = obj_id.into_inner();
-//     // 如果obj_id有后缀，获取后缀并去掉
-//     // 判断obj_id是否是19位数字加上点再加上任意字符
-//     let regex = Regex::new(r"^(\d{19})\.?([a-zA-Z0-9]*)$").unwrap();
-//     let (obj_id, suffix) = if let Some(captures) = regex.captures(&obj_id) {
-//         // 匹配成功，提取19位数字和后缀
-//         let obj_id = captures.get(1).unwrap().as_str().to_string();
-//         let suffix = captures.get(2).unwrap().as_str().to_string();
-//         (obj_id, Some(suffix))
-//     } else {
-//         return Err(ApiError::ValidationError("无效的ID".to_string()));
-//     };
-//
-//     Ok(HttpResponse::Ok().json(""))
-// }
+#[get("/obj/download/{obj_id}")]
+pub async fn download(
+    data: web::Data<DbAppData>,
+    obj_id: web::Path<String>,
+) -> Result<impl Responder, ApiError> {
+    let obj_id = obj_id.into_inner();
+    // 如果obj_id有后缀，获取后缀并去掉
+    // 判断obj_id是否是19位数字加上点再加上任意字符
+    let regex = Regex::new(r"^(\d+)\.?([a-zA-Z0-9]*)$").unwrap();
+    let (obj_id, ext) = if let Some(captures) = regex.captures(&obj_id) {
+        // 匹配成功，提取19位数字和后缀
+        let obj_id = captures.get(1).unwrap().as_str().to_string();
+        let ext = captures.get(2).unwrap().as_str().to_string();
+        (obj_id, Some(ext))
+    } else {
+        return Err(ApiError::ValidationError("无效的ID".to_string()));
+    };
+
+    let (file_name, content) =
+        oss_obj_svc::download(&data.db, obj_id.parse::<u64>().unwrap(), ext.unwrap()).await?;
+
+    Ok(HttpResponse::Ok()
+        .content_type("application/octet-stream")
+        .append_header((
+            "Content-Disposition",
+            format!("attachment; filename=\"{}\"", file_name),
+        ))
+        .body(content))
+}
