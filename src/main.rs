@@ -2,7 +2,8 @@ use chrono::Local;
 use clap::Parser;
 use env_logger::Builder;
 use log::{debug, info};
-use oss_rs::config::Config;
+use oss_rs::config::{Config, CONFIG};
+use oss_rs::id_worker::init_id_worker;
 use oss_rs::web_server::WebServer;
 use std::io::Write;
 
@@ -54,9 +55,12 @@ async fn main() -> std::io::Result<()> {
 
     debug!("加载配置文件...");
     let config = Config::new(args.config_file, args.port);
+    CONFIG.set(config).expect("无法设置全局配置");
 
-    info!("创建Web服务器({:?})并运行...", config.web_server);
-    WebServer::new(config.web_server).await.run().await;
+    debug!("初始化ID生成器...");
+    init_id_worker();
+
+    WebServer::new().await.run().await;
 
     info!("退出程序");
     Ok(())

@@ -9,10 +9,18 @@ log = "0.4.28"
 clap = { version = "4.5.47", features = ["derive"] }
 chrono = "0.4.42"
 env_logger = "0.11.8"
-serde = { version = "1.0.219", features = ["derive"] }
+serde = { version = "1.0.224", features = ["derive"] }
 serde_yaml = "0.9.34-deprecated"
 humantime = "2.3.0"
 tokio = { version = "1.47.1", features = ["rt", "rt-multi-thread", "macros", "signal"] }
 actix-web = "4.11.0"
+actix-multipart = "0.7.2"
 sea-orm = { version = "1.1.16", features = ["sqlx-postgres", "runtime-actix-rustls"] }
 thiserror = "2.0.16"
+bytesize = { version = "2.1.0", features = ["serde"] }
+regex = "1.11.2"
+serde_json = "1.0.143"
+tempfile = "3.22.0"
+uuid = { version = "1.18.1", features = ["v4"] }
+time = "0.3.43"
+idworker = "0.3.0"

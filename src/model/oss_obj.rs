@@ -17,6 +17,10 @@ pub struct Model {
     pub create_timestamp: Option<i64>,
     pub updator_id: Option<i64>,
     pub update_timestamp: Option<i64>,
+    pub ref_count: i64,
+    pub is_completed: bool,
+    pub ext: Option<String>,
+    pub hash: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

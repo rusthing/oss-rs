@@ -1,0 +1,3 @@
+curl -v --request POST \
+--url http://localhost:9840/oss/obj/upload/test \
+-F file=@/Users/zbz/Downloads/mothers.mp4

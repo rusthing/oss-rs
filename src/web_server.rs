@@ -1,9 +1,11 @@
 use crate::api::api_config::api_config;
 use crate::app_data::db_app_data::DbAppData;
-use crate::config::WebServerConfig;
-use crate::db::get_conn;
+use crate::config::CONFIG;
+use crate::utils::db::get_conn;
+use actix_multipart::form::MultipartFormConfig;
 use actix_web::dev::Server;
 use actix_web::{web, App, HttpServer};
+use log::info;
 use web::Data;
 
 pub struct WebServer {
@@ -11,7 +13,10 @@ pub struct WebServer {
 }
 
 impl WebServer {
-    pub async fn new(web_server_config: WebServerConfig) -> Self {
+    pub async fn new() -> Self {
+        let web_server_config = CONFIG.get().unwrap().web_server.clone();
+        info!("创建Web服务器({:?})并运行...", web_server_config);
+
         let port = web_server_config.port.unwrap();
         let db = get_conn().await;
         let app_data = Data::new(DbAppData { db });
