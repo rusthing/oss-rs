@@ -1,8 +1,10 @@
 use crate::model::oss_obj::{Entity, Model};
-use sea_orm::{ActiveModelTrait, DatabaseConnection, DbErr, EntityTrait, IntoActiveModel};
+use sea_orm::{
+    ActiveModelTrait, DatabaseConnection, DatabaseTransaction, DbErr, EntityTrait, IntoActiveModel,
+};
 
 /// 添加
-pub async fn insert(db: &DatabaseConnection, model: Model) -> Result<Model, DbErr> {
+pub async fn insert(db: &DatabaseTransaction, model: Model) -> Result<Model, DbErr> {
     let active_model = model.into_active_model();
     active_model.insert(db).await
 }

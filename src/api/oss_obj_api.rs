@@ -42,9 +42,10 @@ pub async fn upload(
     let file_name = form.file.file_name.unwrap();
     let file_size = form.file.size;
     let temp_file = form.file.file;
+    let hash: Option<String> = form.hash.map(|t| t.into_inner());
 
     // 保存文件到指定的bucket中
-    let ro = oss_obj_svc::upload(&data.db, &bucket, &file_name, file_size, temp_file).await?;
+    let ro = oss_obj_svc::upload(&data.db, &bucket, &file_name, file_size, hash, temp_file).await?;
 
     Ok(HttpResponse::Ok().json(ro))
 }
