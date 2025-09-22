@@ -37,12 +37,16 @@ pub async fn upload(
             .unwrap()
             .as_millis() as i64,
     );
-    let ext = file_name
-        .split(".")
-        .last()
-        .unwrap()
-        .to_string()
-        .to_lowercase();
+    let ext = if file_name.contains('.') {
+        file_name
+            .split('.')
+            .last()
+            .unwrap()
+            .to_string()
+            .to_lowercase()
+    } else {
+        String::new()
+    };
     let name = format!("{}.{}", id, ext);
     let url = Some(format!("/oss/obj/preview/{}", name));
     let ref_count = 1;
@@ -92,7 +96,7 @@ pub async fn download(
     // 获取文件路径
     let model = ro.extra.ok_or_else(|| SvcError::NotFound())?;
 
-    if model.ext.as_ref().unwrap() != &ext {
+    if model.ext.unwrap().as_str() != &ext {
         return Err(SvcError::NotFound());
     }
 
