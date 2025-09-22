@@ -12,8 +12,6 @@ use thiserror::Error;
 pub enum ApiError {
     #[error("参数校验错误: {0}")]
     ValidationError(String),
-    #[error("找不到数据")]
-    NotFound(),
     #[error("服务层错误")]
     SvcError(#[from] SvcError),
 }
@@ -24,8 +22,10 @@ impl ResponseError for ApiError {
     fn status_code(&self) -> StatusCode {
         match self {
             ApiError::ValidationError(_) => StatusCode::BAD_REQUEST,
-            ApiError::NotFound() => StatusCode::NOT_FOUND,
-            _ => StatusCode::INTERNAL_SERVER_ERROR,
+            ApiError::SvcError(error) => match error {
+                SvcError::NotFound() => StatusCode::NOT_FOUND,
+                _ => StatusCode::INTERNAL_SERVER_ERROR,
+            },
         }
     }
 
@@ -33,8 +33,10 @@ impl ResponseError for ApiError {
     fn error_response(&self) -> HttpResponse {
         let ro_result = match self {
             ApiError::ValidationError(_) => RoResult::IllegalArgument,
-            ApiError::NotFound() => RoResult::Warn,
-            _ => RoResult::Fail,
+            ApiError::SvcError(error) => match error {
+                SvcError::NotFound() => RoResult::Warn,
+                _ => RoResult::Fail,
+            },
         };
         let mut body: Ro<()> = Ro::new(ro_result, self.to_string());
         if let ApiError::SvcError(_) = self {

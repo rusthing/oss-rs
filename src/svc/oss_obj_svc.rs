@@ -85,8 +85,11 @@ pub async fn download(
     let ro = get_by_id(db, obj_id).await?;
 
     // 获取文件路径
-    let model = ro.extra.unwrap();
+    let model = ro.extra.ok_or_else(|| SvcError::NotFound())?;
 
+    if model.ext.as_ref().unwrap() != &ext {
+        return Err(SvcError::NotFound());
+    }
 
     let file_path = model.path.unwrap();
 

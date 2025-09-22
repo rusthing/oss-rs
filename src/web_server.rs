@@ -2,7 +2,6 @@ use crate::api::api_config::api_config;
 use crate::app_data::db_app_data::DbAppData;
 use crate::config::CONFIG;
 use crate::utils::db::get_conn;
-use actix_multipart::form::MultipartFormConfig;
 use actix_web::dev::Server;
 use actix_web::{web, App, HttpServer};
 use log::info;
