@@ -7,7 +7,9 @@ use chrono::Utc;
 use sea_orm::{DatabaseConnection, TransactionTrait};
 use std::fs;
 use std::fs::File;
-use std::io::Read;
+use std::io::{Read, Seek, SeekFrom};
+
+use crate::config::CONFIG;
 use tempfile::NamedTempFile;
 
 /// 根据id获取对象信息
@@ -55,7 +57,7 @@ pub async fn upload(
     let model = Model {
         id,
         bucket: bucket.to_string(),
-        name,
+        name: file_name.to_string(),
         ext: Some(ext),
         size: Some(file_size as i64),
         hash,
@@ -77,11 +79,14 @@ pub async fn upload(
     Ok(Ro::success("上传成功".to_string()))
 }
 
+// 修改 download 函数中的文件读取部分
 pub async fn download(
     db: &DatabaseConnection,
     obj_id: u64,
     ext: String,
-) -> Result<(String, Vec<u8>), SvcError> {
+    start: Option<u64>,
+    mut end: Option<u64>,
+) -> Result<(String, u64, u64, Vec<u8>, Option<u64>, Option<u64>), SvcError> {
     let ro = get_by_id(db, obj_id).await?;
 
     // 获取文件路径
@@ -93,10 +98,28 @@ pub async fn download(
 
     let file_path = model.path.unwrap();
 
-    // 读取文件内容
+    // 读取文件指定范围内容
     let mut file = File::open(&file_path)?;
-
     let mut content = Vec::new();
-    file.read_to_end(&mut content)?;
-    Ok((model.name, content))
+
+    let file_size = file.metadata()?.len();
+    let mut length = file_size;
+    if start.is_some() && end.is_none() {
+        end = Some(length - 1);
+    }
+    if let (Some(start_pos), Some(end_pos)) = (start, end) {
+        file.seek(SeekFrom::Start(start_pos))?;
+        length = end_pos - start_pos + 1;
+        let size = CONFIG.get().unwrap().oss.download_buffer_size.as_u64();
+        if length > size {
+            length = size;
+            end = Some(start_pos + length - 1);
+        }
+        content.resize(length as usize, 0);
+        file.read_exact(&mut content)?;
+    } else {
+        file.read_to_end(&mut content)?;
+    }
+
+    Ok((model.name, file_size, length, content, start, end))
 }
