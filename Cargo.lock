@@ -1726,6 +1726,7 @@ dependencies = [
  "sea-orm",
  "serde",
  "serde_yaml",
+ "sha2",
  "tempfile",
  "thiserror",
  "tokio",

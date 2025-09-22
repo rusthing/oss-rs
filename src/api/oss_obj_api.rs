@@ -1,12 +1,35 @@
 use crate::api::api_error::ApiError;
 use crate::app_data::db_app_data::DbAppData;
 use crate::svc::oss_obj_svc;
+use crate::utils::file_utils::calc_hash;
 use crate::utils::upload::UploadForm;
 use actix_multipart::form::MultipartForm;
-use actix_web::{get, post, web, HttpRequest, HttpResponse, Result};
+use actix_web::{delete, get, post, web, HttpRequest, HttpResponse, Result};
 use once_cell::sync::Lazy;
 use regex::Regex;
 use std::collections::HashMap;
+
+#[delete("/obj/remove")]
+pub async fn remove(
+    data: web::Data<DbAppData>,
+    query: web::Query<HashMap<String, String>>,
+) -> Result<HttpResponse, ApiError> {
+    let id = match query.get("id") {
+        Some(id_str) => match id_str.parse::<u64>() {
+            Ok(id_val) => id_val,
+            Err(_) => {
+                return Err(ApiError::ValidationError(
+                    "以下参数传值不正确{id}".to_string(),
+                ));
+            }
+        },
+        None => {
+            return Err(ApiError::ValidationError("缺少以下参数{id}".to_string()));
+        }
+    };
+    let ro = oss_obj_svc::remove(&data.db, id).await?;
+    Ok(HttpResponse::Ok().json(ro))
+}
 
 #[get("/obj/get-by-id")]
 pub async fn get_by_id(
@@ -44,9 +67,13 @@ pub async fn upload(
     let file_name = form.file.file_name.unwrap();
     let file_size = form.file.size;
     let temp_file = form.file.file;
-    let hash: Option<String> = form.hash.map(|t| t.into_inner());
+    let provided_hash: Option<String> = form.hash.map(|t| t.into_inner());
+    let computed_hash = calc_hash(&temp_file.path());
+    if provided_hash.is_some() && provided_hash.unwrap() != computed_hash {
+        return Err(ApiError::ValidationError("文件Hash值不匹配".to_string()));
+    }
+    let hash = Some(computed_hash);
 
-    // 保存文件到指定的bucket中
     let ro = oss_obj_svc::upload(&data.db, &bucket, &file_name, file_size, hash, temp_file).await?;
 
     Ok(HttpResponse::Ok().json(ro))

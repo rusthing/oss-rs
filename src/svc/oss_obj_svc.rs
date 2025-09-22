@@ -1,4 +1,6 @@
+use crate::config::CONFIG;
 use crate::dao::oss_obj_dao;
+use crate::dao::oss_obj_dao::increment_ref_count_atomic;
 use crate::id_worker::ID_WORKER;
 use crate::model::oss_obj::Model;
 use crate::ro::ro::Ro;
@@ -8,14 +10,11 @@ use sea_orm::{DatabaseConnection, TransactionTrait};
 use std::fs;
 use std::fs::File;
 use std::io::{Read, Seek, SeekFrom};
-
-use crate::config::CONFIG;
 use tempfile::NamedTempFile;
 
 /// 根据id获取对象信息
 pub async fn get_by_id(db: &DatabaseConnection, id: u64) -> Result<Ro<Model>, SvcError> {
-    let result = oss_obj_dao::get_by_id(db, id).await?;
-    Ok(Ro::success("查询成功".to_string()).extra(result))
+    Ok(Ro::success("查询成功".to_string()).extra(oss_obj_dao::get_by_id(db, id).await?))
 }
 
 /// 上传对象
@@ -27,9 +26,26 @@ pub async fn upload(
     hash: Option<String>,
     temp_file: NamedTempFile,
 ) -> Result<Ro<Model>, SvcError> {
-    // 开启事务
-    let txn = db.begin().await?;
-    // let result = oss_obj_dao::get_by_id(db, id).await?;
+    let mut retry_count: i8 = 10;
+    loop {
+        let one =
+            oss_obj_dao::get_by_hash_and_size(db, hash.clone().unwrap().as_str(), file_size as i64)
+                .await?;
+        if one.is_none() {
+            break;
+        }
+        let result = increment_ref_count_atomic(db, one.clone().unwrap()).await?;
+        if result.rows_affected() != 1 {
+            retry_count -= 1;
+            if retry_count <= 0 {
+                return Err(SvcError::DatabaseError(sea_orm::DbErr::RecordNotUpdated));
+            }
+            continue;
+        }
+        return Ok(Ro::success("上传成功".to_string())
+            .extra(oss_obj_dao::get_by_id(db, one.unwrap().id as u64).await?));
+    }
+
     let id = ID_WORKER.get().unwrap().next_id() as i64;
     let now = Some(
         std::time::SystemTime::now()
@@ -74,13 +90,45 @@ pub async fn upload(
         creator_id: None,
         updator_id: None,
     };
-    oss_obj_dao::insert(&txn, model).await?;
+
+    // 开启事务
+    let tx = db.begin().await?;
+    oss_obj_dao::insert(&tx, model).await?;
 
     fs::rename(temp_file.path(), &new_file_path)?;
 
     // 提交事务
-    txn.commit().await?;
-    Ok(Ro::success("上传成功".to_string()))
+    tx.commit().await?;
+
+    Ok(Ro::success("上传成功".to_string()).extra(oss_obj_dao::get_by_id(db, id as u64).await?))
+}
+
+pub async fn remove(db: &DatabaseConnection, obj_id: u64) -> Result<Ro<()>, SvcError> {
+    let model = oss_obj_dao::get_by_id(db, obj_id).await?;
+    if model.is_none() {
+        return Err(SvcError::NotFound());
+    }
+    let model = model.unwrap();
+    let id = model.id as u64;
+
+    // 开启事务
+    let exec_result = oss_obj_dao::decrement_ref_count_atomic(db, model).await?;
+    if exec_result.rows_affected() != 1 {
+        return Err(SvcError::DatabaseError(sea_orm::DbErr::RecordNotUpdated));
+    }
+    let one = oss_obj_dao::get_by_id(db, id).await?;
+    if one.is_none() {
+        return Err(SvcError::NotFound());
+    }
+    let one = one.unwrap();
+    if one.ref_count <= 0 {
+        let tx = db.begin().await?;
+        oss_obj_dao::delete(db, one.clone()).await?;
+        let path = one.path.unwrap();
+        fs::remove_file(path)?;
+        tx.commit().await?;
+    }
+    Ok(Ro::success("删除成功".to_string()))
 }
 
 // 修改 download 函数中的文件读取部分

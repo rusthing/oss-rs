@@ -1,4 +1,4 @@
-use crate::api::oss_obj_api::{download, get_by_id, preview, upload};
+use crate::api::oss_obj_api::{download, get_by_id, preview, remove, upload};
 use crate::config::CONFIG;
 use actix_multipart::form::MultipartFormConfig;
 use actix_web::web;
@@ -12,6 +12,7 @@ pub fn api_config(cfg: &mut web::ServiceConfig) {
             .service(get_by_id) // 根据id查询
             .service(upload) // 上传
             .service(download) // 下载
-            .service(preview), // 预览
+            .service(preview) // 预览
+            .service(remove), // 删除
     );
 }

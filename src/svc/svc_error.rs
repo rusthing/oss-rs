@@ -8,8 +8,8 @@ use thiserror::Error;
 pub enum SvcError {
     #[error("找不到数据")]
     NotFound(),
-    #[error("IO错误")]
+    #[error("IO错误: {0}")]
     IoError(#[from] Error),
-    #[error("数据库错误")]
+    #[error("数据库错误: {0}")]
     DatabaseError(#[from] DbErr),
 }
