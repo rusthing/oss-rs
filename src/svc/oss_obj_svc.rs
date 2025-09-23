@@ -5,6 +5,7 @@ use crate::id_worker::ID_WORKER;
 use crate::model::oss_obj::Model;
 use crate::ro::ro::Ro;
 use crate::svc::svc_error::SvcError;
+use crate::vo::oss_obj::OssObjVo;
 use chrono::Utc;
 use sea_orm::{DatabaseConnection, TransactionTrait};
 use std::fs;
@@ -13,8 +14,9 @@ use std::io::{Read, Seek, SeekFrom};
 use tempfile::NamedTempFile;
 
 /// 根据id获取对象信息
-pub async fn get_by_id(db: &DatabaseConnection, id: u64) -> Result<Ro<Model>, SvcError> {
-    Ok(Ro::success("查询成功".to_string()).extra(oss_obj_dao::get_by_id(db, id).await?))
+pub async fn get_by_id(db: &DatabaseConnection, id: u64) -> Result<Ro<OssObjVo>, SvcError> {
+    let one = oss_obj_dao::get_by_id(db, id).await?;
+    Ok(Ro::success("查询成功".to_string()).extra(one.map(|v| OssObjVo::from(v))))
 }
 
 /// 上传对象
@@ -25,7 +27,7 @@ pub async fn upload(
     file_size: usize,
     hash: Option<String>,
     temp_file: NamedTempFile,
-) -> Result<Ro<Model>, SvcError> {
+) -> Result<Ro<OssObjVo>, SvcError> {
     let mut retry_count: i8 = 10;
     loop {
         let one =
@@ -42,8 +44,8 @@ pub async fn upload(
             }
             continue;
         }
-        return Ok(Ro::success("上传成功".to_string())
-            .extra(oss_obj_dao::get_by_id(db, one.unwrap().id as u64).await?));
+        let one = oss_obj_dao::get_by_id(db, one.unwrap().id as u64).await?;
+        return Ok(Ro::success("上传成功".to_string()).extra(one.map(|v| OssObjVo::from(v))));
     }
 
     let id = ID_WORKER.get().unwrap().next_id() as i64;
@@ -99,8 +101,8 @@ pub async fn upload(
 
     // 提交事务
     tx.commit().await?;
-
-    Ok(Ro::success("上传成功".to_string()).extra(oss_obj_dao::get_by_id(db, id as u64).await?))
+    let one = oss_obj_dao::get_by_id(db, id as u64).await?;
+    Ok(Ro::success("上传成功".to_string()).extra(one.map(|v| OssObjVo::from(v))))
 }
 
 pub async fn remove(db: &DatabaseConnection, obj_id: u64) -> Result<Ro<()>, SvcError> {
