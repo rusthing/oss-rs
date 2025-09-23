@@ -1,12 +1,8 @@
-use chrono::Local;
 use clap::Parser;
 use log::{debug, info};
 use oss_rs::config::{Config, CONFIG};
 use oss_rs::id_worker::init_id_worker;
 use oss_rs::web_server::WebServer;
-use std::fmt;
-use tracing_subscriber::fmt::format::Writer;
-use tracing_subscriber::fmt::time::{FormatTime, LocalTime};
 
 /// 网络监控工具
 ///
@@ -31,15 +27,6 @@ struct Args {
     /// Web服务器的端口号
     #[arg(short, long)]
     port: Option<u16>,
-}
-
-// 自定义时间格式化器
-struct CustomTimeFormat;
-
-impl FormatTime for CustomTimeFormat {
-    fn format_time(&self, w: &mut Writer<'_>) -> fmt::Result {
-        write!(w, "{}", Local::now().format("%Y-%m-%d %H:%M:%S"))
-    }
 }
 
 #[tokio::main]
