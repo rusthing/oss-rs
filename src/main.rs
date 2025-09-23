@@ -1,11 +1,12 @@
 use chrono::Local;
 use clap::Parser;
-use env_logger::Builder;
 use log::{debug, info};
 use oss_rs::config::{Config, CONFIG};
 use oss_rs::id_worker::init_id_worker;
 use oss_rs::web_server::WebServer;
-use std::io::Write;
+use std::fmt;
+use tracing_subscriber::fmt::format::Writer;
+use tracing_subscriber::fmt::time::{FormatTime, LocalTime};
 
 /// 网络监控工具
 ///
@@ -32,21 +33,19 @@ struct Args {
     port: Option<u16>,
 }
 
+// 自定义时间格式化器
+struct CustomTimeFormat;
+
+impl FormatTime for CustomTimeFormat {
+    fn format_time(&self, w: &mut Writer<'_>) -> fmt::Result {
+        write!(w, "{}", Local::now().format("%Y-%m-%d %H:%M:%S"))
+    }
+}
+
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
-    // 初始化日志实现库
-    Builder::from_default_env()
-        // 自定义日志格式
-        .format(|buf, record| {
-            writeln!(
-                buf,
-                "{} [{}] {}",
-                Local::now().format("%Y-%m-%d %H:%M:%S"),
-                format!("{:<5}", record.level()),
-                record.args()
-            )
-        })
-        .init();
+    // 初始化日志(不能自定义时间格式，否则sea_orm日志打印不出来)
+    tracing_subscriber::fmt::init();
 
     info!("程序正在启动……");
 

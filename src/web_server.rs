@@ -1,7 +1,7 @@
 use crate::api::api_config::api_config;
 use crate::app_data::db_app_data::DbAppData;
 use crate::config::CONFIG;
-use crate::utils::db::get_conn;
+use crate::utils::db::init_db;
 use actix_web::dev::Server;
 use actix_web::{web, App, HttpServer};
 use log::info;
@@ -17,7 +17,7 @@ impl WebServer {
         info!("创建Web服务器({:?})并运行...", web_server_config);
 
         let port = web_server_config.port.unwrap();
-        let db = get_conn().await;
+        let db = init_db().await;
         let app_data = Data::new(DbAppData { db });
         let mut server =
             HttpServer::new(move || App::new().app_data(app_data.clone()).configure(api_config));

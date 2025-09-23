@@ -1,5 +1,5 @@
 use bytesize::ByteSize;
-use log::warn;
+use log::{info, warn};
 use serde::{Deserialize, Serialize};
 use std::sync::OnceLock;
 use std::{env, fs};
@@ -11,12 +11,15 @@ pub static CONFIG: OnceLock<Config> = OnceLock::new();
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "kebab-case")]
 pub struct Config {
-    /// Web服务器
-    #[serde(default = "web_server_default")]
-    pub web_server: WebServerConfig,
     /// oss
     #[serde(default = "oss_default")]
     pub oss: OssConfig,
+    /// db
+    #[serde(default = "db_default")]
+    pub db: DbConfig,
+    /// Web服务器
+    #[serde(default = "web_server_default")]
+    pub web_server: WebServerConfig,
     /// id_worker
     #[serde(default = "id_worker_default")]
     pub id_worker: IdWorkerConfig,
@@ -24,10 +27,66 @@ pub struct Config {
 
 fn config_default() -> Config {
     Config {
+        db: db_default(),
         web_server: web_server_default(),
         oss: oss_default(),
         id_worker: id_worker_default(),
     }
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "kebab-case")]
+pub struct OssConfig {
+    /// 文件根目录
+    #[serde(default = "file_root_dir_default")]
+    pub file_root_dir: String,
+    /// 上传文件限制的大小
+    #[serde(default = "upload_file_limit_size_default")]
+    pub upload_file_limit_size: ByteSize,
+    /// 上传缓冲区大小
+    #[serde(default = "upload_buffer_size_default")]
+    pub upload_buffer_size: ByteSize,
+    /// 下载缓冲区大小
+    #[serde(default = "download_buffer_size_default")]
+    pub download_buffer_size: ByteSize,
+}
+fn oss_default() -> OssConfig {
+    OssConfig {
+        file_root_dir: file_root_dir_default(),
+        upload_file_limit_size: upload_file_limit_size_default(),
+        upload_buffer_size: upload_buffer_size_default(),
+        download_buffer_size: download_buffer_size_default(),
+    }
+}
+
+fn file_root_dir_default() -> String {
+    "oss".to_string()
+}
+
+fn upload_file_limit_size_default() -> ByteSize {
+    ByteSize::mib(300)
+}
+fn upload_buffer_size_default() -> ByteSize {
+    ByteSize::mib(1)
+}
+
+fn download_buffer_size_default() -> ByteSize {
+    ByteSize::mib(1)
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "kebab-case")]
+pub struct DbConfig {
+    #[serde(default = "url_default")]
+    pub url: String,
+}
+
+fn url_default() -> String {
+    "".to_string()
+}
+
+fn db_default() -> DbConfig {
+    DbConfig { url: url_default() }
 }
 
 fn web_server_default() -> WebServerConfig {
@@ -60,45 +119,6 @@ fn port_default() -> Option<u16> {
     Some(9840)
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
-#[serde(rename_all = "kebab-case")]
-pub struct OssConfig {
-    /// 文件根目录
-    #[serde(default = "file_root_dir_default")]
-    pub file_root_dir: String,
-    /// 上传文件限制的大小
-    #[serde(default = "upload_file_limit_size_default")]
-    pub upload_file_limit_size: ByteSize,
-    /// 上传缓冲区大小
-    #[serde(default = "upload_buffer_size_default")]
-    pub upload_buffer_size: ByteSize,
-    /// 下载缓冲区大小
-    #[serde(default = "download_buffer_size_default")]
-    pub download_buffer_size: ByteSize,
-}
-
-fn oss_default() -> OssConfig {
-    OssConfig {
-        file_root_dir: file_root_dir_default(),
-        upload_file_limit_size: upload_file_limit_size_default(),
-        upload_buffer_size: upload_buffer_size_default(),
-        download_buffer_size: download_buffer_size_default(),
-    }
-}
-fn file_root_dir_default() -> String {
-    "oss".to_string()
-}
-
-fn upload_file_limit_size_default() -> ByteSize {
-    ByteSize::mib(300)
-}
-
-fn upload_buffer_size_default() -> ByteSize {
-    ByteSize::mib(1)
-}
-fn download_buffer_size_default() -> ByteSize {
-    ByteSize::mib(1)
-}
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "kebab-case")]
 pub struct IdWorkerConfig {
@@ -206,7 +226,10 @@ impl Config {
             config.web_server.port = port;
         }
 
-        // info!("检查配置是否符合规范");
+        info!("检查配置是否符合规范");
+        if config.db.url.is_empty() {
+            panic!("配置文件中没有配置db.url(数据库连接字符串)");
+        }
 
         config
     }

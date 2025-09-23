@@ -1,8 +1,11 @@
-use sea_orm::{Database, DatabaseConnection};
+use crate::config::CONFIG;
+use sea_orm::{ConnectOptions, Database, DatabaseConnection};
 
-pub async fn get_conn() -> DatabaseConnection {
+pub async fn init_db() -> DatabaseConnection {
+    let db_config = CONFIG.get().unwrap().db.clone();
+
+    let mut opt = ConnectOptions::new(db_config.url);
+    opt.sqlx_logging_level(log::LevelFilter::Trace);
     // 连接数据库
-    Database::connect("postgres://oss:oss@127.0.0.1/oss")
-        .await
-        .expect("连接数据库失败")
+    Database::connect(opt).await.expect("连接数据库失败")
 }
