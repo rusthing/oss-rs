@@ -3,6 +3,7 @@ use crate::app_data::db_app_data::DbAppData;
 use crate::config::CONFIG;
 use crate::utils::db::init_db;
 use actix_web::dev::Server;
+use actix_web::middleware::Logger;
 use actix_web::{web, App, HttpServer};
 use log::info;
 use web::Data;
@@ -19,8 +20,12 @@ impl WebServer {
         let port = web_server_config.port.unwrap();
         let db = init_db().await;
         let app_data = Data::new(DbAppData { db });
-        let mut server =
-            HttpServer::new(move || App::new().app_data(app_data.clone()).configure(api_config));
+        let mut server = HttpServer::new(move || {
+            App::new()
+                .wrap(Logger::default())
+                .app_data(app_data.clone())
+                .configure(api_config)
+        });
 
         // 绑定IP地址
         for bind in web_server_config.bind {
