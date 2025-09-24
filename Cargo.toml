@@ -23,7 +23,10 @@ tempfile = "3.22.0"
 idworker = "0.3.0"
 once_cell = "1.21.3"
 sha2 = "0.10.9"
-tracing-subscriber = { version = "0.3.20", features = ["env-filter", "json"] }
+tracing-subscriber = { version = "0.3.20", features = ["env-filter", "json", "chrono", "tracing-log"] }
 tracing-appender = "0.2.3"
 o2o = "0.5.4"
 tracing = "0.1.41"
+tracing-core = "0.1.34"
+colored = "3.0.0"
+tracing-log = "0.2.0"
