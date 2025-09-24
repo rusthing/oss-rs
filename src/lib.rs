@@ -3,6 +3,7 @@ pub mod app_data;
 pub mod config;
 pub mod dao;
 pub mod id_worker;
+pub mod log;
 pub mod model;
 pub mod ro;
 pub mod svc;

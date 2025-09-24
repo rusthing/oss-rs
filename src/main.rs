@@ -2,6 +2,7 @@ use clap::Parser;
 use log::{debug, info};
 use oss_rs::config::{Config, CONFIG};
 use oss_rs::id_worker::init_id_worker;
+use oss_rs::log::init_log;
 use oss_rs::web_server::WebServer;
 
 /// 网络监控工具
@@ -31,8 +32,7 @@ struct Args {
 
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
-    // 初始化日志(不能自定义时间格式，否则sea_orm日志打印不出来)
-    tracing_subscriber::fmt::init();
+    init_log()?;
 
     info!("程序正在启动……");
 

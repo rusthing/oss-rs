@@ -1,5 +1,5 @@
 use bytesize::ByteSize;
-use log::{info, warn};
+use log::info;
 use serde::{Deserialize, Serialize};
 use std::sync::OnceLock;
 use std::{env, fs};
@@ -193,16 +193,10 @@ impl Config {
             let config_file_name = concat!(env!("CARGO_PKG_NAME"), ".yml");
             exe_file_path.pop(); // 移除可执行文件名
             let config_file_path = exe_file_path.join(&config_file_name);
-            match fs::read_to_string(config_file_path) {
-                Ok(content) => Some(content),
-                Err(e) => {
-                    warn!(
-                        "读取配置文件内容出错，可能是配置文件不存在，将使用默认配置: \n{}",
-                        e
-                    );
-                    None
-                }
-            }
+            Some(
+                fs::read_to_string(config_file_path)
+                    .expect("读取配置文件失败，可能是配置文件不存在"),
+            )
         };
 
         // 解析配置文件
