@@ -190,7 +190,8 @@ impl Config {
         } else {
             // 如果未指定配置文件路径
             let mut exe_file_path = env::current_exe().expect("获取可执行文件路径失败");
-            let config_file_name = concat!(env!("CARGO_PKG_NAME"), ".yml");
+            let exe_file_name_without_ext = exe_file_path.file_stem().unwrap().to_str().unwrap();
+            let config_file_name = format!("{}.yml", exe_file_name_without_ext);
             exe_file_path.pop(); // 移除可执行文件名
             let config_file_path = exe_file_path.join(&config_file_name);
             Some(
@@ -220,7 +221,7 @@ impl Config {
             config.web_server.port = port;
         }
 
-        info!("检查配置是否符合规范");
+        info!("检查配置是否符合规范...");
         if config.db.url.is_empty() {
             panic!("配置文件中没有配置db.url(数据库连接字符串)");
         }

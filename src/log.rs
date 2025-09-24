@@ -1,4 +1,3 @@
-use colored::*;
 use std::{env, fs};
 use tracing_core::{Event, Level, Subscriber};
 use tracing_log::NormalizeEvent;
@@ -99,10 +98,17 @@ pub fn init_log() -> Result<(), std::io::Error> {
 
     // 文件输出层
     let mut exe_file_path = env::current_exe().expect("获取可执行文件路径失败");
+    let exe_file_name_without_ext = exe_file_path
+        .file_stem()
+        .unwrap()
+        .to_str()
+        .unwrap()
+        .to_string();
     exe_file_path.pop(); // 移除可执行文件名
     let log_dir = exe_file_path.join("log");
     fs::create_dir_all(log_dir.as_path())?;
-    let file_appender = tracing_appender::rolling::hourly(log_dir, "oss-rs.log");
+    let file_appender =
+        tracing_appender::rolling::hourly(log_dir, format!("{}.log", exe_file_name_without_ext));
     let (non_blocking, _guard) = tracing_appender::non_blocking(file_appender);
     let file_layer = fmt::layer()
         .with_timer(ChronoLocal::new("%Y-%m-%d %H:%M:%S%.6f".to_string()))
