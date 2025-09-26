@@ -2,6 +2,7 @@ pub mod api;
 pub mod app_data;
 pub mod config;
 pub mod dao;
+pub mod env;
 pub mod id_worker;
 pub mod log;
 pub mod model;

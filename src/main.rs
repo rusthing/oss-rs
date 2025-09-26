@@ -1,6 +1,7 @@
 use clap::Parser;
 use log::{debug, info};
-use oss_rs::config::{Config, CONFIG};
+use oss_rs::config::init_config;
+use oss_rs::env::init_env;
 use oss_rs::id_worker::init_id_worker;
 use oss_rs::log::init_log;
 use oss_rs::web_server::WebServer;
@@ -32,6 +33,8 @@ struct Args {
 
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
+    init_env();
+
     init_log()?;
 
     info!("程序正在启动……");
@@ -40,8 +43,7 @@ async fn main() -> std::io::Result<()> {
     let args = Args::parse();
 
     debug!("加载配置文件...");
-    let config = Config::new(args.config_file, args.port);
-    CONFIG.set(config).expect("无法设置全局配置");
+    init_config(args.config_file, args.port);
 
     debug!("初始化ID生成器...");
     init_id_worker();
