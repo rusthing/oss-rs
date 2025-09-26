@@ -4,6 +4,7 @@ use oss_rs::config::init_config;
 use oss_rs::env::init_env;
 use oss_rs::id_worker::init_id_worker;
 use oss_rs::log::init_log;
+use oss_rs::migration::migrate;
 use oss_rs::web_server::WebServer;
 
 /// 网络监控工具
@@ -33,17 +34,22 @@ struct Args {
 
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
+    info!("程序正在启动……");
+
+    info!("初始化环境变量...");
     init_env();
 
+    info!("初始化日志系统...");
     init_log()?;
-
-    info!("程序正在启动……");
 
     debug!("解析命令行参数...");
     let args = Args::parse();
 
     debug!("加载配置文件...");
     init_config(args.config_file, args.port);
+
+    debug!("升级数据库版本...");
+    migrate().await.expect("升级数据库版本失败");
 
     debug!("初始化ID生成器...");
     init_id_worker();

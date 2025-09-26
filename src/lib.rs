@@ -5,6 +5,7 @@ pub mod dao;
 pub mod env;
 pub mod id_worker;
 pub mod log;
+pub mod migration;
 pub mod model;
 pub mod ro;
 pub mod svc;
