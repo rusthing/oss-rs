@@ -1,5 +1,6 @@
 use crate::config::CONFIG;
 use crate::dao::{oss_obj_dao, oss_obj_ref_dao};
+use crate::env::ENV;
 use crate::id_worker::ID_WORKER;
 use crate::model::{oss_obj, oss_obj_ref};
 use crate::ro::ro::Ro;
@@ -20,7 +21,10 @@ pub async fn get_by_id(
     obj_ref_id: u64,
 ) -> Result<Ro<OssObjRefVo>, SvcError> {
     let one = oss_obj_ref_dao::get_by_id(db, obj_ref_id as i64).await?;
-    Ok(Ro::success("查询成功".to_string()).extra(one.map(OssObjRefVo::from)))
+    Ok(Ro::success("查询成功".to_string()).extra(match one {
+        Some(one) => Some(OssObjRefVo::from(one)),
+        _ => return Err(SvcError::NotFound()),
+    }))
 }
 
 /// 上传对象
@@ -38,7 +42,10 @@ pub async fn upload(
     let one =
         oss_obj_dao::get_by_hash_and_size(&tx, hash.clone().unwrap().as_str(), file_size as i64)
             .await?;
-    let (obj_id, new_file_path) = if one.is_some() {
+
+    // 判断对象是否存在
+    let obj_existed = one.is_some();
+    let (obj_id, new_file_path) = if obj_existed {
         // 如果已经上传过该文件，则直接返回之前的对象ID和存放路径
         let one = one.unwrap();
         (one.id, one.path.unwrap())
@@ -54,7 +61,11 @@ pub async fn upload(
         // 根据当前时间，创建yyyy/MM/dd/HH的目录，并将文件存入此目录中
         let datetime = Utc.timestamp_opt(now as i64, 0).unwrap();
         let date_path = datetime.format("%Y/%m/%d/%H").to_string();
-        let storage_dir = std::path::Path::new("storage")
+        let storage_dir = ENV
+            .get()
+            .unwrap()
+            .app_dir
+            .join("storage")
             .join(bucket.to_string())
             .join(&date_path);
         fs::create_dir_all(&storage_dir)?;
@@ -97,16 +108,21 @@ pub async fn upload(
     )
     .await?;
 
-    // 将临时文件移动到目标目录中
-    let (source, destination) = (temp_file.path(), &new_file_path);
-    match fs::rename(source, destination) {
-        Ok(_) => {}
-        Err(e) if is_cross_device_error(&e) => {
-            // 如果为跨设备错误，使用 copy + remove 替代
-            fs::copy(source, destination)?;
-            fs::remove_file(source)?;
+    if obj_existed {
+        // 如果对象已经存在，则直接关闭并删除临时文件
+        temp_file.close()?;
+    } else {
+        // 如果对象不存在，则移动临时文件到目标目录中
+        let (source, destination) = (temp_file.path(), &new_file_path);
+        match fs::rename(source, destination) {
+            Ok(_) => {}
+            Err(e) if is_cross_device_error(&e) => {
+                // 如果为跨设备错误，使用 copy + remove 替代
+                fs::copy(source, destination)?;
+                temp_file.close()?;
+            }
+            Err(e) => return Err(e.into()),
         }
-        Err(e) => return Err(e.into()),
     }
 
     // 提交事务

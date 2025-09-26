@@ -42,16 +42,16 @@ async fn main() -> std::io::Result<()> {
     info!("初始化日志系统...");
     init_log()?;
 
-    debug!("解析命令行参数...");
+    info!("解析命令行参数...");
     let args = Args::parse();
 
-    debug!("加载配置文件...");
+    info!("加载配置文件...");
     init_config(args.config_file, args.port);
 
-    debug!("升级数据库版本...");
+    info!("升级数据库版本...");
     migrate().await.expect("升级数据库版本失败");
 
-    debug!("初始化ID生成器...");
+    info!("初始化ID生成器...");
     init_id_worker();
 
     WebServer::new().await.run().await;
