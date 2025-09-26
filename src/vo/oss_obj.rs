@@ -19,8 +19,6 @@ pub struct OssObjVo {
     pub bucket: String,
     #[from(~.clone().map(|v|v.to_string()))]
     pub hash: Option<String>,
-    #[from(~.to_string())]
-    pub ref_count: String,
     #[from(~.clone().map(|v|v.to_string()))]
     pub size: Option<String>,
     #[from(~.clone().map(|v|v.to_string()))]

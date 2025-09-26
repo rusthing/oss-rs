@@ -1,4 +1,4 @@
-use crate::api::oss_obj_api::{download, get_by_id, preview, remove, upload};
+use crate::api::oss_obj_ref_api::{download, get_by_id, preview, remove, upload};
 use crate::config::CONFIG;
 use actix_multipart::form::MultipartFormConfig;
 use actix_web::web;

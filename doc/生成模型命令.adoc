@@ -1,4 +1,4 @@
 [source,bash]
 ----
-sea-orm-cli generate entity --with-serde both --tables oss_obj --database-url postgres://oss:oss@127.0.0.1/oss -o src/model
+sea-orm-cli generate entity --model-extra-derives Default --with-serde both --ignore-tables databasechangelog,databasechangeloglock --database-url postgres://oss:oss@127.0.0.1/oss -o src/model
 ----

@@ -1,6 +1,6 @@
 use crate::api::api_error::ApiError;
 use crate::app_data::db_app_data::DbAppData;
-use crate::svc::oss_obj_svc;
+use crate::svc::oss_obj_ref_svc;
 use crate::utils::file_utils::calc_hash;
 use crate::utils::upload::UploadForm;
 use actix_multipart::form::MultipartForm;
@@ -9,29 +9,8 @@ use once_cell::sync::Lazy;
 use regex::Regex;
 use std::collections::HashMap;
 
-#[delete("/obj/remove")]
-pub async fn remove(
-    data: web::Data<DbAppData>,
-    query: web::Query<HashMap<String, String>>,
-) -> Result<HttpResponse, ApiError> {
-    let id = match query.get("id") {
-        Some(id_str) => match id_str.parse::<u64>() {
-            Ok(id_val) => id_val,
-            Err(_) => {
-                return Err(ApiError::ValidationError(
-                    "以下参数传值不正确{id}".to_string(),
-                ));
-            }
-        },
-        None => {
-            return Err(ApiError::ValidationError("缺少以下参数{id}".to_string()));
-        }
-    };
-    let ro = oss_obj_svc::remove(&data.db, id).await?;
-    Ok(HttpResponse::Ok().json(ro))
-}
-
-#[get("/obj/get-by-id")]
+/// 根据id获取对象引用
+#[get("/obj-ref/get-by-id")]
 pub async fn get_by_id(
     data: web::Data<DbAppData>,
     query: web::Query<HashMap<String, String>>,
@@ -49,11 +28,12 @@ pub async fn get_by_id(
             return Err(ApiError::ValidationError("缺少以下参数{id}".to_string()));
         }
     };
-    let ro = oss_obj_svc::get_by_id(&data.db, id).await?;
+    let ro = oss_obj_ref_svc::get_by_id(&data.db, id).await?;
     Ok(HttpResponse::Ok().json(ro))
 }
 
-#[post("/obj/upload/{bucket}")]
+/// 上传对象引用
+#[post("/obj-ref/upload/{bucket}")]
 pub async fn upload(
     data: web::Data<DbAppData>,
     bucket: web::Path<String>,
@@ -74,19 +54,20 @@ pub async fn upload(
     }
     let hash = Some(computed_hash);
 
-    let ro = oss_obj_svc::upload(&data.db, &bucket, &file_name, file_size, hash, temp_file).await?;
+    let ro = oss_obj_ref_svc::upload(&data.db, &bucket, &file_name, file_size, hash, temp_file).await?;
 
     Ok(HttpResponse::Ok().json(ro))
 }
 
-#[get("/obj/download/{obj_id}")]
+/// 下载对象引用
+#[get("/obj-ref/download/{obj_id}")]
 pub async fn download(
     data: web::Data<DbAppData>,
     obj_id: web::Path<String>,
 ) -> Result<HttpResponse, ApiError> {
     let (obj_id, ext) = parse_obj_id(&obj_id.into_inner())?;
 
-    let (file_name, _file_size, length, content, ..) = oss_obj_svc::download(
+    let (file_name, _file_size, length, content, ..) = oss_obj_ref_svc::download(
         &data.db,
         obj_id.parse::<u64>().unwrap(),
         ext.unwrap(),
@@ -98,7 +79,8 @@ pub async fn download(
     Ok(response_octet_stream(file_name, length, content))
 }
 
-#[get("/obj/preview/{obj_id}")]
+/// 预览对象引用
+#[get("/obj-ref/preview/{obj_id}")]
 pub async fn preview(
     req: HttpRequest,
     obj_id: web::Path<String>,
@@ -128,7 +110,7 @@ pub async fn preview(
         .parse::<u64>()
         .map_err(|_| ApiError::ValidationError("无效的ID".to_string()))?;
 
-    let (file_name, file_size, length, content, start, end) = oss_obj_svc::download(
+    let (file_name, file_size, length, content, start, end) = oss_obj_ref_svc::download(
         &data.db,
         obj_id_num,
         ext.clone().unwrap_or_default(),
@@ -160,6 +142,29 @@ pub async fn preview(
         }
         None => Ok(response_octet_stream(file_name, length, content)),
     }
+}
+
+/// 移除对象引用
+#[delete("/obj-ref/remove")]
+pub async fn remove(
+    data: web::Data<DbAppData>,
+    query: web::Query<HashMap<String, String>>,
+) -> Result<HttpResponse, ApiError> {
+    let id = match query.get("id") {
+        Some(id_str) => match id_str.parse::<u64>() {
+            Ok(id_val) => id_val,
+            Err(_) => {
+                return Err(ApiError::ValidationError(
+                    "以下参数传值不正确{id}".to_string(),
+                ));
+            }
+        },
+        None => {
+            return Err(ApiError::ValidationError("缺少以下参数{id}".to_string()));
+        }
+    };
+    let ro = oss_obj_ref_svc::remove(&data.db, id).await?;
+    Ok(HttpResponse::Ok().json(ro))
 }
 
 fn response_partial_content(

@@ -4,33 +4,34 @@ use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, Default)]
-#[sea_orm(table_name = "oss_obj")]
+#[sea_orm(table_name = "oss_obj_ref")]
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false, unique)]
     pub id: i64,
+    pub obj_id: i64,
     pub name: String,
     pub bucket: String,
-    pub path: Option<String>,
-    pub size: Option<i64>,
-    pub url: Option<String>,
     pub creator_id: Option<i64>,
     pub create_timestamp: Option<i64>,
     pub updator_id: Option<i64>,
     pub update_timestamp: Option<i64>,
-    pub is_completed: bool,
-    pub ext: Option<String>,
-    pub hash: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-    #[sea_orm(has_many = "super::oss_obj_ref::Entity")]
-    OssObjRef,
+    #[sea_orm(
+        belongs_to = "super::oss_obj::Entity",
+        from = "Column::ObjId",
+        to = "super::oss_obj::Column::Id",
+        on_update = "Restrict",
+        on_delete = "Restrict"
+    )]
+    OssObj,
 }
 
-impl Related<super::oss_obj_ref::Entity> for Entity {
+impl Related<super::oss_obj::Entity> for Entity {
     fn to() -> RelationDef {
-        Relation::OssObjRef.def()
+        Relation::OssObj.def()
     }
 }
 
