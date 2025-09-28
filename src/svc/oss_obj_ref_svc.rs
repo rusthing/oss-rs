@@ -8,7 +8,7 @@ use crate::svc::svc_error::SvcError;
 use crate::utils::file_utils::{get_file_ext, is_cross_device_error};
 use crate::utils::time_utils::get_current_timestamp;
 use crate::vo::oss_obj_ref::OssObjRefVo;
-use chrono::{TimeZone, Utc};
+use chrono::{Local, TimeZone};
 use sea_orm::{DatabaseConnection, TransactionTrait};
 use std::fs;
 use std::fs::File;
@@ -59,7 +59,7 @@ pub async fn upload(
         let url = Some(format!("/oss/obj/preview/{}", name));
         let is_completed = true;
         // 根据当前时间，创建yyyy/MM/dd/HH的目录，并将文件存入此目录中
-        let datetime = Utc.timestamp_opt(now as i64, 0).unwrap();
+        let datetime = Local.timestamp_opt((now / 1000) as i64, 0).unwrap();
         let date_path = datetime.format("%Y/%m/%d/%H").to_string();
         let storage_dir = ENV
             .get()
@@ -132,31 +132,6 @@ pub async fn upload(
     Ok(Ro::success("上传成功".to_string()).extra(one.map(OssObjRefVo::from)))
 }
 
-pub async fn remove(db: &DatabaseConnection, obj_ref_id: u64) -> Result<Ro<()>, SvcError> {
-    // 开启事务
-    let tx = db.begin().await?;
-
-    let one = oss_obj_ref_dao::get_by_id(&tx, obj_ref_id as i64).await?;
-    let (obj_ref_model, obj_model) = one.ok_or(SvcError::NotFound())?;
-
-    // 删除对象引用
-    oss_obj_ref_dao::delete(&tx, obj_ref_model).await?;
-
-    // 如果对象没有引用，则删除对象
-    if oss_obj_ref_dao::count_by_obj_id(&tx, obj_model.id).await? == 0 {
-        oss_obj_dao::delete(&tx, obj_model.clone()).await?;
-
-        // 删除文件
-        let path = obj_model.path.unwrap();
-        fs::remove_file(path)?;
-    }
-
-    // 提交事务
-    tx.commit().await?;
-
-    Ok(Ro::success("删除成功".to_string()))
-}
-
 // 下载
 pub async fn download(
     db: &DatabaseConnection,
@@ -199,4 +174,29 @@ pub async fn download(
     }
 
     Ok((obj_ref_model.name, file_size, length, content, start, end))
+}
+
+pub async fn remove(db: &DatabaseConnection, obj_ref_id: u64) -> Result<Ro<()>, SvcError> {
+    // 开启事务
+    let tx = db.begin().await?;
+
+    let one = oss_obj_ref_dao::get_by_id(&tx, obj_ref_id as i64).await?;
+    let (obj_ref_model, obj_model) = one.ok_or(SvcError::NotFound())?;
+
+    // 删除对象引用
+    oss_obj_ref_dao::delete(&tx, obj_ref_model).await?;
+
+    // 如果对象没有引用，则删除对象
+    if oss_obj_ref_dao::count_by_obj_id(&tx, obj_model.id).await? == 0 {
+        oss_obj_dao::delete(&tx, obj_model.clone()).await?;
+
+        // 删除文件
+        let path = obj_model.path.unwrap();
+        fs::remove_file(path)?;
+    }
+
+    // 提交事务
+    tx.commit().await?;
+
+    Ok(Ro::success("删除成功".to_string()))
 }
