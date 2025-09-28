@@ -6,7 +6,7 @@ use serde_with::skip_serializing_none;
 
 #[skip_serializing_none] // 忽略空字段(好像必须放在#[derive(o2o, Serialize)]的上方才能起效)
 #[derive(o2o, Serialize)]
-#[from((oss_obj_ref::Model, Option<oss_obj::Model>))]
+#[from((oss_obj_ref::Model, oss_obj::Model))]
 #[serde(rename_all = "camelCase")]
 pub struct OssObjRefVo {
     #[from(0,~.id.to_string())]
@@ -26,6 +26,6 @@ pub struct OssObjRefVo {
     #[from(0,~.update_timestamp.clone().map(|v|v.to_string()))]
     pub update_timestamp: Option<String>,
 
-    #[from(1,OssObjVo::from(~.clone().unwrap()))]
+    #[from(1,OssObjVo::from(~.clone()))]
     oss_obj: OssObjVo,
 }

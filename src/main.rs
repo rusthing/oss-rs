@@ -1,5 +1,5 @@
 use clap::Parser;
-use log::{debug, info};
+use log::info;
 use oss_rs::config::init_config;
 use oss_rs::env::init_env;
 use oss_rs::id_worker::init_id_worker;

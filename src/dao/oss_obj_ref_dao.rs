@@ -37,7 +37,7 @@ where
 }
 
 /// 根据id查询
-pub async fn get_by_id<C>(db: &C, id: i64) -> Result<Option<(Model, Option<oss_obj::Model>)>, DbErr>
+pub async fn get_by_id<C>(db: &C, id: i64) -> Result<Option<(Model, oss_obj::Model)>, DbErr>
 where
     C: ConnectionTrait,
 {
@@ -45,6 +45,7 @@ where
         .find_also_related(oss_obj::Entity)
         .one(db)
         .await
+        .map(|result| result.and_then(|(model, obj_opt)| obj_opt.map(|obj| (model, obj))))
 }
 
 /// 根据对象id查询数量

@@ -137,10 +137,7 @@ pub async fn remove(db: &DatabaseConnection, obj_ref_id: u64) -> Result<Ro<()>, 
     let tx = db.begin().await?;
 
     let one = oss_obj_ref_dao::get_by_id(&tx, obj_ref_id as i64).await?;
-    let (obj_ref_model, obj_model) = match one {
-        Some((ref_model, Some(obj_model))) => (ref_model, obj_model),
-        _ => return Err(SvcError::NotFound()),
-    };
+    let (obj_ref_model, obj_model) = one.ok_or(SvcError::NotFound())?;
 
     // 删除对象引用
     oss_obj_ref_dao::delete(&tx, obj_ref_model).await?;
@@ -169,10 +166,7 @@ pub async fn download(
     mut end: Option<u64>,
 ) -> Result<(String, u64, u64, Vec<u8>, Option<u64>, Option<u64>), SvcError> {
     let one = oss_obj_ref_dao::get_by_id(db, obj_ref_id as i64).await?;
-    let (obj_ref_model, obj_model) = match one {
-        Some((ref_model, Some(obj_model))) => (ref_model, obj_model),
-        _ => return Err(SvcError::NotFound()),
-    };
+    let (obj_ref_model, obj_model) = one.ok_or(SvcError::NotFound())?;
     // FIXME: 扩展名不对也不行
     // if obj_ref_model.ext.unwrap().as_str() != &ext {
     //     return Err(SvcError::NotFound());
