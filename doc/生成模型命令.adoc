@@ -1,4 +1,0 @@
-[source,bash]
-----
-sea-orm-cli generate entity --model-extra-derives Default --with-serde both --ignore-tables _sqlx_migrations --database-url postgres://ossrs:ossrs@127.0.0.1/ossrs -o src/model
-----

@@ -16,8 +16,8 @@ where
         model.id = ID_WORKER.get().unwrap().next_id() as i64;
     }
     // 当创建时间未设置时，设置创建时间和修改时间
-    if model.create_timestamp.is_none() {
-        let now = Some(get_current_timestamp() as i64);
+    if model.create_timestamp == 0 {
+        let now = get_current_timestamp() as i64;
         model.create_timestamp = now;
         model.update_timestamp = now;
     }

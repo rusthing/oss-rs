@@ -1,3 +1,4 @@
 pub mod api_config;
-pub mod oss_obj_ref_api;
 mod api_error;
+pub mod oss_bucket_api;
+pub mod oss_obj_ref_api;

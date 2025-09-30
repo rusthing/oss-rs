@@ -49,9 +49,9 @@ pub async fn upload(
     if provided_hash.is_some() && provided_hash.unwrap() != computed_hash {
         return Err(ApiError::ValidationError("文件Hash值不匹配".to_string()));
     }
-    let hash = Some(computed_hash);
+    let hash = computed_hash;
 
-    let ro = oss_obj_ref_svc::upload(&bucket, &file_name, file_size, hash, temp_file).await?;
+    let ro = oss_obj_ref_svc::upload(&bucket, &file_name, file_size, &hash, temp_file).await?;
 
     Ok(HttpResponse::Ok().json(ro))
 }

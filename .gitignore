@@ -1,3 +1,8 @@
 /target
 .idea
 storage
+
+# Ignore PowerDesigner files
+*.ldb
+*.pjb
+*.pdb

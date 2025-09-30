@@ -1,4 +1,4 @@
-use crate::api::oss_obj_ref_api::{download, get_by_id, preview, remove, upload};
+use crate::api::{oss_bucket_api, oss_obj_ref_api};
 use crate::settings::SETTINGS;
 use actix_multipart::form::MultipartFormConfig;
 use actix_web::web;
@@ -9,10 +9,11 @@ pub fn api_config(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/oss")
             .app_data(MultipartFormConfig::default().total_limit(total_limit))
-            .service(get_by_id) // 根据id查询
-            .service(upload) // 上传
-            .service(download) // 下载
-            .service(preview) // 预览
-            .service(remove), // 删除
+            .service(oss_obj_ref_api::get_by_id) // 根据id查询
+            .service(oss_obj_ref_api::upload) // 上传
+            .service(oss_obj_ref_api::download) // 下载
+            .service(oss_obj_ref_api::preview) // 预览
+            .service(oss_obj_ref_api::remove) // 删除
+            .service(oss_bucket_api::get_by_id), // 根据id查询
     );
 }

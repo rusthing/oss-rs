@@ -1,0 +1,34 @@
+= 常用命令
+
+== 新增数据库版本
+
+. 配置连接数据库的环境变量，示例如下:
++
+..env
+[source,ini]
+----
+DATABASE_URL=postgres://ossrs:ossrs@127.0.0.1/ossrs
+----
++
+. 执行新增数据库版本
++
+[source,bash]
+----
+sqlx migrate add <版本名称>
+----
++
+[NOTE]
+====
+版本名称: 例如 `create-table`、`alert-table`、`init-data`、`update-data`
+====
+. 上面的命令会在`migrations`目录下生成一个文件，文件名格式为 `V<版本号>_<版本名称>.sql`，例如 `V20220101000000_create-table.sql`
+. 在生成的文件中编写SQL语句，并保存
+. 每次运行程序都会自动判断是否需要执行数据库迁移，如果需要则执行迁移
+
+== 生成模型
+
+[source,bash]
+----
+sea-orm-cli generate entity --model-extra-derives Default --with-serde both --ignore-tables _sqlx_migrations --database-url postgres://ossrs:ossrs@127.0.0.1/ossrs -o src/model
+----
+

@@ -8,13 +8,13 @@
 /* Table: oss_bucket                                            */
 /*==============================================================*/
 create table oss_bucket (
-   _id                  INT8                 not null,
-   name                 VARCHAR(50)          not null,
-   _creator_id          INT8                 not null,
-   _create_timestamp    INT8                 not null,
-   _updator_id          INT8                 not null,
-   _update_timestamp    INT8                 not null,
-   constraint PK_OSS_BUCKET primary key (_id)
+                            _id                  INT8                 not null,
+                            name                 VARCHAR(50)          not null,
+                            _creator_id          INT8                 not null,
+                            _create_timestamp    INT8                 not null,
+                            _updator_id          INT8                 not null,
+                            _update_timestamp    INT8                 not null,
+                            constraint PK_OSS_BUCKET primary key (_id)
 );
 
 comment on table oss_bucket is
@@ -42,25 +42,25 @@ comment on column oss_bucket._update_timestamp is
 /* Index: oss_bucket_PK                                         */
 /*==============================================================*/
 create unique index oss_bucket_PK on oss_bucket (
-_id
-);
+                                                 _id
+    );
 
 /*==============================================================*/
 /* Table: oss_obj                                               */
 /*==============================================================*/
 create table oss_obj (
-   _id                  INT8                 not null,
-   name                 VARCHAR(100)         not null,
-   is_completed         BOOL                 not null default true,
-   path                 VARCHAR(100)         not null,
-   size                 INT8                 not null,
-   hash                 VARCHAR(64)          not null,
-   url                  VARCHAR(200)         not null,
-   _creator_id          INT8                 not null,
-   _create_timestamp    INT8                 not null,
-   _updator_id          INT8                 not null,
-   _update_timestamp    INT8                 not null,
-   constraint PK_OSS_OBJ primary key (_id)
+                         _id                  INT8                 not null,
+                         name                 VARCHAR(100)         not null,
+                         is_completed         BOOL                 not null default true,
+                         path                 VARCHAR(100)         not null,
+                         size                 INT8                 not null,
+                         hash                 VARCHAR(64)          not null,
+                         url                  VARCHAR(200)         not null,
+                         _creator_id          INT8                 not null,
+                         _create_timestamp    INT8                 not null,
+                         _updator_id          INT8                 not null,
+                         _update_timestamp    INT8                 not null,
+                         constraint PK_OSS_OBJ primary key (_id)
 );
 
 comment on table oss_obj is
@@ -104,23 +104,23 @@ comment on column oss_obj._update_timestamp is
 /* Index: oss_obj_PK                                            */
 /*==============================================================*/
 create unique index oss_obj_PK on oss_obj (
-_id
-);
+                                           _id
+    );
 
 /*==============================================================*/
 /* Table: oss_obj_ref                                           */
 /*==============================================================*/
 create table oss_obj_ref (
-   _id                  INT8                 not null,
-   obj_id               INT8                 not null,
-   bucket_id            INT8                 not null,
-   name                 VARCHAR(100)         not null,
-   ext                  VARCHAR(10)          not null,
-   _creator_id          INT8                 not null,
-   _create_timestamp    INT8                 not null,
-   _updator_id          INT8                 not null,
-   _update_timestamp    INT8                 not null,
-   constraint PK_OSS_OBJ_REF primary key (_id)
+                             _id                  INT8                 not null,
+                             obj_id               INT8                 not null,
+                             bucket_id            INT8                 not null,
+                             name                 VARCHAR(100)         not null,
+                             ext                  VARCHAR(10)          not null,
+                             _creator_id          INT8                 not null,
+                             _create_timestamp    INT8                 not null,
+                             _updator_id          INT8                 not null,
+                             _update_timestamp    INT8                 not null,
+                             constraint PK_OSS_OBJ_REF primary key (_id)
 );
 
 comment on table oss_obj_ref is
@@ -157,30 +157,30 @@ comment on column oss_obj_ref._update_timestamp is
 /* Index: oss_obj_ref_PK                                        */
 /*==============================================================*/
 create unique index oss_obj_ref_PK on oss_obj_ref (
-_id
-);
+                                                   _id
+    );
 
 /*==============================================================*/
 /* Index: Relationship_1_FK                                     */
 /*==============================================================*/
 create  index Relationship_1_FK on oss_obj_ref (
-obj_id
-);
+                                                obj_id
+    );
 
 /*==============================================================*/
 /* Index: Relationship_2_FK                                     */
 /*==============================================================*/
 create  index Relationship_2_FK on oss_obj_ref (
-bucket_id
-);
+                                                bucket_id
+    );
 
 alter table oss_obj_ref
-   add constraint FK_OSS_OBJ__RELATIONS_OSS_OBJ foreign key (obj_id)
-      references oss_obj (_id)
-      on delete restrict on update restrict;
+    add constraint FK_OSS_OBJ__RELATIONS_OSS_OBJ foreign key (obj_id)
+        references oss_obj (_id)
+        on delete restrict on update restrict;
 
 alter table oss_obj_ref
-   add constraint FK_OSS_OBJ__RELATIONS_OSS_BUCK foreign key (bucket_id)
-      references oss_bucket (_id)
-      on delete restrict on update restrict;
+    add constraint FK_OSS_OBJ__RELATIONS_OSS_BUCK foreign key (bucket_id)
+        references oss_bucket (_id)
+        on delete restrict on update restrict;
 
