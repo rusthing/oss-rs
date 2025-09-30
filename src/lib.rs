@@ -12,3 +12,4 @@ pub mod svc;
 pub mod utils;
 pub mod vo;
 pub mod web_server;
+pub mod db;

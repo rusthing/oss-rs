@@ -1,5 +1,4 @@
 use crate::api::api_error::ApiError;
-use crate::app_data::db_app_data::DbAppData;
 use crate::svc::oss_obj_ref_svc;
 use crate::utils::file_utils::calc_hash;
 use crate::utils::upload::UploadForm;
@@ -12,7 +11,6 @@ use std::collections::HashMap;
 /// 根据id获取对象引用
 #[get("/obj-ref/get-by-id")]
 pub async fn get_by_id(
-    data: web::Data<DbAppData>,
     query: web::Query<HashMap<String, String>>,
 ) -> Result<HttpResponse, ApiError> {
     let id = match query.get("id") {
@@ -28,14 +26,13 @@ pub async fn get_by_id(
             return Err(ApiError::ValidationError("缺少以下参数{id}".to_string()));
         }
     };
-    let ro = oss_obj_ref_svc::get_by_id(&data.db, id).await?;
+    let ro = oss_obj_ref_svc::get_by_id(id).await?;
     Ok(HttpResponse::Ok().json(ro))
 }
 
 /// 上传对象引用
 #[post("/obj-ref/upload/{bucket}")]
 pub async fn upload(
-    data: web::Data<DbAppData>,
     bucket: web::Path<String>,
     MultipartForm(form): MultipartForm<UploadForm>,
 ) -> Result<HttpResponse, ApiError> {
@@ -54,27 +51,18 @@ pub async fn upload(
     }
     let hash = Some(computed_hash);
 
-    let ro = oss_obj_ref_svc::upload(&data.db, &bucket, &file_name, file_size, hash, temp_file).await?;
+    let ro = oss_obj_ref_svc::upload(&bucket, &file_name, file_size, hash, temp_file).await?;
 
     Ok(HttpResponse::Ok().json(ro))
 }
 
 /// 下载对象引用
 #[get("/obj-ref/download/{obj_id}")]
-pub async fn download(
-    data: web::Data<DbAppData>,
-    obj_id: web::Path<String>,
-) -> Result<HttpResponse, ApiError> {
+pub async fn download(obj_id: web::Path<String>) -> Result<HttpResponse, ApiError> {
     let (obj_id, ext) = parse_obj_id(&obj_id.into_inner())?;
 
-    let (file_name, _file_size, length, content, ..) = oss_obj_ref_svc::download(
-        &data.db,
-        obj_id.parse::<u64>().unwrap(),
-        ext.unwrap(),
-        None,
-        None,
-    )
-    .await?;
+    let (file_name, _file_size, length, content, ..) =
+        oss_obj_ref_svc::download(obj_id.parse::<u64>().unwrap(), ext.unwrap(), None, None).await?;
 
     Ok(response_octet_stream(file_name, length, content))
 }
@@ -84,7 +72,6 @@ pub async fn download(
 pub async fn preview(
     req: HttpRequest,
     obj_id: web::Path<String>,
-    data: web::Data<DbAppData>,
 ) -> Result<HttpResponse, ApiError> {
     let (obj_id, ext) = parse_obj_id(&obj_id.into_inner())?;
 
@@ -110,14 +97,8 @@ pub async fn preview(
         .parse::<u64>()
         .map_err(|_| ApiError::ValidationError("无效的ID".to_string()))?;
 
-    let (file_name, file_size, length, content, start, end) = oss_obj_ref_svc::download(
-        &data.db,
-        obj_id_num,
-        ext.clone().unwrap_or_default(),
-        start,
-        end,
-    )
-    .await?;
+    let (file_name, file_size, length, content, start, end) =
+        oss_obj_ref_svc::download(obj_id_num, ext.clone().unwrap_or_default(), start, end).await?;
 
     match ext.as_deref() {
         Some(ext) => {
@@ -146,10 +127,7 @@ pub async fn preview(
 
 /// 移除对象引用
 #[delete("/obj-ref/remove")]
-pub async fn remove(
-    data: web::Data<DbAppData>,
-    query: web::Query<HashMap<String, String>>,
-) -> Result<HttpResponse, ApiError> {
+pub async fn remove(query: web::Query<HashMap<String, String>>) -> Result<HttpResponse, ApiError> {
     let id = match query.get("id") {
         Some(id_str) => match id_str.parse::<u64>() {
             Ok(id_val) => id_val,
@@ -163,7 +141,7 @@ pub async fn remove(
             return Err(ApiError::ValidationError("缺少以下参数{id}".to_string()));
         }
     };
-    let ro = oss_obj_ref_svc::remove(&data.db, id).await?;
+    let ro = oss_obj_ref_svc::remove(id).await?;
     Ok(HttpResponse::Ok().json(ro))
 }
 

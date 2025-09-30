@@ -1,10 +1,11 @@
 use clap::Parser;
 use log::info;
-use oss_rs::settings::init_settings;
 use oss_rs::env::init_env;
 use oss_rs::id_worker::init_id_worker;
 use oss_rs::log::init_log;
 use oss_rs::migration::migrate;
+use oss_rs::settings::init_settings;
+use oss_rs::db::init_db;
 use oss_rs::web_server::WebServer;
 
 /// 网络监控工具
@@ -53,6 +54,9 @@ async fn main() -> std::io::Result<()> {
 
     info!("初始化ID生成器...");
     init_id_worker();
+
+    info!("初始化数据库...");
+    init_db().await;
 
     WebServer::new().await.run().await;
 

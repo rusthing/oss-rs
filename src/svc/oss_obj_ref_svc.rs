@@ -5,21 +5,20 @@ use crate::model::{oss_obj, oss_obj_ref};
 use crate::ro::ro::Ro;
 use crate::settings::SETTINGS;
 use crate::svc::svc_error::SvcError;
+use crate::db::DB_CONN;
 use crate::utils::file_utils::{get_file_ext, is_cross_device_error};
 use crate::utils::time_utils::get_current_timestamp;
 use crate::vo::oss_obj_ref::OssObjRefVo;
 use chrono::{Local, TimeZone};
-use sea_orm::{DatabaseConnection, TransactionTrait};
+use sea_orm::TransactionTrait;
 use std::fs;
 use std::fs::File;
 use std::io::{Read, Seek, SeekFrom};
 use tempfile::NamedTempFile;
 
 /// 根据id获取对象信息
-pub async fn get_by_id(
-    db: &DatabaseConnection,
-    obj_ref_id: u64,
-) -> Result<Ro<OssObjRefVo>, SvcError> {
+pub async fn get_by_id(obj_ref_id: u64) -> Result<Ro<OssObjRefVo>, SvcError> {
+    let db = DB_CONN.get().unwrap();
     let one = oss_obj_ref_dao::get_by_id(db, obj_ref_id as i64).await?;
     Ok(Ro::success("查询成功".to_string()).extra(match one {
         Some(one) => Some(OssObjRefVo::from(one)),
@@ -29,13 +28,13 @@ pub async fn get_by_id(
 
 /// 上传对象
 pub async fn upload(
-    db: &DatabaseConnection,
     bucket: &str,
     file_name: &str,
     file_size: usize,
     hash: Option<String>,
     temp_file: NamedTempFile,
 ) -> Result<Ro<OssObjRefVo>, SvcError> {
+    let db = DB_CONN.get().unwrap();
     // 开启事务
     let tx = db.begin().await?;
     let now = get_current_timestamp();
@@ -137,12 +136,12 @@ pub async fn upload(
 
 // 下载
 pub async fn download(
-    db: &DatabaseConnection,
     obj_ref_id: u64,
     ext: String,
     start: Option<u64>,
     mut end: Option<u64>,
 ) -> Result<(String, u64, u64, Vec<u8>, Option<u64>, Option<u64>), SvcError> {
+    let db = DB_CONN.get().unwrap();
     let one = oss_obj_ref_dao::get_by_id(db, obj_ref_id as i64).await?;
     let (obj_ref_model, obj_model) = one.ok_or(SvcError::NotFound())?;
     // FIXME: 扩展名不对也不行
@@ -179,7 +178,8 @@ pub async fn download(
     Ok((obj_ref_model.name, file_size, length, content, start, end))
 }
 
-pub async fn remove(db: &DatabaseConnection, obj_ref_id: u64) -> Result<Ro<()>, SvcError> {
+pub async fn remove(obj_ref_id: u64) -> Result<Ro<()>, SvcError> {
+    let db = DB_CONN.get().unwrap();
     // 开启事务
     let tx = db.begin().await?;
 
