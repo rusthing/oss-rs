@@ -60,13 +60,15 @@ pub async fn upload(
         let is_completed = true;
         // 根据当前时间，创建yyyy/MM/dd/HH的目录，并将文件存入此目录中
         let datetime = Local.timestamp_opt((now / 1000) as i64, 0).unwrap();
-        let date_path = datetime.format("%Y/%m/%d/%H").to_string();
+        let settings_oss = SETTINGS.get().unwrap().oss.clone();
+
+        let date_path = datetime.format(&settings_oss.file_dir_format).to_string();
 
         let storage_dir = ENV
             .get()
             .unwrap()
             .app_dir
-            .join(SETTINGS.get().unwrap().oss.file_root_dir.as_str())
+            .join(&settings_oss.file_root_dir)
             .join(bucket.to_string())
             .join(&date_path);
         fs::create_dir_all(&storage_dir)?;

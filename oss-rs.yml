@@ -1,9 +1,0 @@
-oss:
-  upload-buffer-size: 2MiB
-  download-buffer-size: 2MiB
-db:
-  url: postgres://ossrs:ossrs@127.0.0.1/ossrs
-id-worker:
-  epoch: 1758108749211
-  machine-id: 1
-  node-id: 1
