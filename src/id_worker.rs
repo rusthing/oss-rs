@@ -1,11 +1,11 @@
-use crate::config::CONFIG;
+use crate::settings::SETTINGS;
 use idworker::{IdWorker, IdWorkerGenerator, Options};
 use std::sync::OnceLock;
 
 pub static ID_WORKER: OnceLock<Box<dyn IdWorker>> = OnceLock::new();
 
 pub fn init_id_worker() {
-    let id_worker_config = CONFIG.get().unwrap().id_worker.clone();
+    let id_worker_config = SETTINGS.get().unwrap().id_worker.clone();
     let id_worker = IdWorkerGenerator::generate(
         Options::new()
             .epoch(id_worker_config.epoch)

@@ -1,6 +1,6 @@
 use crate::api::api_config::api_config;
 use crate::app_data::db_app_data::DbAppData;
-use crate::config::CONFIG;
+use crate::settings::SETTINGS;
 use crate::utils::db::init_db;
 use actix_web::dev::Server;
 use actix_web::middleware::Logger;
@@ -14,7 +14,7 @@ pub struct WebServer {
 
 impl WebServer {
     pub async fn new() -> Self {
-        let web_server_config = CONFIG.get().unwrap().web_server.clone();
+        let web_server_config = SETTINGS.get().unwrap().web_server.clone();
         info!("创建Web服务器({:?})并运行...", web_server_config);
 
         let port = web_server_config.port.unwrap();

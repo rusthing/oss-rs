@@ -1,6 +1,5 @@
 pub mod api;
 pub mod app_data;
-pub mod config;
 pub mod dao;
 pub mod env;
 pub mod id_worker;
@@ -8,6 +7,7 @@ pub mod log;
 pub mod migration;
 pub mod model;
 pub mod ro;
+pub mod settings;
 pub mod svc;
 pub mod utils;
 pub mod vo;

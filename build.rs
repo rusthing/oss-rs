@@ -9,17 +9,27 @@ use std::path::Path;
 /// - 当路径操作失败时会panic
 /// - 当文件复制失败时会panic
 fn main() {
-    // 定义源配置文件路径和获取输出目录路径
-    let config_file_name = concat!(env!("CARGO_PKG_NAME"), ".yml");
-    let config_file_path = Path::new(config_file_name);
+    // 获取输出目录路径
     let out_dir = std::env::var("OUT_DIR").unwrap();
+    // 复制配置文件到输出目录
+    copy_config_file(&out_dir, "toml");
+    copy_config_file(&out_dir, "yml");
+    copy_config_file(&out_dir, "json");
+    copy_config_file(&out_dir, "ini");
+    copy_config_file(&out_dir, "ron");
+}
+
+fn copy_config_file(out_dir: &str, file_ext: &str) {
+    // 定义源配置文件路径
+    let config_file_name = format!("{}.{}", env!("CARGO_PKG_NAME"), file_ext);
+    let config_file_path = Path::new(&config_file_name);
 
     // 构造目标文件路径，通过向上回溯OUT_DIR的父级目录来定位
     let dest_path = Path::new(&out_dir)
         .ancestors()
         .nth(3)
         .unwrap()
-        .join(config_file_name);
+        .join(&config_file_name);
 
     // 如果源配置文件存在，则执行复制操作
     if config_file_path.exists() {

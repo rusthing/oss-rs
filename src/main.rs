@@ -1,6 +1,6 @@
 use clap::Parser;
 use log::info;
-use oss_rs::config::init_config;
+use oss_rs::settings::init_settings;
 use oss_rs::env::init_env;
 use oss_rs::id_worker::init_id_worker;
 use oss_rs::log::init_log;
@@ -45,8 +45,8 @@ async fn main() -> std::io::Result<()> {
     info!("解析命令行参数...");
     let args = Args::parse();
 
-    info!("加载配置文件...");
-    init_config(args.config_file, args.port);
+    info!("初始化设置选项...");
+    init_settings(args.config_file, args.port);
 
     info!("升级数据库版本...");
     migrate().await.expect("升级数据库版本失败");

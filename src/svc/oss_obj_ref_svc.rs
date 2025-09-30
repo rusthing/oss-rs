@@ -1,9 +1,9 @@
-use crate::config::CONFIG;
 use crate::dao::{oss_obj_dao, oss_obj_ref_dao};
 use crate::env::ENV;
 use crate::id_worker::ID_WORKER;
 use crate::model::{oss_obj, oss_obj_ref};
 use crate::ro::ro::Ro;
+use crate::settings::SETTINGS;
 use crate::svc::svc_error::SvcError;
 use crate::utils::file_utils::{get_file_ext, is_cross_device_error};
 use crate::utils::time_utils::get_current_timestamp;
@@ -61,11 +61,12 @@ pub async fn upload(
         // 根据当前时间，创建yyyy/MM/dd/HH的目录，并将文件存入此目录中
         let datetime = Local.timestamp_opt((now / 1000) as i64, 0).unwrap();
         let date_path = datetime.format("%Y/%m/%d/%H").to_string();
+
         let storage_dir = ENV
             .get()
             .unwrap()
             .app_dir
-            .join("storage")
+            .join(SETTINGS.get().unwrap().oss.file_root_dir.as_str())
             .join(bucket.to_string())
             .join(&date_path);
         fs::create_dir_all(&storage_dir)?;
@@ -162,7 +163,7 @@ pub async fn download(
     if let (Some(start_pos), Some(end_pos)) = (start, end) {
         file.seek(SeekFrom::Start(start_pos))?;
         length = end_pos - start_pos + 1;
-        let size = CONFIG.get().unwrap().oss.download_buffer_size.as_u64();
+        let size = SETTINGS.get().unwrap().oss.download_buffer_size.as_u64();
         if length > size {
             length = size;
             end = Some(start_pos + length - 1);

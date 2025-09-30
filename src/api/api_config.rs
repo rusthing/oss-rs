@@ -1,10 +1,10 @@
 use crate::api::oss_obj_ref_api::{download, get_by_id, preview, remove, upload};
-use crate::config::CONFIG;
+use crate::settings::SETTINGS;
 use actix_multipart::form::MultipartFormConfig;
 use actix_web::web;
 
 pub fn api_config(cfg: &mut web::ServiceConfig) {
-    let oss_config = CONFIG.get().unwrap().oss.clone();
+    let oss_config = SETTINGS.get().unwrap().oss.clone();
     let total_limit = oss_config.upload_file_limit_size.as_u64() as usize;
     cfg.service(
         web::scope("/oss")
