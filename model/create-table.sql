@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      PostgreSQL 9.x                               */
-/* Created on:     2025/9/30 17:16:59                           */
+/* Created on:     2025/10/9 11:48:59                           */
 /*==============================================================*/
 
 
@@ -14,7 +14,8 @@ create table oss_bucket (
    _create_timestamp    INT8                 not null,
    _updator_id          INT8                 not null,
    _update_timestamp    INT8                 not null,
-   constraint PK_OSS_BUCKET primary key (_id)
+   constraint PK_OSS_BUCKET primary key (_id),
+   constraint AK_NAME_OSS_BUCK unique (name)
 );
 
 comment on table oss_bucket is
