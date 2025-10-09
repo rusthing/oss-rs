@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+use once_cell::sync::Lazy;
 use crate::id_worker::ID_WORKER;
 use crate::model::oss_obj_ref::{Entity, Model};
 use crate::model::{oss_bucket, oss_obj};
@@ -6,6 +8,9 @@ use sea_orm::{
     ActiveModelTrait, ColumnTrait, ConnectionTrait, DbErr, EntityTrait, IntoActiveModel,
 };
 use sea_orm::{PaginatorTrait, QueryFilter};
+
+pub static UNIQUE_FIELD_HASHMAP: Lazy<HashMap<&'static str, &'static str>> =
+    Lazy::new(|| HashMap::new());
 
 /// 添加
 pub async fn insert<C>(db: &C, mut model: Model) -> Result<Model, DbErr>

@@ -1,10 +1,16 @@
 use crate::id_worker::ID_WORKER;
 use crate::model::oss_obj::{Column, Entity, Model};
 use crate::utils::time_utils::get_current_timestamp;
+use once_cell::sync::Lazy;
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, ConnectionTrait, DbErr, EntityTrait, IntoActiveModel,
     QueryFilter,
 };
+use std::collections::HashMap;
+
+/// 定义unique字段列表
+pub static UNIQUE_FIELD_HASHMAP: Lazy<HashMap<&'static str, &'static str>> =
+    Lazy::new(|| HashMap::new());
 
 /// 添加
 pub async fn insert<C>(db: &C, mut model: Model) -> Result<Model, DbErr>

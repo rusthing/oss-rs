@@ -12,8 +12,6 @@ pub struct OssObjVo {
     #[from(~.to_string())]
     pub id: String,
     #[from(~.to_string())]
-    pub name: String,
-    #[from(~.to_string())]
     pub hash: String,
     #[from(~.to_string())]
     pub size: String,

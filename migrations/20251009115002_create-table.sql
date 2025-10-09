@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      PostgreSQL 9.x                               */
-/* Created on:     2025/10/9 11:48:59                           */
+/* Created on:     2025/10/9 19:49:40                           */
 /*==============================================================*/
 
 
@@ -51,7 +51,6 @@ create unique index oss_bucket_PK on oss_bucket (
 /*==============================================================*/
 create table oss_obj (
                          _id                  INT8                 not null,
-                         name                 VARCHAR(100)         not null,
                          is_completed         BOOL                 not null default true,
                          path                 VARCHAR(100)         not null,
                          size                 INT8                 not null,
@@ -61,7 +60,10 @@ create table oss_obj (
                          _create_timestamp    INT8                 not null,
                          _updator_id          INT8                 not null,
                          _update_timestamp    INT8                 not null,
-                         constraint PK_OSS_OBJ primary key (_id)
+                         constraint PK_OSS_OBJ primary key (_id),
+                         constraint AK_PATH_OSS_OBJ unique (path),
+                         constraint AK_SIZE_ANE_HASH_OSS_OBJ unique (size, hash),
+                         constraint AK_URL_OSS_OBJ unique (url)
 );
 
 comment on table oss_obj is
@@ -69,9 +71,6 @@ comment on table oss_obj is
 
 comment on column oss_obj._id is
 'ID';
-
-comment on column oss_obj.name is
-'名称(上传时的文件原名，带后缀名)';
 
 comment on column oss_obj.is_completed is
 '是否完成';

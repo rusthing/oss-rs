@@ -8,11 +8,12 @@ use serde::{Deserialize, Serialize};
 pub struct Model {
     #[sea_orm(column_name = "_id", primary_key, auto_increment = false, unique)]
     pub id: i64,
-    pub name: String,
     pub is_completed: bool,
+    #[sea_orm(unique)]
     pub path: String,
     pub size: i64,
     pub hash: String,
+    #[sea_orm(unique)]
     pub url: String,
     #[sea_orm(column_name = "_creator_id")]
     pub creator_id: i64,

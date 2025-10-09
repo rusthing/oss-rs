@@ -85,7 +85,6 @@ pub async fn upload(
             &tx,
             oss_obj::Model {
                 id,
-                name: file_name.to_string(),
                 size: file_size as i64,
                 hash: hash.to_string(),
                 path: new_file_path.to_string(),
