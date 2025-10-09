@@ -10,7 +10,7 @@ use crate::utils::file_utils::{get_file_ext, is_cross_device_error};
 use crate::utils::time_utils::get_current_timestamp;
 use crate::vo::oss_obj_ref::OssObjRefVo;
 use chrono::{Local, TimeZone};
-use sea_orm::TransactionTrait;
+use sea_orm::{IntoActiveModel, TransactionTrait};
 use std::fs;
 use std::fs::File;
 use std::io::{Read, Seek, SeekFrom};
@@ -91,7 +91,8 @@ pub async fn upload(
                 url,
                 is_completed,
                 ..Default::default()
-            },
+            }
+            .into_active_model(),
         )
         .await?;
         (id, new_file_path)
@@ -106,7 +107,8 @@ pub async fn upload(
             obj_id,
             ext,
             ..Default::default()
-        },
+        }
+        .into_active_model(),
     )
     .await?;
 
@@ -182,18 +184,20 @@ pub async fn remove(obj_ref_id: u64) -> Result<Ro<()>, SvcError> {
     let tx = db.begin().await?;
 
     let one = oss_obj_ref_dao::get_by_id(&tx, obj_ref_id as i64).await?;
-    let (obj_ref_model, _, obj_model) =
+    let (oss_obj_ref_model, _, oss_obj_model) =
         one.ok_or(SvcError::NotFound(format!("id: {}", obj_ref_id)))?;
 
     // 删除对象引用
-    oss_obj_ref_dao::delete(&tx, obj_ref_model).await?;
+    oss_obj_ref_dao::delete(&tx, oss_obj_ref_model.into_active_model()).await?;
 
     // 如果对象没有引用，则删除对象
-    if oss_obj_ref_dao::count_by_obj_id(&tx, obj_model.id).await? == 0 {
-        oss_obj_dao::delete(&tx, obj_model.clone()).await?;
+    if oss_obj_ref_dao::count_by_obj_id(&tx, oss_obj_model.id).await? == 0 {
+        let path = oss_obj_model.path.clone();
+        
+        oss_obj_dao::delete(&tx, oss_obj_model.into_active_model()).await?;
 
         // 删除文件
-        fs::remove_file(obj_model.path)?;
+        fs::remove_file(path)?;
     }
 
     // 提交事务

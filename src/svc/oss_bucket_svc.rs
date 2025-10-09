@@ -1,4 +1,5 @@
 use crate::dao::oss_bucket_dao;
+use crate::dao::oss_bucket_dao::UNIQUE_FIELD_HASHMAP;
 use crate::db::DB_CONN;
 use crate::model::oss_bucket::ActiveModel;
 use crate::ro::ro::Ro;
@@ -22,7 +23,7 @@ pub async fn add(add_to: OssBucketAddTo) -> Result<Ro<OssBucketVo>, SvcError> {
     let active_model: ActiveModel = add_to.into();
     let one = oss_bucket_dao::insert(db, active_model)
         .await
-        .map_err(handle_db_err_to_svc_error)?;
+        .map_err(|e| handle_db_err_to_svc_error(e, &UNIQUE_FIELD_HASHMAP))?;
     Ok(Ro::success("添加成功".to_string()).extra(Some(OssBucketVo::from(one))))
 }
 

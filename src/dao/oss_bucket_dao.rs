@@ -1,14 +1,19 @@
 use crate::id_worker::ID_WORKER;
 use crate::model::oss_bucket::{ActiveModel, Column, Entity, Model};
 use crate::utils::time_utils::get_current_timestamp;
+use once_cell::sync::Lazy;
 use sea_orm::{
     ActiveModelTrait, ActiveValue, ConnectionTrait, DbErr, EntityTrait, IntoActiveModel,
 };
 use sea_orm::{ColumnTrait, QueryFilter};
+use std::collections::HashMap;
 
 /// 定义unique字段列表
-pub const UNIQUE_FIELD_LIST: [Column; 1] = [Column::Name];
-
+pub static UNIQUE_FIELD_HASHMAP: Lazy<HashMap<&'static str, &'static str>> = Lazy::new(|| {
+    let mut hashmap = HashMap::new();
+    hashmap.insert("name", "桶名称");
+    hashmap
+});
 
 /// 添加
 pub async fn insert<C>(db: &C, mut model: ActiveModel) -> Result<Model, DbErr>
@@ -30,13 +35,13 @@ where
 }
 
 /// 修改
-pub async fn update<C>(db: &C, mut model: Model) -> Result<(), DbErr>
+pub async fn update<C>(db: &C, mut model: ActiveModel) -> Result<(), DbErr>
 where
     C: ConnectionTrait,
 {
     // 当修改时间未设置时，设置修改时间
-    if model.update_timestamp == 0 {
-        let now = get_current_timestamp() as i64;
+    if model.update_timestamp == ActiveValue::NotSet {
+        let now = ActiveValue::set(get_current_timestamp() as i64);
         model.update_timestamp = now;
     }
     let active_model = model.into_active_model();
@@ -45,7 +50,7 @@ where
 }
 
 /// 删除
-pub async fn delete<C>(db: &C, model: Model) -> Result<(), DbErr>
+pub async fn delete<C>(db: &C, model: ActiveModel) -> Result<(), DbErr>
 where
     C: ConnectionTrait,
 {
