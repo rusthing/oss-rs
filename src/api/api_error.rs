@@ -1,5 +1,5 @@
 use crate::ro::ro::Ro;
-use crate::svc::svc_error::SvcError;
+use crate::svc::svc_utils::SvcError;
 use actix_web::http::StatusCode;
 use actix_web::{HttpResponse, ResponseError};
 use log::error;
@@ -17,12 +17,20 @@ pub enum ApiError {
 }
 
 impl ApiError {
-    fn body(&self) -> Ro<()> {
+    /// 将错误转换为Ro对象
+    fn to_ro(&self) -> Ro<()> {
         match self {
             ApiError::ValidationError(error) => Ro::illegal_argument(error.to_string()),
-            ApiError::IoError(error) => Ro::fail(error.to_string()),
+            ApiError::IoError(error) => {
+                Ro::fail("磁盘异常".to_string()).detail(Some(error.to_string()))
+            }
             ApiError::SvcError(error) => match error {
-                SvcError::NotFound() => Ro::warn(error.to_string()),
+                SvcError::NotFound(err) => {
+                    Ro::warn("找不到数据".to_string()).detail(Some(err.to_string()))
+                }
+                SvcError::DuplicateKey(field_name, field_value) => {
+                    Ro::warn(format!("{}<{}>已存在！", field_name, field_value))
+                }
                 _ => Ro::fail(error.to_string()),
             },
         }
@@ -36,7 +44,8 @@ impl ResponseError for ApiError {
             ApiError::ValidationError(_) => StatusCode::BAD_REQUEST,
             ApiError::IoError(_) => StatusCode::INTERNAL_SERVER_ERROR,
             ApiError::SvcError(error) => match error {
-                SvcError::NotFound() => StatusCode::NOT_FOUND,
+                SvcError::NotFound(_) => StatusCode::NOT_FOUND,
+                SvcError::DuplicateKey(_, _) => StatusCode::OK,
                 _ => StatusCode::INTERNAL_SERVER_ERROR,
             },
         }
@@ -44,6 +53,6 @@ impl ResponseError for ApiError {
 
     /// 异常时响应的方法
     fn error_response(&self) -> HttpResponse {
-        HttpResponse::build(self.status_code()).json(self.body())
+        HttpResponse::build(self.status_code()).json(self.to_ro())
     }
 }

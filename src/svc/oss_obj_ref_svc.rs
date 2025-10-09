@@ -5,7 +5,7 @@ use crate::id_worker::ID_WORKER;
 use crate::model::{oss_obj, oss_obj_ref};
 use crate::ro::ro::Ro;
 use crate::settings::SETTINGS;
-use crate::svc::svc_error::SvcError;
+use crate::svc::svc_utils::SvcError;
 use crate::utils::file_utils::{get_file_ext, is_cross_device_error};
 use crate::utils::time_utils::get_current_timestamp;
 use crate::vo::oss_obj_ref::OssObjRefVo;
@@ -22,7 +22,7 @@ pub async fn get_by_id(obj_ref_id: u64) -> Result<Ro<OssObjRefVo>, SvcError> {
     let one = oss_obj_ref_dao::get_by_id(db, obj_ref_id as i64).await?;
     Ok(Ro::success("查询成功".to_string()).extra(match one {
         Some(one) => Some(OssObjRefVo::from(one)),
-        _ => return Err(SvcError::NotFound()),
+        _ => return Err(SvcError::NotFound(format!("id: {}", obj_ref_id))),
     }))
 }
 
@@ -144,10 +144,11 @@ pub async fn download(
 ) -> Result<(String, u64, u64, Vec<u8>, Option<u64>, Option<u64>), SvcError> {
     let db = DB_CONN.get().unwrap();
     let one = oss_obj_ref_dao::get_by_id(db, obj_ref_id as i64).await?;
-    let (obj_ref_model, _, obj_model) = one.ok_or(SvcError::NotFound())?;
+    let (obj_ref_model, _, obj_model) =
+        one.ok_or(SvcError::NotFound(format!("id: {}", obj_ref_id)))?;
     // 扩展名不对也不行
     if obj_ref_model.ext.as_str() != &ext {
-        return Err(SvcError::NotFound());
+        return Err(SvcError::NotFound(format!("id: {}", obj_ref_id)));
     }
 
     // 读取文件指定范围内容
@@ -182,7 +183,8 @@ pub async fn remove(obj_ref_id: u64) -> Result<Ro<()>, SvcError> {
     let tx = db.begin().await?;
 
     let one = oss_obj_ref_dao::get_by_id(&tx, obj_ref_id as i64).await?;
-    let (obj_ref_model, _, obj_model) = one.ok_or(SvcError::NotFound())?;
+    let (obj_ref_model, _, obj_model) =
+        one.ok_or(SvcError::NotFound(format!("id: {}", obj_ref_id)))?;
 
     // 删除对象引用
     oss_obj_ref_dao::delete(&tx, obj_ref_model).await?;

@@ -9,7 +9,7 @@ use regex::Regex;
 use std::collections::HashMap;
 
 /// 根据id获取对象引用
-#[get("/obj-ref/get-by-id")]
+#[get("/get-by-id")]
 pub async fn get_by_id(
     query: web::Query<HashMap<String, String>>,
 ) -> Result<HttpResponse, ApiError> {
@@ -23,7 +23,7 @@ pub async fn get_by_id(
             }
         },
         None => {
-            return Err(ApiError::ValidationError("缺少以下参数{id}".to_string()));
+            return Err(ApiError::ValidationError("缺少必要参数{id}".to_string()));
         }
     };
     let ro = oss_obj_ref_svc::get_by_id(id).await?;
@@ -31,7 +31,7 @@ pub async fn get_by_id(
 }
 
 /// 上传对象引用
-#[post("/obj-ref/upload/{bucket}")]
+#[post("/upload/{bucket}")]
 pub async fn upload(
     bucket: web::Path<String>,
     MultipartForm(form): MultipartForm<UploadForm>,
@@ -57,7 +57,7 @@ pub async fn upload(
 }
 
 /// 下载对象引用
-#[get("/obj-ref/download/{obj_id}")]
+#[get("/download/{obj_id}")]
 pub async fn download(obj_id: web::Path<String>) -> Result<HttpResponse, ApiError> {
     let (obj_id, ext) = parse_obj_id(&obj_id.into_inner())?;
 
@@ -68,7 +68,7 @@ pub async fn download(obj_id: web::Path<String>) -> Result<HttpResponse, ApiErro
 }
 
 /// 预览对象引用
-#[get("/obj-ref/preview/{obj_id}")]
+#[get("/preview/{obj_id}")]
 pub async fn preview(
     req: HttpRequest,
     obj_id: web::Path<String>,
@@ -126,7 +126,7 @@ pub async fn preview(
 }
 
 /// 移除对象引用
-#[delete("/obj-ref/remove")]
+#[delete("/remove")]
 pub async fn remove(query: web::Query<HashMap<String, String>>) -> Result<HttpResponse, ApiError> {
     let id = match query.get("id") {
         Some(id_str) => match id_str.parse::<u64>() {
@@ -138,7 +138,7 @@ pub async fn remove(query: web::Query<HashMap<String, String>>) -> Result<HttpRe
             }
         },
         None => {
-            return Err(ApiError::ValidationError("缺少以下参数{id}".to_string()));
+            return Err(ApiError::ValidationError("缺少必要参数{id}".to_string()));
         }
     };
     let ro = oss_obj_ref_svc::remove(id).await?;

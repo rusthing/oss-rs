@@ -1,24 +1,28 @@
 use crate::id_worker::ID_WORKER;
-use crate::model::oss_bucket::{Column, Entity, Model};
+use crate::model::oss_bucket::{ActiveModel, Column, Entity, Model};
 use crate::utils::time_utils::get_current_timestamp;
 use sea_orm::{
-    ActiveModelTrait, ConnectionTrait, DbErr, EntityTrait, IntoActiveModel,
+    ActiveModelTrait, ActiveValue, ConnectionTrait, DbErr, EntityTrait, IntoActiveModel,
 };
 use sea_orm::{ColumnTrait, QueryFilter};
 
+/// 定义unique字段列表
+pub const UNIQUE_FIELD_LIST: [Column; 1] = [Column::Name];
+
+
 /// 添加
-pub async fn insert<C>(db: &C, mut model: Model) -> Result<Model, DbErr>
+pub async fn insert<C>(db: &C, mut model: ActiveModel) -> Result<Model, DbErr>
 where
     C: ConnectionTrait,
 {
     // 当id为默认值(0)时生成ID
-    if model.id == 0 {
-        model.id = ID_WORKER.get().unwrap().next_id() as i64;
+    if model.id == ActiveValue::NotSet {
+        model.id = ActiveValue::set(ID_WORKER.get().unwrap().next_id() as i64);
     }
     // 当创建时间未设置时，设置创建时间和修改时间
-    if model.create_timestamp == 0 {
-        let now = get_current_timestamp() as i64;
-        model.create_timestamp = now;
+    if model.create_timestamp == ActiveValue::NotSet {
+        let now = ActiveValue::set(get_current_timestamp() as i64);
+        model.create_timestamp = now.clone();
         model.update_timestamp = now;
     }
     let active_model = model.into_active_model();
