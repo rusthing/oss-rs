@@ -19,7 +19,7 @@ use tempfile::NamedTempFile;
 /// 根据id获取对象信息
 pub async fn get_by_id(obj_ref_id: u64) -> Result<Ro<OssObjRefVo>, SvcError> {
     let db = DB_CONN.get().unwrap();
-    let one = oss_obj_ref_dao::get_by_id(db, obj_ref_id as i64).await?;
+    let one = oss_obj_ref_dao::get_by_id(obj_ref_id as i64, db).await?;
     Ok(Ro::success("查询成功".to_string()).extra(match one {
         Some(one) => Some(OssObjRefVo::from(one)),
         _ => return Err(SvcError::NotFound(format!("id: {}", obj_ref_id))),
@@ -36,7 +36,7 @@ pub async fn upload(
 ) -> Result<Ro<OssObjRefVo>, SvcError> {
     let db = DB_CONN.get().unwrap();
 
-    let one_bucket = match oss_bucket_dao::get_by_name(db, bucket).await? {
+    let one_bucket = match oss_bucket_dao::get_by_name(bucket, db).await? {
         Some(bucket) => bucket,
         None => return Ok(Ro::warn("未找到存储桶".to_string())),
     };
@@ -44,7 +44,7 @@ pub async fn upload(
     // 开启事务
     let tx = db.begin().await?;
     let now = get_current_timestamp();
-    let one = oss_obj_dao::get_by_hash_and_size(&tx, hash, file_size as i64).await?;
+    let one = oss_obj_dao::get_by_hash_and_size(hash, file_size as i64, &tx).await?;
     let ext = get_file_ext(file_name);
     // 判断对象是否存在
     let obj_existed = one.is_some();
@@ -82,7 +82,6 @@ pub async fn upload(
 
         // 新增对象
         oss_obj_dao::insert(
-            &tx,
             oss_obj::Model {
                 id,
                 size: file_size as i64,
@@ -93,6 +92,7 @@ pub async fn upload(
                 ..Default::default()
             }
             .into_active_model(),
+            &tx,
         )
         .await?;
         (id, new_file_path)
@@ -100,7 +100,6 @@ pub async fn upload(
 
     // 新增对象引用
     let obj_ref_model = oss_obj_ref_dao::insert(
-        &tx,
         oss_obj_ref::Model {
             name: file_name.to_string(),
             bucket_id: one_bucket.id,
@@ -109,6 +108,7 @@ pub async fn upload(
             ..Default::default()
         }
         .into_active_model(),
+        &tx,
     )
     .await?;
 
@@ -132,7 +132,7 @@ pub async fn upload(
     // 提交事务
     tx.commit().await?;
 
-    let one = oss_obj_ref_dao::get_by_id(db, obj_ref_model.id).await?;
+    let one = oss_obj_ref_dao::get_by_id(obj_ref_model.id, db).await?;
     Ok(Ro::success("上传成功".to_string()).extra(one.map(OssObjRefVo::from)))
 }
 
@@ -144,7 +144,7 @@ pub async fn download(
     mut end: Option<u64>,
 ) -> Result<(String, u64, u64, Vec<u8>, Option<u64>, Option<u64>), SvcError> {
     let db = DB_CONN.get().unwrap();
-    let one = oss_obj_ref_dao::get_by_id(db, obj_ref_id as i64).await?;
+    let one = oss_obj_ref_dao::get_by_id(obj_ref_id as i64, db).await?;
     let (obj_ref_model, _, obj_model) =
         one.ok_or(SvcError::NotFound(format!("id: {}", obj_ref_id)))?;
     // 扩展名不对也不行
@@ -183,18 +183,18 @@ pub async fn remove(obj_ref_id: u64) -> Result<Ro<()>, SvcError> {
     // 开启事务
     let tx = db.begin().await?;
 
-    let one = oss_obj_ref_dao::get_by_id(&tx, obj_ref_id as i64).await?;
+    let one = oss_obj_ref_dao::get_by_id(obj_ref_id as i64, &tx).await?;
     let (oss_obj_ref_model, _, oss_obj_model) =
         one.ok_or(SvcError::NotFound(format!("id: {}", obj_ref_id)))?;
 
     // 删除对象引用
-    oss_obj_ref_dao::delete(&tx, oss_obj_ref_model.into_active_model()).await?;
+    oss_obj_ref_dao::delete(oss_obj_ref_model.into_active_model(), &tx).await?;
 
     // 如果对象没有引用，则删除对象
-    if oss_obj_ref_dao::count_by_obj_id(&tx, oss_obj_model.id).await? == 0 {
+    if oss_obj_ref_dao::count_by_obj_id(oss_obj_model.id, &tx).await? == 0 {
         let path = oss_obj_model.path.clone();
-        
-        oss_obj_dao::delete(&tx, oss_obj_model.into_active_model()).await?;
+
+        oss_obj_dao::delete(oss_obj_model.into_active_model(), &tx).await?;
 
         // 删除文件
         fs::remove_file(path)?;

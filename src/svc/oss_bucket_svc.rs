@@ -10,7 +10,7 @@ use crate::vo::oss_bucket::OssBucketVo;
 /// 根据id获取对象信息
 pub async fn get_by_id(obj_ref_id: u64) -> Result<Ro<OssBucketVo>, SvcError> {
     let db = DB_CONN.get().unwrap();
-    let one = oss_bucket_dao::get_by_id(db, obj_ref_id as i64).await?;
+    let one = oss_bucket_dao::get_by_id(obj_ref_id as i64, db).await?;
     Ok(Ro::success("查询成功".to_string()).extra(match one {
         Some(one) => Some(OssBucketVo::from(one)),
         _ => return Err(SvcError::NotFound(format!("id: {}", obj_ref_id))),
@@ -21,7 +21,7 @@ pub async fn get_by_id(obj_ref_id: u64) -> Result<Ro<OssBucketVo>, SvcError> {
 pub async fn add(add_to: OssBucketAddTo) -> Result<Ro<OssBucketVo>, SvcError> {
     let db = DB_CONN.get().unwrap();
     let active_model: ActiveModel = add_to.into();
-    let one = oss_bucket_dao::insert(db, active_model)
+    let one = oss_bucket_dao::insert(active_model, db)
         .await
         .map_err(|e| handle_db_err_to_svc_error(e, &UNIQUE_FIELD_HASHMAP))?;
     Ok(Ro::success("添加成功".to_string()).extra(Some(OssBucketVo::from(one))))

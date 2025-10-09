@@ -14,7 +14,7 @@ pub static UNIQUE_FIELD_HASHMAP: Lazy<HashMap<&'static str, &'static str>> =
     Lazy::new(|| HashMap::new());
 
 /// 添加
-pub async fn insert<C>(db: &C, mut model: ActiveModel) -> Result<Model, DbErr>
+pub async fn insert<C>(mut model: ActiveModel, db: &C) -> Result<Model, DbErr>
 where
     C: ConnectionTrait,
 {
@@ -33,7 +33,7 @@ where
 }
 
 /// 修改
-pub async fn update<C>(db: &C, mut model: ActiveModel) -> Result<(), DbErr>
+pub async fn update<C>(mut model: ActiveModel, db: &C) -> Result<(), DbErr>
 where
     C: ConnectionTrait,
 {
@@ -47,7 +47,7 @@ where
     Ok(())
 }
 
-pub async fn delete<C>(db: &C, model: ActiveModel) -> Result<(), DbErr>
+pub async fn delete<C>(model: ActiveModel, db: &C) -> Result<(), DbErr>
 where
     C: ConnectionTrait,
 {
@@ -58,8 +58,8 @@ where
 
 /// 根据id查询
 pub async fn get_by_id<C>(
-    db: &C,
     id: i64,
+    db: &C,
 ) -> Result<Option<(Model, oss_bucket::Model, oss_obj::Model)>, DbErr>
 where
     C: ConnectionTrait,
@@ -77,7 +77,7 @@ where
 }
 
 /// 根据对象id查询数量
-pub async fn count_by_obj_id<C>(db: &C, obj_id: i64) -> Result<u64, DbErr>
+pub async fn count_by_obj_id<C>(obj_id: i64, db: &C) -> Result<u64, DbErr>
 where
     C: ConnectionTrait,
 {

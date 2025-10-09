@@ -16,7 +16,7 @@ pub static UNIQUE_FIELD_HASHMAP: Lazy<HashMap<&'static str, &'static str>> = Laz
 });
 
 /// 添加
-pub async fn insert<C>(db: &C, mut model: ActiveModel) -> Result<Model, DbErr>
+pub async fn insert<C>(mut model: ActiveModel, db: &C) -> Result<Model, DbErr>
 where
     C: ConnectionTrait,
 {
@@ -35,7 +35,7 @@ where
 }
 
 /// 修改
-pub async fn update<C>(db: &C, mut model: ActiveModel) -> Result<(), DbErr>
+pub async fn update<C>(mut model: ActiveModel, db: &C) -> Result<(), DbErr>
 where
     C: ConnectionTrait,
 {
@@ -50,7 +50,7 @@ where
 }
 
 /// 删除
-pub async fn delete<C>(db: &C, model: ActiveModel) -> Result<(), DbErr>
+pub async fn delete<C>(model: ActiveModel, db: &C) -> Result<(), DbErr>
 where
     C: ConnectionTrait,
 {
@@ -60,7 +60,7 @@ where
 }
 
 /// 根据id查询
-pub async fn get_by_id<C>(db: &C, id: i64) -> Result<Option<Model>, DbErr>
+pub async fn get_by_id<C>(id: i64, db: &C) -> Result<Option<Model>, DbErr>
 where
     C: ConnectionTrait,
 {
@@ -68,7 +68,7 @@ where
 }
 
 /// 根据名称查询桶
-pub async fn get_by_name<C>(db: &C, name: &str) -> Result<Option<Model>, DbErr>
+pub async fn get_by_name<C>(name: &str, db: &C) -> Result<Option<Model>, DbErr>
 where
     C: ConnectionTrait,
 {
