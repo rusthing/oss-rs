@@ -11,6 +11,7 @@ pub struct Env {
     pub app_file_name: String,
 }
 
+/// 初始化环境变量
 pub fn init_env() {
     let mut app_file_path = env::current_exe().expect("获取应用程序路径失败");
     let app_file_name = app_file_path

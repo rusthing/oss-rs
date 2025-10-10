@@ -8,8 +8,8 @@ use validator::Validate;
 #[derive(Debug, Deserialize, Validate)]
 #[serde(rename_all = "camelCase")]
 pub struct OssBucketAddTo {
-    #[validate(length(min = 1, message = "名称不能为空"))]
-    pub name: String,
+    #[validate(required(message = "名称不能为空"))]
+    pub name: Option<String>,
     #[serde(skip_deserializing)]
     pub current_user_id: u64,
 }
@@ -18,7 +18,7 @@ pub struct OssBucketAddTo {
 impl Into<ActiveModel> for OssBucketAddTo {
     fn into(self) -> ActiveModel {
         ActiveModel {
-            name: ActiveValue::set(self.name),
+            name: ActiveValue::set(self.name.unwrap()),
             creator_id: ActiveValue::set(self.current_user_id as i64),
             updator_id: ActiveValue::set(self.current_user_id as i64),
             ..Default::default()
@@ -42,9 +42,21 @@ pub struct OssBucketModifyTo {
     pub name: Option<String>,
     #[serde(skip_deserializing)]
     // #[map(creator_id, ActiveValue::Set(~ as i64), updator_id, ActiveValue::Set(~ as i64))]
-    // #[map(creator_id,ActiveValue::Set(~ as i64))]
-    // #[map(updator_id,ActiveValue::Set(~ as i64))]
     // #[into(creator_id,ActiveValue::Set(~ as i64))]
     #[into(updator_id,ActiveValue::Set(~ as i64))]
+    pub current_user_id: u64,
+}
+
+#[derive(o2o, Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+#[into(OssBucketAddTo)]
+#[into(OssBucketModifyTo)]
+pub struct OssBucketSaveTo {
+    #[into(OssBucketModifyTo| ~.clone())]
+    #[ghost(OssBucketAddTo)]
+    pub id: Option<String>,
+    #[into(~.clone())]
+    pub name: Option<String>,
+    #[serde(skip_deserializing)]
     pub current_user_id: u64,
 }

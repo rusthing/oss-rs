@@ -85,6 +85,7 @@ where
     }
 }
 
+/// 初始化日志
 pub fn init_log() -> Result<(), std::io::Error> {
     // 创建环境过滤器，支持 RUST_LOG 环境变量
     let env_filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"));

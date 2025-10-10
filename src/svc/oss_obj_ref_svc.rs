@@ -26,7 +26,7 @@ pub async fn get_by_id(obj_ref_id: u64) -> Result<Ro<OssObjRefVo>, SvcError> {
     }))
 }
 
-/// 上传对象
+/// 上传文件
 pub async fn upload(
     bucket: &str,
     file_name: &str,
@@ -136,7 +136,7 @@ pub async fn upload(
     Ok(Ro::success("上传成功".to_string()).extra(one.map(OssObjRefVo::from)))
 }
 
-// 下载
+/// 下载文件
 pub async fn download(
     obj_ref_id: u64,
     ext: String,
@@ -178,6 +178,7 @@ pub async fn download(
     Ok((obj_ref_model.name, file_size, length, content, start, end))
 }
 
+/// 删除对象引用
 pub async fn remove(obj_ref_id: u64) -> Result<Ro<()>, SvcError> {
     let db = DB_CONN.get().unwrap();
     // 开启事务

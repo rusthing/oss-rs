@@ -3,13 +3,15 @@ use crate::settings::SETTINGS;
 use actix_multipart::form::MultipartFormConfig;
 use actix_web::web;
 
-pub fn api_config(cfg: &mut web::ServiceConfig) {
+/// 初始化api配置
+pub fn init_api_config(cfg: &mut web::ServiceConfig) {
     let oss_config = SETTINGS.get().unwrap().oss.clone();
     let total_limit = oss_config.upload_file_limit_size.as_u64() as usize;
     cfg.service(
         web::scope("/oss/bucket")
             .service(oss_bucket_api::get_by_id) // 根据id获取实体
             .service(oss_bucket_api::add) // 添加
+            .service(oss_bucket_api::save) // 根据id获取实体
             .service(oss_bucket_api::modify), // 根据id获取实体
     );
     cfg.service(

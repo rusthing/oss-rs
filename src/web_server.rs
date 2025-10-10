@@ -1,4 +1,4 @@
-use crate::api_config::api_config;
+use crate::api_config::init_api_config;
 use crate::settings::SETTINGS;
 use actix_web::dev::Server;
 use actix_web::middleware::Logger;
@@ -16,7 +16,7 @@ impl WebServer {
 
         let port = web_server_config.port.unwrap();
         let mut server =
-            HttpServer::new(move || App::new().wrap(Logger::default()).configure(api_config));
+            HttpServer::new(move || App::new().wrap(Logger::default()).configure(init_api_config));
 
         // 绑定IP地址
         for bind in web_server_config.bind {
