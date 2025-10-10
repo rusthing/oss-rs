@@ -5,7 +5,7 @@ use crate::id_worker::ID_WORKER;
 use crate::model::{oss_obj, oss_obj_ref};
 use crate::ro::ro::Ro;
 use crate::settings::SETTINGS;
-use crate::svc::svc_utils::SvcError;
+use crate::utils::svc_utils::SvcError;
 use crate::utils::file_utils::{get_file_ext, is_cross_device_error};
 use crate::utils::time_utils::get_current_timestamp;
 use crate::vo::oss_obj_ref::OssObjRefVo;
