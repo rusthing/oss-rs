@@ -2,7 +2,7 @@ use crate::ro::ro_result::RoResult;
 use chrono::Utc;
 use serde::Serialize;
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize)]
 pub struct Ro<T> {
     pub result: RoResult,
     pub msg: String,
@@ -53,5 +53,8 @@ impl<T> Ro<T> {
     pub fn code(mut self, code: Option<String>) -> Self {
         self.code = code;
         self
+    }
+    pub fn get_extra(self) -> Option<T> {
+        self.extra
     }
 }

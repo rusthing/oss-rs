@@ -3,9 +3,10 @@ use crate::dao::oss_bucket_dao::UNIQUE_FIELD_HASHMAP;
 use crate::db::DB_CONN;
 use crate::model::oss_bucket::ActiveModel;
 use crate::ro::ro::Ro;
-use crate::utils::svc_utils::{handle_db_err_to_svc_error, SvcError};
 use crate::to::oss_bucket::{OssBucketAddTo, OssBucketModifyTo, OssBucketSaveTo};
+use crate::utils::svc_utils::{handle_db_err_to_svc_error, SvcError};
 use crate::vo::oss_bucket::OssBucketVo;
+use log::warn;
 use sea_orm::DatabaseConnection;
 
 /// # 添加新记录
@@ -88,8 +89,18 @@ pub async fn save(
 /// ## 返回值
 /// * `Ok(Ro<()>)` - 删除成功，返回封装了成功消息的Ro对象
 /// * `Err(SvcError)` - 删除失败，可能因为记录不存在或其他数据库错误
-pub async fn del(id: u64, db: Option<&DatabaseConnection>) -> Result<Ro<()>, SvcError> {
+pub async fn del(
+    id: u64,
+    current_user_id: u64,
+    db: Option<&DatabaseConnection>,
+) -> Result<Ro<()>, SvcError> {
     let db = db.unwrap_or_else(|| DB_CONN.get().unwrap());
+    let del_one = get_by_id(id, Some(db)).await?;
+    warn!(
+        "ID为<{}>的用户将删除oss_bucket中的记录: {:?}",
+        current_user_id,
+        del_one.get_extra().unwrap()
+    );
     oss_bucket_dao::delete(
         ActiveModel {
             id: sea_orm::ActiveValue::Set(id as i64),

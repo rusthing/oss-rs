@@ -19,7 +19,17 @@ static REGEX_DUPLICATE_KEY_MYSQL: Lazy<Regex> = Lazy::new(|| {
     Regex::new(r#"Duplicate entry '(?P<value>[^']+)' for key '(?P<column>[^']+)'$"#).unwrap()
 });
 
-/// # 自定义服务层的错误
+/// # 自定义服务层的错误枚举
+///
+/// 该枚举定义了服务层可能遇到的各种错误类型，包括数据未找到、重复键约束违反、
+/// IO错误和数据库错误。这些错误类型用于在服务层统一处理各种异常情况，
+/// 并提供清晰的错误信息反馈给调用方。
+///
+/// ## 错误类型说明
+/// - `NotFound`: 表示请求的数据未找到，通常用于查询操作
+/// - `DuplicateKey`: 表示违反了唯一性约束，如重复的用户名或邮箱
+/// - `IoError`: 表示输入输出相关的错误，如文件读写失败
+/// - `DatabaseError`: 表示底层数据库操作发生的错误
 #[derive(Debug, Error)]
 pub enum SvcError {
     #[error("找不到数据: {0}")]
