@@ -8,15 +8,15 @@ use crate::to::oss_bucket::{OssBucketAddTo, OssBucketModifyTo, OssBucketSaveTo};
 use crate::vo::oss_bucket::OssBucketVo;
 use sea_orm::DatabaseConnection;
 
-/// 根据id获取桶信息
+/// # 根据id获取桶信息
 ///
 /// 通过给定的ID从数据库中查询对应的桶记录，如果找到则返回封装在Ro中的Vo对象，否则返回NotFound错误。
 ///
-/// # 参数
+/// ## 参数
 /// * `id` - 要查询的桶的ID
 /// * `db` - 数据库连接，如果未提供则使用全局数据库连接
 ///
-/// # 返回值
+/// ## 返回值
 /// * `Ok(Ro<OssBucketVo>)` - 查询成功，返回封装在Ro中的OssBucketVo对象
 /// * `Err(SvcError)` - 查询失败，可能是因为记录不存在或其他数据库错误
 pub async fn get_by_id(

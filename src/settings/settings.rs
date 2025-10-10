@@ -29,20 +29,20 @@ pub struct Settings {
     pub id_worker: IdWorkerSettings,
 }
 
-/// 创建新的配置实例
+/// # 创建新的配置实例
 ///
 /// 该函数用于初始化应用程序配置，支持通过配置文件路径和端口参数来定制配置。
 /// 如果未提供配置文件路径，将尝试在可执行文件同目录下查找与包名同名的YAML配置文件。
 /// 如果提供了端口参数，将覆盖配置文件中的端口设置。
 ///
-/// # 参数
+/// ## 参数
 /// * `path` - 可选的配置文件路径，如果为None则使用当前程序所在的目录
 /// * `port` - 可选的端口号，如果提供将覆盖配置文件中的端口设置
 ///
-/// # 返回值
+/// ## 返回值
 /// 返回解析后的Settings实例
 ///
-/// # Panics
+/// ## Panics
 /// 当配置文件读取失败或解析失败时会触发panic
 pub fn init_settings(path: Option<String>, port: Option<u16>) {
     let config = Config::builder();
