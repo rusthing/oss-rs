@@ -38,7 +38,7 @@ pub async fn upload(
 
     let one_bucket = match oss_bucket_dao::get_by_name(bucket, db).await? {
         Some(bucket) => bucket,
-        None => return Ok(Ro::warn("未找到存储桶".to_string())),
+        None => return Ok(Ro::warn(format!("未找到存储桶<{}>", bucket))),
     };
 
     // 开启事务

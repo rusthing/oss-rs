@@ -14,11 +14,14 @@ pub async fn get_by_id(
         Some(id_str) => match id_str.parse::<u64>() {
             Ok(id_val) => id_val,
             Err(_) => {
-                return Err(ApiError::ValidationError("参数传值不正确{id}".to_string()));
+                return Err(ApiError::ValidationError(format!(
+                    "参数<id>传值格式错误: {}",
+                    id_str
+                )));
             }
         },
         None => {
-            return Err(ApiError::ValidationError("缺少必要参数{id}".to_string()));
+            return Err(ApiError::ValidationError("缺少必要参数<id>".to_string()));
         }
     };
     let ro = oss_bucket_svc::get_by_id(id).await?;
@@ -37,12 +40,14 @@ pub async fn add(
     bucket.current_user_id = req
         .headers()
         .get(USER_ID_HEADER_NAME)
-        .ok_or_else(|| ApiError::ValidationError(format!("缺少必要参数{}", USER_ID_HEADER_NAME)))?
+        .ok_or_else(|| ApiError::ValidationError(format!("缺少必要参数<{}>", USER_ID_HEADER_NAME)))?
         .to_str()
         .unwrap()
         .to_string()
         .parse::<u64>()
-        .map_err(|_| ApiError::ValidationError(format!("参数{}格式不正确", USER_ID_HEADER_NAME)))?;
+        .map_err(|_| {
+            ApiError::ValidationError(format!("参数<{}>格式不正确", USER_ID_HEADER_NAME))
+        })?;
 
     let result = oss_bucket_svc::add(bucket).await?;
     Ok(HttpResponse::Ok().json(result))

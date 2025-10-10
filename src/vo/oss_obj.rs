@@ -16,8 +16,6 @@ pub struct OssObjVo {
     #[from(~.to_string())]
     pub size: String,
     #[from(~.to_string())]
-    pub path: String,
-    #[from(~.to_string())]
     pub url: String,
     pub is_completed: bool,
     #[from(~.to_string())]
