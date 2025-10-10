@@ -38,6 +38,10 @@ impl<T> Ro<T> {
     pub fn fail(msg: String) -> Self {
         Self::new(RoResult::Fail, msg)
     }
+    pub fn msg(mut self, msg: String) -> Self {
+        self.msg = msg;
+        self
+    }
     pub fn extra(mut self, extra: Option<T>) -> Self {
         self.extra = extra;
         self

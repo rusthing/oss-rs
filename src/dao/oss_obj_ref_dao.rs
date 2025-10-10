@@ -33,7 +33,10 @@ where
 }
 
 /// 修改
-pub async fn update<C>(mut model: ActiveModel, db: &C) -> Result<(), DbErr>
+pub async fn update<C>(
+    mut model: ActiveModel,
+    db: &C,
+) -> Result<(Model, oss_bucket::Model, oss_obj::Model), DbErr>
 where
     C: ConnectionTrait,
 {
@@ -42,9 +45,10 @@ where
         let now = ActiveValue::set(get_current_timestamp() as i64);
         model.update_timestamp = now;
     }
+    let id = model.id.clone().unwrap();
     let active_model = model.into_active_model();
     active_model.update(db).await?;
-    Ok(())
+    Ok(get_by_id(id, db).await?.unwrap())
 }
 
 pub async fn delete<C>(model: ActiveModel, db: &C) -> Result<(), DbErr>

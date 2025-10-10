@@ -9,7 +9,8 @@ pub fn api_config(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/oss/bucket")
             .service(oss_bucket_api::get_by_id) // 根据id获取实体
-            .service(oss_bucket_api::add), // 添加
+            .service(oss_bucket_api::add) // 添加
+            .service(oss_bucket_api::modify), // 根据id获取实体
     );
     cfg.service(
         web::scope("/oss/obj-ref")

@@ -35,7 +35,7 @@ where
 }
 
 /// 修改
-pub async fn update<C>(mut model: ActiveModel, db: &C) -> Result<(), DbErr>
+pub async fn update<C>(mut model: ActiveModel, db: &C) -> Result<Model, DbErr>
 where
     C: ConnectionTrait,
 {
@@ -44,9 +44,9 @@ where
         let now = ActiveValue::set(get_current_timestamp() as i64);
         model.update_timestamp = now;
     }
-    let active_model = model.into_active_model();
+    let active_model = model.clone().into_active_model();
     active_model.update(db).await?;
-    Ok(())
+    Ok(get_by_id(model.id.unwrap(), db).await?.unwrap())
 }
 
 /// 删除

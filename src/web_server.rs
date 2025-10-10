@@ -1,4 +1,4 @@
-use crate::api::api_config::api_config;
+use crate::api_config::api_config;
 use crate::settings::SETTINGS;
 use actix_web::dev::Server;
 use actix_web::middleware::Logger;

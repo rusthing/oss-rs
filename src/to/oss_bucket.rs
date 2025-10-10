@@ -1,3 +1,4 @@
+use o2o::o2o;
 use sea_orm::ActiveValue;
 use serde::Deserialize;
 
@@ -23,4 +24,27 @@ impl Into<ActiveModel> for OssBucketAddTo {
             ..Default::default()
         }
     }
+}
+
+#[derive(o2o, Debug, Deserialize, Validate)]
+#[serde(rename_all = "camelCase")]
+#[into(ActiveModel)]
+#[ghosts(
+    creator_id: Default::default(),
+    create_timestamp: Default::default(),
+    update_timestamp: Default::default(),
+)]
+pub struct OssBucketModifyTo {
+    #[validate(required(message = "缺少必要参数<id>"))]
+    #[into(ActiveValue::Set(~.clone().unwrap().parse::<i64>().unwrap()))]
+    pub id: Option<String>,
+    #[into(ActiveValue::Set(~.clone().unwrap()))]
+    pub name: Option<String>,
+    #[serde(skip_deserializing)]
+    // #[map(creator_id, ActiveValue::Set(~ as i64), updator_id, ActiveValue::Set(~ as i64))]
+    // #[map(creator_id,ActiveValue::Set(~ as i64))]
+    // #[map(updator_id,ActiveValue::Set(~ as i64))]
+    // #[into(creator_id,ActiveValue::Set(~ as i64))]
+    #[into(updator_id,ActiveValue::Set(~ as i64))]
+    pub current_user_id: u64,
 }

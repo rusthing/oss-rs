@@ -15,7 +15,7 @@ pub async fn upload(
 ) -> Result<HttpResponse, ApiError> {
     let bucket = bucket.into_inner();
     if bucket.is_empty() {
-        return Err(ApiError::ValidationError("无效的bucket".to_string()));
+        return Err(ApiError::ValidationError("缺少必要路径<桶名称>".to_string()));
     }
 
     let file_name = form.file.file_name.unwrap();
