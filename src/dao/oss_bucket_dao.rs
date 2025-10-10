@@ -2,13 +2,12 @@ use crate::id_worker::ID_WORKER;
 use crate::model::oss_bucket::{ActiveModel, Column, Entity, Model};
 use crate::utils::time_utils::get_current_timestamp;
 use once_cell::sync::Lazy;
-use sea_orm::{
-    ActiveModelTrait, ActiveValue, ConnectionTrait, DbErr, EntityTrait, IntoActiveModel,
-};
+use sea_orm::{ActiveModelTrait, ActiveValue, ConnectionTrait, DbErr, EntityTrait};
 use sea_orm::{ColumnTrait, QueryFilter};
 use std::collections::HashMap;
 
-/// 定义unique字段列表
+/// 存储unique字段的HashMap
+/// 在捕获到数据库重复键异常时，提取字段名称时可据此获取到字段的中文意义，方便提示给用户
 pub static UNIQUE_FIELD_HASHMAP: Lazy<HashMap<&'static str, &'static str>> = Lazy::new(|| {
     let mut hashmap = HashMap::new();
     hashmap.insert("name", "桶名称");
@@ -16,45 +15,48 @@ pub static UNIQUE_FIELD_HASHMAP: Lazy<HashMap<&'static str, &'static str>> = Laz
 });
 
 /// 添加
-pub async fn insert<C>(mut model: ActiveModel, db: &C) -> Result<Model, DbErr>
+pub async fn insert<C>(mut active_model: ActiveModel, db: &C) -> Result<Model, DbErr>
 where
     C: ConnectionTrait,
 {
     // 当id为默认值(0)时生成ID
-    if model.id == ActiveValue::NotSet {
-        model.id = ActiveValue::set(ID_WORKER.get().unwrap().next_id() as i64);
+    if active_model.id == ActiveValue::NotSet {
+        active_model.id = ActiveValue::set(ID_WORKER.get().unwrap().next_id() as i64);
     }
     // 当创建时间未设置时，设置创建时间和修改时间
-    if model.create_timestamp == ActiveValue::NotSet {
+    if active_model.create_timestamp == ActiveValue::NotSet {
         let now = ActiveValue::set(get_current_timestamp() as i64);
-        model.create_timestamp = now.clone();
-        model.update_timestamp = now;
+        active_model.create_timestamp = now.clone();
+        active_model.update_timestamp = now;
     }
-    let active_model = model.into_active_model();
+    // 添加时修改者就是创建者
+    active_model.updator_id = active_model.creator_id.clone();
+    // 执行数据库插入操作
     active_model.insert(db).await
 }
 
 /// 修改
-pub async fn update<C>(mut model: ActiveModel, db: &C) -> Result<Model, DbErr>
+pub async fn update<C>(mut active_model: ActiveModel, db: &C) -> Result<Model, DbErr>
 where
     C: ConnectionTrait,
 {
     // 当修改时间未设置时，设置修改时间
-    if model.update_timestamp == ActiveValue::NotSet {
+    if active_model.update_timestamp == ActiveValue::NotSet {
         let now = ActiveValue::set(get_current_timestamp() as i64);
-        model.update_timestamp = now;
+        active_model.update_timestamp = now;
     }
-    let active_model = model.clone().into_active_model();
+    // 提取id以在更新后获取结果
+    let id = active_model.id.clone().unwrap();
+    // 执行数据库更新操作
     active_model.update(db).await?;
-    Ok(get_by_id(model.id.unwrap(), db).await?.unwrap())
+    Ok(get_by_id(id, db).await?.unwrap())
 }
 
 /// 删除
-pub async fn delete<C>(model: ActiveModel, db: &C) -> Result<(), DbErr>
+pub async fn delete<C>(active_model: ActiveModel, db: &C) -> Result<(), DbErr>
 where
     C: ConnectionTrait,
 {
-    let active_model = model.into_active_model();
     active_model.delete(db).await?;
     Ok(())
 }

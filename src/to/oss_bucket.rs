@@ -5,25 +5,22 @@ use serde::Deserialize;
 use crate::model::oss_bucket::ActiveModel;
 use validator::Validate;
 
-#[derive(Debug, Deserialize, Validate)]
+#[derive(o2o, Debug, Deserialize, Validate)]
 #[serde(rename_all = "camelCase")]
+#[into(ActiveModel)]
+#[ghosts(
+    id: Default::default(),
+    updator_id: Default::default(),
+    create_timestamp: Default::default(),
+    update_timestamp: Default::default(),
+)]
 pub struct OssBucketAddTo {
     #[validate(required(message = "名称不能为空"))]
+    #[into(ActiveValue::Set(~.clone().unwrap()))]
     pub name: Option<String>,
     #[serde(skip_deserializing)]
+    #[into(creator_id, ActiveValue::Set(~ as i64))]
     pub current_user_id: u64,
-}
-
-#[allow(clippy::from_over_into)]
-impl Into<ActiveModel> for OssBucketAddTo {
-    fn into(self) -> ActiveModel {
-        ActiveModel {
-            name: ActiveValue::set(self.name.unwrap()),
-            creator_id: ActiveValue::set(self.current_user_id as i64),
-            updator_id: ActiveValue::set(self.current_user_id as i64),
-            ..Default::default()
-        }
-    }
 }
 
 #[derive(o2o, Debug, Deserialize, Validate)]
@@ -41,9 +38,7 @@ pub struct OssBucketModifyTo {
     #[into(ActiveValue::Set(~.clone().unwrap()))]
     pub name: Option<String>,
     #[serde(skip_deserializing)]
-    // #[map(creator_id, ActiveValue::Set(~ as i64), updator_id, ActiveValue::Set(~ as i64))]
-    // #[into(creator_id,ActiveValue::Set(~ as i64))]
-    #[into(updator_id,ActiveValue::Set(~ as i64))]
+    #[into(updator_id, ActiveValue::Set(~ as i64))]
     pub current_user_id: u64,
 }
 
