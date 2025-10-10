@@ -69,11 +69,8 @@ where
         let now = ActiveValue::set(get_current_timestamp() as i64);
         active_model.update_timestamp = now;
     }
-    // 提取id以在更新后获取结果
-    let id = active_model.id.clone().unwrap();
     // 执行数据库更新操作
-    active_model.update(db).await?;
-    Ok(get_by_id(id, db).await?.unwrap())
+    active_model.update(db).await
 }
 
 /// # 删除记录

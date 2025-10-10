@@ -3,6 +3,7 @@ use crate::svc::svc_utils::SvcError;
 use actix_web::http::StatusCode;
 use actix_web::{HttpResponse, ResponseError};
 use log::error;
+use sea_orm::DbErr;
 use thiserror::Error;
 
 /// 自定义API的错误
@@ -31,6 +32,12 @@ impl ApiError {
                 SvcError::DuplicateKey(field_name, field_value) => {
                     Ro::warn(format!("{}<{}>已存在！", field_name, field_value))
                 }
+                SvcError::DatabaseError(db_err) => match db_err {
+                    DbErr::RecordNotUpdated => {
+                        Ro::warn("未更新数据，请检查记录是否存在".to_string())
+                    }
+                    _ => Ro::fail("数据库错误".to_string()).detail(Some(db_err.to_string())),
+                },
                 _ => Ro::fail(error.to_string()),
             },
         }

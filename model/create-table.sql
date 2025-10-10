@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      PostgreSQL 9.x                               */
-/* Created on:     2025/10/9 19:49:40                           */
+/* Created on:     2025/10/10 15:37:35                          */
 /*==============================================================*/
 
 
@@ -10,6 +10,7 @@
 create table oss_bucket (
    _id                  INT8                 not null,
    name                 VARCHAR(50)          not null,
+   remark               VARCHAR(50)          null,
    _creator_id          INT8                 not null,
    _create_timestamp    INT8                 not null,
    _updator_id          INT8                 not null,
@@ -26,6 +27,9 @@ comment on column oss_bucket._id is
 
 comment on column oss_bucket.name is
 '名称';
+
+comment on column oss_bucket.remark is
+'备注';
 
 comment on column oss_bucket._creator_id is
 '创建人的用户ID';

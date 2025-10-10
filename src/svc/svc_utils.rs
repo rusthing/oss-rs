@@ -7,19 +7,19 @@ use std::collections::HashMap;
 use std::io::Error;
 use thiserror::Error;
 
-/// 正则匹配重复键错误-PostgreSQL
+/// # 正则匹配重复键错误-PostgreSQL
 /// 格式: duplicate key value violates unique constraint "...", detail: Some("Key (<字段名>)=(<字段值>) already exists."), ...
 static REGEX_DUPLICATE_KEY_POSTGRES: Lazy<Regex> = Lazy::new(|| {
     Regex::new(r#"Key \((?P<column>[^)]+)\)=\((?P<value>[^)]+)\) already exists"#).unwrap()
 });
 
-/// 正则匹配重复键错误-MySQL
+/// # 正则匹配重复键错误-MySQL
 /// 格式: Duplicate entry '<字段值>' for key '<字段名>'
 static REGEX_DUPLICATE_KEY_MYSQL: Lazy<Regex> = Lazy::new(|| {
     Regex::new(r#"Duplicate entry '(?P<value>[^']+)' for key '(?P<column>[^']+)'$"#).unwrap()
 });
 
-/// 自定义服务层的错误
+/// # 自定义服务层的错误
 #[derive(Debug, Error)]
 pub enum SvcError {
     #[error("找不到数据: {0}")]
@@ -32,7 +32,18 @@ pub enum SvcError {
     DatabaseError(#[from] DbErr),
 }
 
-/// 处理数据库错误，并转换为服务层错误
+/// # 处理数据库错误，并转换为服务层错误
+///
+/// 该函数用于将数据库层的错误(DbErr)转换为服务层错误(SvcError)，
+/// 特别处理了重复键错误，能够识别PostgreSQL和MySQL的重复键错误格式，
+/// 并将其转换为带有字段名称和值的DuplicateKey错误。
+///
+/// ## 参数
+/// * `db_err` - 数据库错误对象
+/// * `unique_field_hashmap` - 用于映射数据库列名到业务字段名的哈希表
+///
+/// ## 返回值
+/// 返回对应的SvcError服务层错误对象
 pub fn handle_db_err_to_svc_error(
     db_err: DbErr,
     unique_field_hashmap: &Lazy<HashMap<&'static str, &'static str>>,
@@ -51,7 +62,18 @@ pub fn handle_db_err_to_svc_error(
     SvcError::DatabaseError(db_err)
 }
 
-/// 从正则匹配中抓取有用信息转换成重复键错误
+/// # 从正则匹配中抓取有用信息转换成重复键错误
+///
+/// 该函数用于从正则表达式匹配结果中提取重复键错误的相关信息，
+/// 包括冲突的列名和值，并通过映射表转换为业务层的字段名，
+/// 最终构造出一个包含字段名和冲突值的DuplicateKey服务错误。
+///
+/// ## 参数
+/// * `caps` - 正则表达式匹配结果，包含column和value两个命名捕获组
+/// * `unique_field_hashmap` - 数据库列名到业务字段名的映射表
+///
+/// ## 返回值
+/// 返回一个包含字段名和冲突值的SvcError::DuplicateKey错误
 fn to_duplicate_key(
     caps: Captures,
     unique_field_hashmap: &Lazy<HashMap<&'static str, &'static str>>,

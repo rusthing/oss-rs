@@ -18,6 +18,8 @@ pub struct OssBucketAddTo {
     #[validate(required(message = "名称不能为空"))]
     #[into(ActiveValue::Set(~.clone().unwrap()))]
     pub name: Option<String>,
+    #[into(ActiveValue::Set(~.clone()))]
+    pub remark: Option<String>,
     #[serde(skip_deserializing)]
     #[into(creator_id, ActiveValue::Set(~ as i64))]
     pub current_user_id: u64,
@@ -37,6 +39,8 @@ pub struct OssBucketModifyTo {
     pub id: Option<String>,
     #[into(ActiveValue::Set(~.clone().unwrap()))]
     pub name: Option<String>,
+    #[into(ActiveValue::Set(~.clone()))]
+    pub remark: Option<String>,
     #[serde(skip_deserializing)]
     #[into(updator_id, ActiveValue::Set(~ as i64))]
     pub current_user_id: u64,
@@ -52,6 +56,8 @@ pub struct OssBucketSaveTo {
     pub id: Option<String>,
     #[into(~.clone())]
     pub name: Option<String>,
+    #[into(~.clone())]
+    pub remark: Option<String>,
     #[serde(skip_deserializing)]
     pub current_user_id: u64,
 }

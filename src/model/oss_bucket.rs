@@ -10,6 +10,7 @@ pub struct Model {
     pub id: i64,
     #[sea_orm(unique)]
     pub name: String,
+    pub remark: Option<String>,
     #[sea_orm(column_name = "_creator_id")]
     pub creator_id: i64,
     #[sea_orm(column_name = "_create_timestamp")]
