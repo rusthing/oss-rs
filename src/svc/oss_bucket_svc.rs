@@ -8,9 +8,9 @@ use crate::to::oss_bucket::{OssBucketAddTo, OssBucketModifyTo, OssBucketSaveTo};
 use crate::vo::oss_bucket::OssBucketVo;
 use sea_orm::DatabaseConnection;
 
-/// # 根据id获取桶信息
+/// # 根据id获取记录信息
 ///
-/// 通过给定的ID从数据库中查询对应的桶记录，如果找到则返回封装在Ro中的Vo对象，否则返回NotFound错误。
+/// 通过提供的ID从数据库中查询相应的记录，如果找到则返回封装在Ro中的Vo对象，否则返回NotFound错误
 ///
 /// ## 参数
 /// * `id` - 要查询的桶的ID
@@ -31,7 +31,17 @@ pub async fn get_by_id(
     }))
 }
 
-/// 添加
+/// # 添加新记录
+///
+/// 将提供的AddTo对象转换为ActiveModel并插入到数据库中
+///
+/// ## 参数
+/// * `add_to` - 包含要添加记录信息的传输对象
+/// * `db` - 数据库连接，如果未提供则使用全局数据库连接
+///
+/// ## 返回值
+/// * `Ok(Ro<Vo>)` - 添加成功，返回封装了新增Vo的Ro对象
+/// * `Err(SvcError)` - 添加失败，可能是因为违反唯一约束或其他数据库错误
 pub async fn add(
     add_to: OssBucketAddTo,
     db: Option<&DatabaseConnection>,
@@ -44,7 +54,17 @@ pub async fn add(
     Ok(Ro::success("添加成功".to_string()).extra(Some(OssBucketVo::from(one))))
 }
 
-/// 修改
+/// # 修改记录
+///
+/// 根据提供的ModifyTo对象更新数据库中的相应记录
+///
+/// ## 参数
+/// * `modify_to` - 包含要修改记录信息的传输对象，必须包含有效的ID
+/// * `db` - 数据库连接，如果未提供则使用全局数据库连接
+///
+/// ## 返回值
+/// * `Ok(Ro<Vo>)` - 修改成功，返回封装了更新后Vo的Ro对象
+/// * `Err(SvcError)` - 修改失败，可能因为记录不存在、违反唯一约束或其他数据库错误
 pub async fn modify(
     modify_to: OssBucketModifyTo,
     db: Option<&DatabaseConnection>,
@@ -58,8 +78,17 @@ pub async fn modify(
     Ok(get_by_id(id, Some(db)).await?.msg("修改成功".to_string()))
 }
 
-/// 保存
-/// 如果id存在则修改，否则添加
+/// # 保存记录
+///
+/// 根据提供的SaveTo对象保存记录到数据库中。如果提供了ID，则更新现有记录；如果没有提供ID，则创建新记录
+///
+/// ## 参数
+/// * `save_to` - 包含要保存记录信息的传输对象
+/// * `db` - 数据库连接，如果未提供则使用全局数据库连接
+///
+/// ## 返回值
+/// * `Ok(Ro<Vo>)` - 保存成功，返回封装了Vo的Ro对象
+/// * `Err(SvcError)` - 保存失败，可能因为违反唯一约束、记录不存在或其他数据库错误
 pub async fn save(
     save_to: OssBucketSaveTo,
     db: Option<&DatabaseConnection>,
