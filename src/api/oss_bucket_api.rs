@@ -1,6 +1,7 @@
 use crate::svc::oss_bucket_svc;
 use crate::to::oss_bucket::{OssBucketAddTo, OssBucketModifyTo, OssBucketSaveTo};
 use crate::utils::api_utils::{get_current_user_id, ApiError};
+use crate::vo::oss_bucket::OssBucketVo;
 use actix_web::{delete, get, post, put, web, HttpRequest, HttpResponse, Result};
 use std::collections::HashMap;
 
@@ -150,6 +151,7 @@ pub async fn del(
 /// * 当缺少参数`id`时，返回`ValidationError`错误
 /// * 当参数`id`格式不正确时，返回`ValidationError`错误
 /// * 当根据ID找不到对应记录时，返回相应的错误信息
+#[utoipa::path(get,path="/oss/bucket/get-by-id",responses((status = OK, body = OssBucketVo)))]
 #[get("/get-by-id")]
 pub async fn get_by_id(
     query: web::Query<HashMap<String, String>>,

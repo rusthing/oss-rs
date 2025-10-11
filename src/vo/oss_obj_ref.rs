@@ -10,23 +10,32 @@ use serde_with::skip_serializing_none;
 #[from((oss_obj_ref::Model, oss_bucket::Model, oss_obj::Model))]
 #[serde(rename_all = "camelCase")]
 pub struct OssObjRefVo {
+    /// ID
     #[from(0,~.id.to_string())]
     pub id: String,
+    /// 名称
     #[from(0,~.name.to_string())]
     pub name: String,
+    /// 扩展名
     #[from(0,~.ext.to_string())]
     pub ext: String,
+    /// 创建者ID
     #[from(0,~.creator_id.to_string())]
     pub creator_id: String,
+    /// 创建时间戳
     #[from(0,~.create_timestamp.to_string())]
     pub create_timestamp: String,
+    /// 更新者ID
     #[from(0,~.updator_id.to_string())]
     pub updator_id: String,
+    /// 更新时间戳
     #[from(0,~.update_timestamp.to_string())]
     pub update_timestamp: String,
 
+    /// 对象存储桶
     #[from(1,OssBucketVo::from(~.clone()))]
     oss_bucket: OssBucketVo,
+    /// 对象
     #[from(2,OssObjVo::from(~.clone()))]
     oss_obj: OssObjVo,
 }
