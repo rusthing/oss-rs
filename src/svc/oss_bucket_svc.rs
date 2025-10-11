@@ -95,11 +95,10 @@ pub async fn del(
     db: Option<&DatabaseConnection>,
 ) -> Result<Ro<()>, SvcError> {
     let db = db.unwrap_or_else(|| DB_CONN.get().unwrap());
-    let del_one = get_by_id(id, Some(db)).await?;
+    let del_model = get_by_id(id, Some(db)).await?.get_extra().unwrap();
     warn!(
         "ID为<{}>的用户将删除oss_bucket中的记录: {:?}",
-        current_user_id,
-        del_one.get_extra().unwrap()
+        current_user_id, del_model
     );
     oss_bucket_dao::delete(
         ActiveModel {
