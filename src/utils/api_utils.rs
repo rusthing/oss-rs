@@ -1,5 +1,6 @@
 use crate::cst::user_id_cst::USER_ID_HEADER_NAME;
 use crate::ro::ro::Ro;
+use crate::ro::ro_code::RO_CODE_WARNING_DELETE_VIOLATE_CONSTRAINT;
 use crate::utils::svc_utils::SvcError;
 use actix_web::http::StatusCode;
 use actix_web::{HttpRequest, HttpResponse, ResponseError};
@@ -61,10 +62,12 @@ impl ApiError {
                     Ro::warn(format!("{}<{}>已存在！", field_name, field_value))
                 }
                 SvcError::DeleteViolateConstraint(pk_table, foreign_key, fk_table) => {
-                    Ro::warn("删除失败，有其它数据依赖于本数据".to_string()).detail(Some(format!(
-                        "{} <- {} <- {}>",
-                        pk_table, foreign_key, fk_table
-                    )))
+                    Ro::warn("删除失败，有其它数据依赖于本数据".to_string())
+                        .code(Some(RO_CODE_WARNING_DELETE_VIOLATE_CONSTRAINT.to_string()))
+                        .detail(Some(format!(
+                            "{} <- {} <- {}>",
+                            pk_table, foreign_key, fk_table
+                        )))
                 }
                 SvcError::DatabaseError(db_err) => match db_err {
                     DbErr::RecordNotUpdated => {
