@@ -60,6 +60,12 @@ impl ApiError {
                 SvcError::DuplicateKey(field_name, field_value) => {
                     Ro::warn(format!("{}<{}>已存在！", field_name, field_value))
                 }
+                SvcError::DeleteViolateConstraint(pk_table, foreign_key, fk_table) => {
+                    Ro::warn("删除失败，有其它数据依赖于本数据".to_string()).detail(Some(format!(
+                        "{} <- {} <- {}>",
+                        pk_table, foreign_key, fk_table
+                    )))
+                }
                 SvcError::DatabaseError(db_err) => match db_err {
                     DbErr::RecordNotUpdated => {
                         Ro::warn("未更新数据，请检查记录是否存在".to_string())
@@ -84,7 +90,9 @@ impl ResponseError for ApiError {
             ApiError::IoError(_) => StatusCode::INTERNAL_SERVER_ERROR,
             ApiError::SvcError(error) => match error {
                 SvcError::NotFound(_) => StatusCode::NOT_FOUND,
-                SvcError::DuplicateKey(_, _) => StatusCode::OK,
+                SvcError::DuplicateKey(_, _) | SvcError::DeleteViolateConstraint(_, _, _) => {
+                    StatusCode::OK
+                }
                 _ => StatusCode::INTERNAL_SERVER_ERROR,
             },
         }

@@ -107,7 +107,8 @@ pub async fn del(
         },
         db,
     )
-    .await?;
+    .await
+    .map_err(|e| handle_db_err_to_svc_error(e, &UNIQUE_FIELD_HASHMAP))?;
     Ok(Ro::success("删除成功".to_string()))
 }
 

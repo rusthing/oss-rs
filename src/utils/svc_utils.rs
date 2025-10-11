@@ -1,4 +1,4 @@
-use crate::utils::svc_utils::SvcError::DuplicateKey;
+use crate::utils::svc_utils::SvcError::{DeleteViolateConstraint, DuplicateKey};
 use log::error;
 use once_cell::sync::Lazy;
 use regex::{Captures, Regex};
@@ -19,6 +19,12 @@ static REGEX_DUPLICATE_KEY_MYSQL: Lazy<Regex> = Lazy::new(|| {
     Regex::new(r#"Duplicate entry '(?P<value>[^']+)' for key '(?P<column>[^']+)'$"#).unwrap()
 });
 
+/// # 正则匹配删除操作违反了约束条件错误-PostgreSQL
+/// 格式: Duplicate entry '<字段值>' for key '<字段名>'
+static REGEX_DELETE_VIOLATE_CONSTRAINT_POSTGRES: Lazy<Regex> = Lazy::new(|| {
+    Regex::new(r#"update or delete on table \\"(?P<pk_table>[^"]+)\\" violates foreign key constraint \\"(?P<foreign_key>[^"]+)\\" on table \\"(?P<fk_table>[^"]+)\\""#).unwrap()
+});
+
 /// # 自定义服务层的错误枚举
 ///
 /// 该枚举定义了服务层可能遇到的各种错误类型，包括数据未找到、重复键约束违反、
@@ -34,8 +40,10 @@ static REGEX_DUPLICATE_KEY_MYSQL: Lazy<Regex> = Lazy::new(|| {
 pub enum SvcError {
     #[error("找不到数据: {0}")]
     NotFound(String),
-    #[error("重复键错误: {0}")]
+    #[error("重复键错误: {0} {1}")]
     DuplicateKey(String, String),
+    #[error("删除操作违反了约束条件: {0} {1} {2}")]
+    DeleteViolateConstraint(String, String, String),
     #[error("IO错误: {0}")]
     IoError(#[from] Error),
     #[error("数据库错误: {0}")]
@@ -67,6 +75,12 @@ pub fn handle_db_err_to_svc_error(
     } else if let Some(caps) = REGEX_DUPLICATE_KEY_MYSQL.captures(&db_err_string) {
         // 正则匹配重复键错误-MySQL
         return to_duplicate_key(caps, unique_field_hashmap);
+    } else if let Some(caps) = REGEX_DELETE_VIOLATE_CONSTRAINT_POSTGRES.captures(&db_err_string) {
+        let pk_table = caps["pk_table"].to_string();
+        let foreign_key = caps["foreign_key"].to_string();
+        let fk_table = caps["fk_table"].to_string();
+        // 正则匹配删除操作违反了约束条件错误-PostgreSQL
+        return DeleteViolateConstraint(pk_table, foreign_key, fk_table);
     }
 
     SvcError::DatabaseError(db_err)
