@@ -1,6 +1,5 @@
 //! # Response Object (RO) 模块，用于统一API响应格式
 
-use crate::ro::ro_code::RoCode;
 use crate::ro::ro_result::RoResult;
 use chrono::Utc;
 use serde::Serialize;
@@ -27,9 +26,9 @@ pub struct Ro<E> {
     /// 详细信息，可选的详细描述信息
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub detail: Option<String>,
-    /// 错误码，可选的业务错误码
+    /// 编码，可选的业务编码
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub code: Option<&'static dyn RoCode>,
+    pub code: Option<String>,
 }
 
 impl<E> Ro<E> {
@@ -102,7 +101,7 @@ impl<E> Ro<E> {
     /// * `msg` - 新的消息内容
     ///
     /// ## 返回值
-    /// 返回更新消息后的Ro实例
+    /// 返回更新消息后的本实例
     pub fn msg(mut self, msg: String) -> Self {
         self.msg = msg;
         self
@@ -114,7 +113,7 @@ impl<E> Ro<E> {
     /// * `extra` - 可选的额外数据
     ///
     /// ## 返回值
-    /// 返回更新额外数据后的Ro实例
+    /// 返回更新额外数据后的本实例
     pub fn extra(mut self, extra: Option<E>) -> Self {
         self.extra = extra;
         self
@@ -126,25 +125,25 @@ impl<E> Ro<E> {
     /// * `detail` - 可选的详细信息
     ///
     /// ## 返回值
-    /// 返回更新详细信息后的Ro实例
+    /// 返回更新详细信息后的本实例
     pub fn detail(mut self, detail: Option<String>) -> Self {
         self.detail = detail;
         self
     }
 
-    /// # 设置错误码
+    /// # 设置编码
     ///
     /// ## 参数
-    /// * `code` - 可选的错误码
+    /// * `code` - 可选的编码
     ///
     /// ## 返回值
-    /// 返回更新错误码后的Ro实例
-    pub fn code(mut self, code: Option<&'static dyn RoCode>) -> Self {
+    /// 返回更新编码后的本实例
+    pub fn code(mut self, code: Option<String>) -> Self {
         self.code = code;
         self
     }
 
-    /// # 获取额外数据并消费当前实例
+    /// # 获取当前实例的额外数据
     ///
     /// ## 返回值
     /// 返回包含额外数据的Option
