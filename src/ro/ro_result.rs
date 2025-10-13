@@ -4,6 +4,7 @@
 
 use serde::{Deserialize, Serialize};
 use std::fmt;
+use utoipa::ToSchema;
 
 /// # API响应结果枚举
 ///
@@ -12,7 +13,7 @@ use std::fmt;
 /// - IllegalArgument: 参数错误
 /// - Warn: 警告状态
 /// - Fail: 操作失败
-#[derive(Debug, Copy, Clone)]
+#[derive(ToSchema, Debug, Copy, Clone)]
 pub enum RoResult {
     Success,
     IllegalArgument,

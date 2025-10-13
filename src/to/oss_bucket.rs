@@ -1,11 +1,11 @@
+use crate::model::oss_bucket::ActiveModel;
 use o2o::o2o;
 use sea_orm::ActiveValue;
 use serde::Deserialize;
-
-use crate::model::oss_bucket::ActiveModel;
+use utoipa::ToSchema;
 use validator::Validate;
 
-#[derive(o2o, Debug, Deserialize, Validate)]
+#[derive(o2o, ToSchema, Debug, Deserialize, Validate)]
 #[serde(rename_all = "camelCase")]
 #[into(ActiveModel)]
 #[ghosts(
@@ -25,7 +25,7 @@ pub struct OssBucketAddTo {
     pub current_user_id: u64,
 }
 
-#[derive(o2o, Debug, Deserialize, Validate)]
+#[derive(o2o, ToSchema, Debug, Deserialize, Validate)]
 #[serde(rename_all = "camelCase")]
 #[into(ActiveModel)]
 #[ghosts(
@@ -46,7 +46,7 @@ pub struct OssBucketModifyTo {
     pub current_user_id: u64,
 }
 
-#[derive(o2o, Debug, Deserialize)]
+#[derive(o2o, ToSchema, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[into(OssBucketAddTo)]
 #[into(OssBucketModifyTo)]

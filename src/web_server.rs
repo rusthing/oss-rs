@@ -1,12 +1,9 @@
 use crate::api_config::init_api_config;
-use crate::api_doc::ApiDoc;
 use crate::settings::SETTINGS;
 use actix_web::dev::Server;
 use actix_web::middleware::Logger;
 use actix_web::{App, HttpServer};
 use log::info;
-use utoipa::OpenApi;
-use utoipa_swagger_ui::SwaggerUi;
 
 pub struct WebServer {
     pub server: Server,
@@ -22,10 +19,6 @@ impl WebServer {
             App::new()
                 .wrap(Logger::default())
                 .configure(init_api_config)
-                .service(
-                    SwaggerUi::new("/swagger-ui/{_:.*}")
-                        .url("/api-docs/openapi.json", ApiDoc::openapi()),
-                )
         });
 
         // 绑定IP地址

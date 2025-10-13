@@ -4,9 +4,10 @@ use crate::vo::oss_obj::OssObjVo;
 use o2o::o2o;
 use serde::Serialize;
 use serde_with::skip_serializing_none;
+use utoipa::ToSchema;
 
 #[skip_serializing_none] // 忽略空字段(好像必须放在#[derive(o2o, Serialize)]的上方才能起效)
-#[derive(o2o, Debug, Serialize)]
+#[derive(o2o, ToSchema, Debug, Serialize)]
 #[from((oss_obj_ref::Model, oss_bucket::Model, oss_obj::Model))]
 #[serde(rename_all = "camelCase")]
 pub struct OssObjRefVo {

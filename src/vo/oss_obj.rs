@@ -3,9 +3,10 @@ use o2o::o2o;
 use serde::Serialize;
 use serde_with::skip_serializing_none;
 use std::string::ToString;
+use utoipa::ToSchema;
 
 #[skip_serializing_none] // 忽略空字段(好像必须放在#[derive(o2o, Serialize)]的上方才能起效)
-#[derive(o2o, Debug, Serialize)]
+#[derive(o2o, ToSchema, Debug, Serialize)]
 #[from(Model)]
 #[serde(rename_all = "camelCase")]
 pub struct OssObjVo {
