@@ -3,6 +3,9 @@ use crate::svc::oss_obj_svc;
 use crate::to::oss_obj::{OssObjAddTo, OssObjModifyTo, OssObjSaveTo};
 use crate::utils::api_utils::{get_current_user_id, ApiError};
 use crate::vo::oss_obj::OssObjVo;
+use std::collections::HashMap;
+use validator::Validate;
+
 /// # 添加新的记录
 ///
 /// 该接口用于添加一个新的记录
@@ -32,15 +35,16 @@ pub async fn add(
 ) -> Result<HttpResponse, ApiError> {
     let mut obj = json_body.into_inner();
 
+    obj.validate()?;
+
     // 从header中解析当前用户ID，如果没有或解析失败则抛出ApiError
     obj.current_user_id = get_current_user_id(req)?;
 
     let result = oss_obj_svc::add(obj, None).await?;
     Ok(HttpResponse::Ok().json(result))
 }
-use actix_web::{delete, get, post, put, web, HttpRequest, HttpResponse, Result};
 
-use std::collections::HashMap;
+use actix_web::{delete, get, post, put, web, HttpRequest, HttpResponse, Result};
 
 /// # 修改记录的信息
 ///
@@ -70,6 +74,8 @@ pub async fn modify(
     req: HttpRequest,
 ) -> Result<HttpResponse, ApiError> {
     let mut obj = json_body.into_inner();
+
+    obj.validate()?;
 
     // 从header中解析当前用户ID，如果没有或解析失败则抛出ApiError
     obj.current_user_id = get_current_user_id(req)?;
@@ -141,16 +147,19 @@ pub async fn del(
         Some(id_str) => match id_str.parse::<u64>() {
             Ok(id_val) => id_val,
             Err(_) => {
-                return Err(ApiError::ValidationError(format!(
-                    "参数<id>格式错误: {}",
-                    id_str
-                )));
+                let msg = format!("参数<id>格式错误: {}", id_str);
+                return Err(ApiError::from(validator::ValidationError::new(Box::leak(
+                    msg.into_boxed_str(),
+                ))));
             }
         },
         None => {
-            return Err(ApiError::ValidationError("缺少必要参数<id>".to_string()));
+            return Err(ApiError::from(validator::ValidationError::new(
+                "缺少必要参数<id>",
+            )));
         }
     };
+
     // 从header中解析当前用户ID，如果没有或解析失败则抛出ApiError
     let current_user_id = get_current_user_id(req)?;
     Ok(HttpResponse::Ok().json(oss_obj_svc::del(id, current_user_id, None).await?))
@@ -188,16 +197,19 @@ pub async fn get_by_id(
         Some(id_str) => match id_str.parse::<u64>() {
             Ok(id_val) => id_val,
             Err(_) => {
-                return Err(ApiError::ValidationError(format!(
-                    "参数<id>格式错误: {}",
-                    id_str
-                )));
+                let msg = format!("参数<id>格式错误: {}", id_str);
+                return Err(ApiError::from(validator::ValidationError::new(Box::leak(
+                    msg.into_boxed_str(),
+                ))));
             }
         },
         None => {
-            return Err(ApiError::ValidationError("缺少必要参数<id>".to_string()));
+            return Err(ApiError::from(validator::ValidationError::new(
+                "缺少必要参数<id>",
+            )));
         }
     };
+
     let ro = oss_obj_svc::get_by_id(id, None).await?;
     Ok(HttpResponse::Ok().json(ro))
 }

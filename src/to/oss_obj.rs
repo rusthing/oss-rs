@@ -16,8 +16,11 @@ use validator::Validate;
     update_timestamp: Default::default(),
 )]
 pub struct OssObjAddTo {
-    #[validate(required(message = "路径不能为空"))]
-    #[into(ActiveValue::Set(~.clone().unwrap()))]
+    #[validate(
+        required(message = "路径不能为空"),
+        length(min = 1, message = "路径不能为空")
+    )]
+    #[into(ActiveValue::Set(~.clone().unwrap_or("".to_string())))]
     pub path: Option<String>,
     #[validate(required(message = "文件大小不能为空"))]
     #[into(ActiveValue::Set(~.clone().unwrap()))]

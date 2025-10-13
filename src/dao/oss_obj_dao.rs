@@ -13,7 +13,7 @@ use std::collections::HashMap;
 pub static UNIQUE_FIELD_HASHMAP: Lazy<HashMap<&'static str, &'static str>> = Lazy::new(|| {
     let mut hashmap = HashMap::new();
     hashmap.insert("path", "对象路径");
-    hashmap.insert("size_and_hash", "对象大小与Hash");
+    hashmap.insert("size, hash", "对象大小与Hash");
     hashmap.insert("url", "对象URL");
     hashmap
 });

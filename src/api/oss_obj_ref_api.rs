@@ -12,16 +12,19 @@ pub async fn get_by_id(
         Some(id_str) => match id_str.parse::<u64>() {
             Ok(id_val) => id_val,
             Err(_) => {
-                return Err(ApiError::ValidationError(format!(
-                    "参数<id>格式不正确: {}",
-                    id_str
-                )));
+                let msg = format!("参数<id>格式错误: {}", id_str);
+                return Err(ApiError::from(validator::ValidationError::new(Box::leak(
+                    msg.into_boxed_str(),
+                ))));
             }
         },
         None => {
-            return Err(ApiError::ValidationError("缺少必要参数<id>".to_string()));
+            return Err(ApiError::from(validator::ValidationError::new(
+                "缺少必要参数<id>",
+            )));
         }
     };
+
     let ro = oss_obj_ref_svc::get_by_id(id).await?;
     Ok(HttpResponse::Ok().json(ro))
 }
@@ -33,15 +36,19 @@ pub async fn remove(query: web::Query<HashMap<String, String>>) -> Result<HttpRe
         Some(id_str) => match id_str.parse::<u64>() {
             Ok(id_val) => id_val,
             Err(_) => {
-                return Err(ApiError::ValidationError(
-                    "以下参数传值不正确{id}".to_string(),
-                ));
+                let msg = format!("参数<id>格式错误: {}", id_str);
+                return Err(ApiError::from(validator::ValidationError::new(Box::leak(
+                    msg.into_boxed_str(),
+                ))));
             }
         },
         None => {
-            return Err(ApiError::ValidationError("缺少必要参数{id}".to_string()));
+            return Err(ApiError::from(validator::ValidationError::new(
+                "缺少必要参数<id>",
+            )));
         }
     };
+
     let ro = oss_obj_ref_svc::remove(id).await?;
     Ok(HttpResponse::Ok().json(ro))
 }

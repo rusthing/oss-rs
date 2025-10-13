@@ -7,6 +7,7 @@ use actix_web::{HttpRequest, HttpResponse, ResponseError};
 use log::error;
 use sea_orm::DbErr;
 use thiserror::Error;
+use validator;
 
 /// # 自定义API错误类型
 ///
@@ -30,7 +31,9 @@ use thiserror::Error;
 #[derive(Debug, Error)]
 pub enum ApiError {
     #[error("参数校验错误: {0}")]
-    ValidationError(String),
+    ValidationError(#[from] validator::ValidationError),
+    #[error("参数校验错误: {0}")]
+    ValidationErrors(#[from] validator::ValidationErrors),
     #[error("IO错误: {0}")]
     IoError(#[from] std::io::Error),
     #[error("服务层错误")]
@@ -51,6 +54,7 @@ impl ApiError {
     fn to_ro(&self) -> Ro<()> {
         match self {
             ApiError::ValidationError(error) => Ro::illegal_argument(error.to_string()),
+            ApiError::ValidationErrors(errors) => Ro::illegal_argument(errors.to_string()),
             ApiError::IoError(error) => {
                 Ro::fail("磁盘异常".to_string()).detail(Some(error.to_string()))
             }
@@ -89,7 +93,7 @@ impl ResponseError for ApiError {
     /// 根据异常获取状态码
     fn status_code(&self) -> StatusCode {
         match self {
-            ApiError::ValidationError(_) => StatusCode::BAD_REQUEST,
+            ApiError::ValidationError(_) | ApiError::ValidationErrors(_) => StatusCode::BAD_REQUEST,
             ApiError::IoError(_) => StatusCode::INTERNAL_SERVER_ERROR,
             ApiError::SvcError(error) => match error {
                 SvcError::NotFound(_) => StatusCode::NOT_FOUND,
@@ -125,13 +129,19 @@ impl ResponseError for ApiError {
 ///
 /// * 如果请求头中缺少必要的用户ID参数，返回`ValidationError`
 /// * 如果用户ID格式不正确，无法解析为u64类型，返回`ValidationError`
-pub fn get_current_user_id(req: HttpRequest) -> actix_web::Result<u64, ApiError> {
+pub fn get_current_user_id(req: HttpRequest) -> Result<u64, validator::ValidationError> {
     req.headers()
         .get(USER_ID_HEADER_NAME)
-        .ok_or_else(|| ApiError::ValidationError(format!("缺少必要参数<{}>", USER_ID_HEADER_NAME)))?
+        .ok_or_else(|| {
+            let msg = format!("缺少必要参数<{}>", USER_ID_HEADER_NAME);
+            validator::ValidationError::new(Box::leak(msg.into_boxed_str()))
+        })?
         .to_str()
         .unwrap()
         .to_string()
         .parse::<u64>()
-        .map_err(|_| ApiError::ValidationError(format!("参数<{}>格式不正确", USER_ID_HEADER_NAME)))
+        .map_err(|_| {
+            let msg = format!("参数<{}>格式不正确", USER_ID_HEADER_NAME);
+            validator::ValidationError::new(Box::leak(msg.into_boxed_str()))
+        })
 }

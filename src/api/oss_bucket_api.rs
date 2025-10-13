@@ -32,6 +32,8 @@ pub async fn add(
 ) -> Result<HttpResponse, ApiError> {
     let mut bucket = json_body.into_inner();
 
+    bucket.validate()?;
+
     // 从header中解析当前用户ID，如果没有或解析失败则抛出ApiError
     bucket.current_user_id = get_current_user_id(req)?;
 
@@ -41,6 +43,7 @@ pub async fn add(
 use actix_web::{delete, get, post, put, web, HttpRequest, HttpResponse, Result};
 
 use std::collections::HashMap;
+use validator::Validate;
 
 /// # 修改记录的信息
 ///
@@ -70,6 +73,8 @@ pub async fn modify(
     req: HttpRequest,
 ) -> Result<HttpResponse, ApiError> {
     let mut bucket = json_body.into_inner();
+
+    bucket.validate()?;
 
     // 从header中解析当前用户ID，如果没有或解析失败则抛出ApiError
     bucket.current_user_id = get_current_user_id(req)?;
@@ -141,16 +146,19 @@ pub async fn del(
         Some(id_str) => match id_str.parse::<u64>() {
             Ok(id_val) => id_val,
             Err(_) => {
-                return Err(ApiError::ValidationError(format!(
-                    "参数<id>格式错误: {}",
-                    id_str
-                )));
+                let msg = format!("参数<id>格式错误: {}", id_str);
+                return Err(ApiError::from(validator::ValidationError::new(Box::leak(
+                    msg.into_boxed_str(),
+                ))));
             }
         },
         None => {
-            return Err(ApiError::ValidationError("缺少必要参数<id>".to_string()));
+            return Err(ApiError::from(validator::ValidationError::new(
+                "缺少必要参数<id>",
+            )));
         }
     };
+
     // 从header中解析当前用户ID，如果没有或解析失败则抛出ApiError
     let current_user_id = get_current_user_id(req)?;
     Ok(HttpResponse::Ok().json(oss_bucket_svc::del(id, current_user_id, None).await?))
@@ -188,16 +196,19 @@ pub async fn get_by_id(
         Some(id_str) => match id_str.parse::<u64>() {
             Ok(id_val) => id_val,
             Err(_) => {
-                return Err(ApiError::ValidationError(format!(
-                    "参数<id>格式错误: {}",
-                    id_str
-                )));
+                let msg = format!("参数<id>格式错误: {}", id_str);
+                return Err(ApiError::from(validator::ValidationError::new(Box::leak(
+                    msg.into_boxed_str(),
+                ))));
             }
         },
         None => {
-            return Err(ApiError::ValidationError("缺少必要参数<id>".to_string()));
+            return Err(ApiError::from(validator::ValidationError::new(
+                "缺少必要参数<id>",
+            )));
         }
     };
+
     let ro = oss_bucket_svc::get_by_id(id, None).await?;
     Ok(HttpResponse::Ok().json(ro))
 }

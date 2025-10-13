@@ -38,9 +38,9 @@ pub async fn upload(
 ) -> Result<HttpResponse, ApiError> {
     let bucket = bucket.into_inner();
     if bucket.is_empty() {
-        return Err(ApiError::ValidationError(
-            "缺少必要路径<桶名称>".to_string(),
-        ));
+        return Err(ApiError::from(validator::ValidationError::new(
+            "缺少必要路径<桶名称>",
+        )));
     }
 
     let file_name = form.file.file_name.unwrap();
@@ -49,7 +49,9 @@ pub async fn upload(
     let provided_hash: Option<String> = form.hash.map(|t| t.into_inner());
     let computed_hash = calc_hash(&temp_file.path());
     if provided_hash.is_some() && provided_hash.unwrap() != computed_hash {
-        return Err(ApiError::ValidationError("文件Hash值不匹配".to_string()));
+        return Err(ApiError::from(validator::ValidationError::new(
+            "文件Hash值不匹配",
+        )));
     }
     let hash = computed_hash;
 
@@ -126,7 +128,7 @@ pub async fn preview(
         Some(range) => {
             let range = range
                 .to_str()
-                .map_err(|_| ApiError::ValidationError("无效的Range".to_string()))?;
+                .map_err(|_| ApiError::from(validator::ValidationError::new("无效的Range")))?;
             let parts: Vec<&str> = range.split("=").nth(1).unwrap().split("-").collect();
             let start = parts[0].parse::<u64>().ok();
             let end = if parts.len() > 1 && !parts[1].is_empty() {
@@ -141,7 +143,7 @@ pub async fn preview(
 
     let obj_id_num = obj_id
         .parse::<u64>()
-        .map_err(|_| ApiError::ValidationError("无效的ID".to_string()))?;
+        .map_err(|_| ApiError::from(validator::ValidationError::new("无效的ID")))?;
 
     let (file_name, file_size, length, content, start, end) =
         oss_obj_ref_svc::download(obj_id_num, ext.clone().unwrap_or_default(), start, end).await?;
@@ -255,7 +257,7 @@ fn response_octet_stream(file_name: String, length: u64, content: Vec<u8>) -> Ht
         .body(content)
 }
 
-/// # 正则表达式，用于匹配对象ID的格式(19位数字和可选的扩展名)
+/// # 正则表达式，用于匹配对象ID的格式(19位数字+可选的扩展名)
 static OBJ_ID_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"^(\d+)\.?([a-zA-Z0-9]*)$").unwrap());
 
 /// # 解析对象ID
@@ -277,9 +279,9 @@ fn parse_obj_id(obj_id: &String) -> Result<(String, Option<String>), ApiError> {
         let ext = captures.get(2).unwrap().as_str().to_string();
         (obj_id, Some(ext))
     } else {
-        return Err(ApiError::ValidationError(format!(
-            "路径<id>格式不正确: {}",
-            obj_id
-        )));
+        let msg = format!("路径<id>格式不正确: {}", obj_id);
+        return Err(ApiError::from(validator::ValidationError::new(Box::leak(
+            msg.into_boxed_str(),
+        ))));
     })
 }

@@ -13,6 +13,9 @@ pub struct OssObjVo {
     /// ID
     #[from(~.to_string())]
     pub id: String,
+    /// 文件路径
+    #[from(~.to_string())]
+    pub path: String,
     /// 文件Hash
     #[from(~.to_string())]
     pub hash: String,
