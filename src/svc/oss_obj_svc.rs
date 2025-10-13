@@ -1,9 +1,9 @@
+use crate::base::svc::svc_error::{handle_db_err_to_svc_error, SvcError};
 use crate::dao::oss_obj_dao::{OssObjDao, UNIQUE_FIELD_HASHMAP};
 use crate::db::DB_CONN;
 use crate::model::oss_obj::ActiveModel;
 use crate::ro::ro::Ro;
 use crate::to::oss_obj::{OssObjAddTo, OssObjModifyTo, OssObjSaveTo};
-use crate::utils::svc_utils::{handle_db_err_to_svc_error, SvcError};
 use crate::vo::oss_obj::OssObjVo;
 use log::warn;
 use sea_orm::DatabaseConnection;
@@ -28,7 +28,9 @@ pub async fn add(
     let one = OssObjDao::insert(active_model, db)
         .await
         .map_err(|e| handle_db_err_to_svc_error(e, &UNIQUE_FIELD_HASHMAP))?;
-    Ok(Ro::success("添加成功".to_string()).extra(Some(OssObjVo::from(one))))
+    Ok(get_by_id(one.id as u64, Some(db))
+        .await?
+        .msg("添加成功".to_string()))
 }
 
 /// # 修改记录

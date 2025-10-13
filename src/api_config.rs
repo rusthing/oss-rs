@@ -15,21 +15,26 @@ pub fn init_api_config(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/oss/bucket")
             .service(oss_bucket_api::add) // 添加
-            .service(oss_bucket_api::save) // 根据id获取实体
             .service(oss_bucket_api::modify) // 根据id获取实体
+            .service(oss_bucket_api::save) // 根据id获取实体
             .service(oss_bucket_api::del) // 删除
             .service(oss_bucket_api::get_by_id), // 根据id获取实体
     );
     cfg.service(
         web::scope("/oss/obj")
             .service(oss_obj_api::add) // 添加
-            .service(oss_obj_api::save) // 根据id获取实体
             .service(oss_obj_api::modify) // 根据id获取实体
+            .service(oss_obj_api::save) // 根据id获取实体
             .service(oss_obj_api::del) // 删除
             .service(oss_obj_api::get_by_id), // 根据id获取实体
     );
     cfg.service(
-        web::scope("/oss/obj-ref").service(oss_obj_ref_api::get_by_id), // 根据id获取实体
+        web::scope("/oss/obj-ref")
+            .service(oss_obj_ref_api::add) // 添加
+            .service(oss_obj_ref_api::modify) // 根据id获取实体
+            .service(oss_obj_ref_api::save) // 根据id获取实体
+            .service(oss_obj_ref_api::del) // 删除
+            .service(oss_obj_ref_api::get_by_id), // 根据id获取实体
     );
     cfg.service(
         web::scope("/oss/file")

@@ -15,7 +15,10 @@ use validator::Validate;
     update_timestamp: Default::default(),
 )]
 pub struct OssBucketAddTo {
-    #[validate(required(message = "名称不能为空"))]
+    #[validate(
+        required(message = "名称不能为空"),
+        length(min = 1, message = "名称不能为空")
+    )]
     #[into(ActiveValue::Set(~.clone().unwrap()))]
     pub name: Option<String>,
     #[into(ActiveValue::Set(~.clone()))]

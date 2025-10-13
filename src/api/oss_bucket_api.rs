@@ -1,8 +1,13 @@
+use crate::base::api::api_error::ApiError;
+use crate::base::api::api_utils::get_current_user_id;
 use crate::ro::ro::Ro;
 use crate::svc::oss_bucket_svc;
 use crate::to::oss_bucket::{OssBucketAddTo, OssBucketModifyTo, OssBucketSaveTo};
-use crate::utils::api_utils::{get_current_user_id, ApiError};
 use crate::vo::oss_bucket::OssBucketVo;
+use actix_web::{delete, get, post, put, web, HttpRequest, HttpResponse, Result};
+use std::collections::HashMap;
+use validator::Validate;
+
 /// # 添加新的记录
 ///
 /// 该接口用于添加一个新的记录
@@ -30,20 +35,16 @@ pub async fn add(
     json_body: web::Json<OssBucketAddTo>,
     req: HttpRequest,
 ) -> Result<HttpResponse, ApiError> {
-    let mut bucket = json_body.into_inner();
+    let mut to = json_body.into_inner();
 
-    bucket.validate()?;
+    to.validate()?;
 
     // 从header中解析当前用户ID，如果没有或解析失败则抛出ApiError
-    bucket.current_user_id = get_current_user_id(req)?;
+    to.current_user_id = get_current_user_id(req)?;
 
-    let result = oss_bucket_svc::add(bucket, None).await?;
+    let result = oss_bucket_svc::add(to, None).await?;
     Ok(HttpResponse::Ok().json(result))
 }
-use actix_web::{delete, get, post, put, web, HttpRequest, HttpResponse, Result};
-
-use std::collections::HashMap;
-use validator::Validate;
 
 /// # 修改记录的信息
 ///
@@ -72,14 +73,14 @@ pub async fn modify(
     json_body: web::Json<OssBucketModifyTo>,
     req: HttpRequest,
 ) -> Result<HttpResponse, ApiError> {
-    let mut bucket = json_body.into_inner();
+    let mut to = json_body.into_inner();
 
-    bucket.validate()?;
+    to.validate()?;
 
     // 从header中解析当前用户ID，如果没有或解析失败则抛出ApiError
-    bucket.current_user_id = get_current_user_id(req)?;
+    to.current_user_id = get_current_user_id(req)?;
 
-    let result = oss_bucket_svc::modify(bucket, None).await?;
+    let result = oss_bucket_svc::modify(to, None).await?;
     Ok(HttpResponse::Ok().json(result))
 }
 
@@ -110,12 +111,12 @@ pub async fn save(
     json_body: web::Json<OssBucketSaveTo>,
     req: HttpRequest,
 ) -> Result<HttpResponse, ApiError> {
-    let mut bucket = json_body.into_inner();
+    let mut to = json_body.into_inner();
 
     // 从header中解析当前用户ID，如果没有或解析失败则抛出ApiError
-    bucket.current_user_id = get_current_user_id(req)?;
+    to.current_user_id = get_current_user_id(req)?;
 
-    let result = oss_bucket_svc::save(bucket, None).await?;
+    let result = oss_bucket_svc::save(to, None).await?;
     Ok(HttpResponse::Ok().json(result))
 }
 

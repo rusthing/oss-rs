@@ -1,5 +1,6 @@
 pub mod api;
 pub mod api_config;
+pub mod base;
 pub mod cst;
 pub mod dao;
 pub mod db;
