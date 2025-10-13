@@ -10,13 +10,13 @@ use thiserror::Error;
 /// # 正则匹配重复键错误-PostgreSQL
 /// 格式: duplicate key value violates unique constraint "...", detail: Some("Key (<字段名>)=(<字段值>) already exists."), ...
 static REGEX_DUPLICATE_KEY_POSTGRES: Lazy<Regex> = Lazy::new(|| {
-    Regex::new(r#"Key \((?P<column>[^)]+)\)=\((?P<value>[^)]+)\) already exists"#).unwrap()
+    Regex::new(r#"Key \((?P<column>[^)]+)\)=\((?P<value>[^)]*)\) already exists\."#).unwrap()
 });
 
 /// # 正则匹配重复键错误-MySQL
 /// 格式: Duplicate entry '<字段值>' for key '<字段名>'
 static REGEX_DUPLICATE_KEY_MYSQL: Lazy<Regex> = Lazy::new(|| {
-    Regex::new(r#"Duplicate entry '(?P<value>[^']+)' for key '(?P<column>[^']+)'$"#).unwrap()
+    Regex::new(r#"Duplicate entry '(?P<value>[^']+)' for key '(?P<column>[^']*)'$"#).unwrap()
 });
 
 /// # 正则匹配删除操作违反了约束条件错误-PostgreSQL
