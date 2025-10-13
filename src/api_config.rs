@@ -54,6 +54,10 @@ pub fn init_api_config(cfg: &mut web::ServiceConfig) {
             OssObjApiDoc::openapi(),
         ),
         (
+            Url::new("对象引用", "/api-docs/obj-ref-openapi.json"),
+            OssObjApiDoc::openapi(),
+        ),
+        (
             Url::new("文件", "/api-docs/file-openapi.json"),
             OssFileApiDoc::openapi(),
         ),
