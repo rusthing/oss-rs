@@ -1,6 +1,5 @@
 use crate::base::api::api_error::ApiError;
 use crate::ro::ro::Ro;
-use crate::svc::oss_obj_svc;
 use crate::to::oss_obj::{OssObjAddTo, OssObjModifyTo, OssObjSaveTo};
 use crate::vo::oss_obj::OssObjVo;
 use std::collections::HashMap;
@@ -40,11 +39,12 @@ pub async fn add(
     // 从header中解析当前用户ID，如果没有或解析失败则抛出ApiError
     to.current_user_id = get_current_user_id(req)?;
 
-    let result = oss_obj_svc::add(to, None).await?;
+    let result = OssObjSvc::add(to, None).await?;
     Ok(HttpResponse::Ok().json(result))
 }
 
 use crate::base::api::api_utils::get_current_user_id;
+use crate::svc::oss_obj_svc::OssObjSvc;
 use actix_web::{delete, get, post, put, web, HttpRequest, HttpResponse, Result};
 
 /// # 修改记录的信息
@@ -81,7 +81,7 @@ pub async fn modify(
     // 从header中解析当前用户ID，如果没有或解析失败则抛出ApiError
     to.current_user_id = get_current_user_id(req)?;
 
-    let result = oss_obj_svc::modify(to, None).await?;
+    let result = OssObjSvc::modify(to, None).await?;
     Ok(HttpResponse::Ok().json(result))
 }
 
@@ -117,7 +117,7 @@ pub async fn save(
     // 从header中解析当前用户ID，如果没有或解析失败则抛出ApiError
     to.current_user_id = get_current_user_id(req)?;
 
-    let result = oss_obj_svc::save(to, None).await?;
+    let result = OssObjSvc::save(to, None).await?;
     Ok(HttpResponse::Ok().json(result))
 }
 
@@ -163,7 +163,7 @@ pub async fn del(
 
     // 从header中解析当前用户ID，如果没有或解析失败则抛出ApiError
     let current_user_id = get_current_user_id(req)?;
-    Ok(HttpResponse::Ok().json(oss_obj_svc::del(id, current_user_id, None).await?))
+    Ok(HttpResponse::Ok().json(OssObjSvc::del(id, current_user_id, None).await?))
 }
 
 /// # 根据ID获取记录的信息
@@ -211,6 +211,6 @@ pub async fn get_by_id(
         }
     };
 
-    let ro = oss_obj_svc::get_by_id(id, None).await?;
+    let ro = OssObjSvc::get_by_id(id, None).await?;
     Ok(HttpResponse::Ok().json(ro))
 }

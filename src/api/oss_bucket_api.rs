@@ -1,7 +1,7 @@
 use crate::base::api::api_error::ApiError;
 use crate::base::api::api_utils::get_current_user_id;
 use crate::ro::ro::Ro;
-use crate::svc::oss_bucket_svc;
+use crate::svc::oss_bucket_svc::OssBucketSvc;
 use crate::to::oss_bucket::{OssBucketAddTo, OssBucketModifyTo, OssBucketSaveTo};
 use crate::vo::oss_bucket::OssBucketVo;
 use actix_web::{delete, get, post, put, web, HttpRequest, HttpResponse, Result};
@@ -42,7 +42,7 @@ pub async fn add(
     // 从header中解析当前用户ID，如果没有或解析失败则抛出ApiError
     to.current_user_id = get_current_user_id(req)?;
 
-    let result = oss_bucket_svc::add(to, None).await?;
+    let result = OssBucketSvc::add(to, None).await?;
     Ok(HttpResponse::Ok().json(result))
 }
 
@@ -80,7 +80,7 @@ pub async fn modify(
     // 从header中解析当前用户ID，如果没有或解析失败则抛出ApiError
     to.current_user_id = get_current_user_id(req)?;
 
-    let result = oss_bucket_svc::modify(to, None).await?;
+    let result = OssBucketSvc::modify(to, None).await?;
     Ok(HttpResponse::Ok().json(result))
 }
 
@@ -116,7 +116,7 @@ pub async fn save(
     // 从header中解析当前用户ID，如果没有或解析失败则抛出ApiError
     to.current_user_id = get_current_user_id(req)?;
 
-    let result = oss_bucket_svc::save(to, None).await?;
+    let result = OssBucketSvc::save(to, None).await?;
     Ok(HttpResponse::Ok().json(result))
 }
 
@@ -162,7 +162,7 @@ pub async fn del(
 
     // 从header中解析当前用户ID，如果没有或解析失败则抛出ApiError
     let current_user_id = get_current_user_id(req)?;
-    Ok(HttpResponse::Ok().json(oss_bucket_svc::del(id, current_user_id, None).await?))
+    Ok(HttpResponse::Ok().json(OssBucketSvc::del(id, current_user_id, None).await?))
 }
 
 /// # 根据ID获取记录的信息
@@ -210,6 +210,6 @@ pub async fn get_by_id(
         }
     };
 
-    let ro = oss_bucket_svc::get_by_id(id, None).await?;
+    let ro = OssBucketSvc::get_by_id(id, None).await?;
     Ok(HttpResponse::Ok().json(ro))
 }

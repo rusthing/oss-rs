@@ -1,6 +1,7 @@
 use crate::api::oss_bucket_api_doc::OssBucketApiDoc;
 use crate::api::oss_file_api_doc::OssFileApiDoc;
 use crate::api::oss_obj_api_doc::OssObjApiDoc;
+use crate::api::oss_obj_ref_api_doc::OssObjRefApiDoc;
 use crate::api::{oss_bucket_api, oss_file_api, oss_obj_api, oss_obj_ref_api};
 use crate::settings::SETTINGS;
 use actix_multipart::form::MultipartFormConfig;
@@ -55,7 +56,7 @@ pub fn init_api_config(cfg: &mut web::ServiceConfig) {
         ),
         (
             Url::new("对象引用", "/api-docs/obj-ref-openapi.json"),
-            OssObjApiDoc::openapi(),
+            OssObjRefApiDoc::openapi(),
         ),
         (
             Url::new("文件", "/api-docs/file-openapi.json"),

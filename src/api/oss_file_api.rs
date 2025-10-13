@@ -1,6 +1,6 @@
-use crate::ro::ro::Ro;
-use crate::svc::oss_file_svc;
 use crate::base::api::api_error::ApiError;
+use crate::ro::ro::Ro;
+use crate::svc::oss_file_svc::OssFileSvc;
 use crate::utils::file_utils::calc_hash;
 use crate::utils::upload::UploadForm;
 use crate::vo::oss_obj_ref::OssObjRefVo;
@@ -50,7 +50,7 @@ pub async fn del(query: web::Query<HashMap<String, String>>) -> Result<HttpRespo
         }
     };
 
-    let ro = oss_file_svc::del(id).await?;
+    let ro = OssFileSvc::del(id).await?;
     Ok(HttpResponse::Ok().json(ro))
 }
 
@@ -100,7 +100,7 @@ pub async fn upload(
     }
     let hash = computed_hash;
 
-    let ro = oss_file_svc::upload(&bucket, &file_name, file_size, &hash, temp_file).await?;
+    let ro = OssFileSvc::upload(&bucket, &file_name, file_size, &hash, temp_file).await?;
 
     Ok(HttpResponse::Ok().json(ro))
 }
@@ -130,7 +130,7 @@ pub async fn download(obj_id: web::Path<String>) -> Result<HttpResponse, ApiErro
     let (obj_id, ext) = parse_obj_id(&obj_id.into_inner())?;
 
     let (file_name, _file_size, length, content, ..) =
-        oss_file_svc::download(obj_id.parse::<u64>().unwrap(), ext.unwrap(), None, None).await?;
+        OssFileSvc::download(obj_id.parse::<u64>().unwrap(), ext.unwrap(), None, None).await?;
 
     Ok(response_octet_stream(file_name, length, content))
 }
@@ -191,7 +191,7 @@ pub async fn preview(
         .map_err(|_| ApiError::from(validator::ValidationError::new("无效的ID")))?;
 
     let (file_name, file_size, length, content, start, end) =
-        oss_file_svc::download(obj_id_num, ext.clone().unwrap_or_default(), start, end).await?;
+        OssFileSvc::download(obj_id_num, ext.clone().unwrap_or_default(), start, end).await?;
 
     match ext.as_deref() {
         Some(ext) => {
