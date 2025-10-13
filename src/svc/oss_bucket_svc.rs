@@ -1,5 +1,4 @@
-use crate::dao::oss_bucket_dao;
-use crate::dao::oss_bucket_dao::UNIQUE_FIELD_HASHMAP;
+use crate::dao::oss_bucket_dao::{OssBucketDao, UNIQUE_FIELD_HASHMAP};
 use crate::db::DB_CONN;
 use crate::model::oss_bucket::ActiveModel;
 use crate::ro::ro::Ro;
@@ -26,7 +25,7 @@ pub async fn add(
 ) -> Result<Ro<OssBucketVo>, SvcError> {
     let db = db.unwrap_or_else(|| DB_CONN.get().unwrap());
     let active_model: ActiveModel = add_to.into();
-    let one = oss_bucket_dao::insert(active_model, db)
+    let one = OssBucketDao::insert(active_model, db)
         .await
         .map_err(|e| handle_db_err_to_svc_error(e, &UNIQUE_FIELD_HASHMAP))?;
     Ok(Ro::success("添加成功".to_string()).extra(Some(OssBucketVo::from(one))))
@@ -50,7 +49,7 @@ pub async fn modify(
     let db = db.unwrap_or_else(|| DB_CONN.get().unwrap());
     let id = modify_to.id.clone().unwrap().parse::<u64>().unwrap();
     let active_model: ActiveModel = modify_to.into();
-    oss_bucket_dao::update(active_model, db)
+    OssBucketDao::update(active_model, db)
         .await
         .map_err(|e| handle_db_err_to_svc_error(e, &UNIQUE_FIELD_HASHMAP))?;
     Ok(get_by_id(id, Some(db)).await?.msg("修改成功".to_string()))
@@ -100,7 +99,7 @@ pub async fn del(
         "ID为<{}>的用户将删除oss_bucket中的记录: {:?}",
         current_user_id, del_model
     );
-    oss_bucket_dao::delete(
+    OssBucketDao::delete(
         ActiveModel {
             id: sea_orm::ActiveValue::Set(id as i64),
             ..Default::default()
@@ -128,7 +127,7 @@ pub async fn get_by_id(
     db: Option<&DatabaseConnection>,
 ) -> Result<Ro<OssBucketVo>, SvcError> {
     let db = db.unwrap_or_else(|| DB_CONN.get().unwrap());
-    let one = oss_bucket_dao::get_by_id(id as i64, db).await?;
+    let one = OssBucketDao::get_by_id(id as i64, db).await?;
     Ok(Ro::success("查询成功".to_string()).extra(match one {
         Some(one) => Some(OssBucketVo::from(one)),
         _ => return Err(SvcError::NotFound(format!("id: {}", id))),

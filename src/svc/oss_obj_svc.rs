@@ -1,5 +1,4 @@
-use crate::dao::oss_obj_dao;
-use crate::dao::oss_obj_dao::UNIQUE_FIELD_HASHMAP;
+use crate::dao::oss_obj_dao::{OssObjDao, UNIQUE_FIELD_HASHMAP};
 use crate::db::DB_CONN;
 use crate::model::oss_obj::ActiveModel;
 use crate::ro::ro::Ro;
@@ -26,7 +25,7 @@ pub async fn add(
 ) -> Result<Ro<OssObjVo>, SvcError> {
     let db = db.unwrap_or_else(|| DB_CONN.get().unwrap());
     let active_model: ActiveModel = add_to.into();
-    let one = oss_obj_dao::insert(active_model, db)
+    let one = OssObjDao::insert(active_model, db)
         .await
         .map_err(|e| handle_db_err_to_svc_error(e, &UNIQUE_FIELD_HASHMAP))?;
     Ok(Ro::success("添加成功".to_string()).extra(Some(OssObjVo::from(one))))
@@ -50,7 +49,7 @@ pub async fn modify(
     let db = db.unwrap_or_else(|| DB_CONN.get().unwrap());
     let id = modify_to.id.clone().unwrap().parse::<u64>().unwrap();
     let active_model: ActiveModel = modify_to.into();
-    oss_obj_dao::update(active_model, db)
+    OssObjDao::update(active_model, db)
         .await
         .map_err(|e| handle_db_err_to_svc_error(e, &UNIQUE_FIELD_HASHMAP))?;
     Ok(get_by_id(id, Some(db)).await?.msg("修改成功".to_string()))
@@ -100,7 +99,7 @@ pub async fn del(
         "ID为<{}>的用户将删除oss_obj中的记录: {:?}",
         current_user_id, del_model
     );
-    oss_obj_dao::delete(
+    OssObjDao::delete(
         ActiveModel {
             id: sea_orm::ActiveValue::Set(id as i64),
             ..Default::default()
@@ -125,7 +124,7 @@ pub async fn del(
 /// * `Err(SvcError)` - 查询失败，可能是因为记录不存在或其他数据库错误
 pub async fn get_by_id(id: u64, db: Option<&DatabaseConnection>) -> Result<Ro<OssObjVo>, SvcError> {
     let db = db.unwrap_or_else(|| DB_CONN.get().unwrap());
-    let one = oss_obj_dao::get_by_id(id as i64, db).await?;
+    let one = OssObjDao::get_by_id(id as i64, db).await?;
     Ok(Ro::success("查询成功".to_string()).extra(match one {
         Some(one) => Some(OssObjVo::from(one)),
         _ => return Err(SvcError::NotFound(format!("id: {}", id))),

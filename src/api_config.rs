@@ -29,15 +29,14 @@ pub fn init_api_config(cfg: &mut web::ServiceConfig) {
             .service(oss_obj_api::get_by_id), // 根据id获取实体
     );
     cfg.service(
-        web::scope("/oss/obj-ref")
-            .service(oss_obj_ref_api::remove) // 删除
-            .service(oss_obj_ref_api::get_by_id), // 根据id获取实体
+        web::scope("/oss/obj-ref").service(oss_obj_ref_api::get_by_id), // 根据id获取实体
     );
     cfg.service(
         web::scope("/oss/file")
             .app_data(MultipartFormConfig::default().total_limit(total_limit)) // 限制文件大小
-            .service(oss_file_api::upload) // 上传
-            .service(oss_file_api::download) // 下载
+            .service(oss_file_api::del) // 删除文件
+            .service(oss_file_api::upload) // 上传文件
+            .service(oss_file_api::download) // 下载文件
             .service(oss_file_api::preview), // 预览
     );
     cfg.service(SwaggerUi::new("/swagger-ui/{_:.*}").urls(vec![
