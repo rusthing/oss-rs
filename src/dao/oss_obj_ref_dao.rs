@@ -1,10 +1,12 @@
 use crate::id_worker::ID_WORKER;
-use crate::model::oss_obj_ref::{ActiveModel, Entity, Model};
+use crate::model::oss_obj_ref::{ActiveModel, Column, Entity, Model};
 use crate::model::{oss_bucket, oss_obj};
 use crate::utils::time_utils::get_current_timestamp;
 use once_cell::sync::Lazy;
-use sea_orm::{ActiveModelTrait, ActiveValue, ColumnTrait, ConnectionTrait, DbErr, EntityTrait};
-use sea_orm::{PaginatorTrait, QueryFilter};
+use sea_orm::{
+    ActiveModelTrait, ActiveValue, ColumnTrait, ConnectionTrait, DbErr, DeleteResult, EntityTrait,
+    QueryFilter,
+};
 use std::collections::HashMap;
 
 /// 存储unique字段的HashMap
@@ -83,12 +85,21 @@ impl OssObjRefDao {
     ///
     /// ## 返回值
     /// 如果删除成功则返回 Ok(())，如果删除失败则返回相应的错误信息
-    pub async fn delete<C>(active_model: ActiveModel, db: &C) -> Result<(), DbErr>
+    pub async fn delete<C>(active_model: ActiveModel, db: &C) -> Result<DeleteResult, DbErr>
     where
         C: ConnectionTrait,
     {
-        active_model.delete(db).await?;
-        Ok(())
+        active_model.delete(db).await
+    }
+
+    pub async fn delete_by_bucket_id<C>(bucket_id: i64, db: &C) -> Result<DeleteResult, DbErr>
+    where
+        C: ConnectionTrait,
+    {
+        Entity::delete_many()
+            .filter(Column::BucketId.eq(bucket_id))
+            .exec(db)
+            .await
     }
 
     /// # 根据ID查询记录
@@ -119,25 +130,5 @@ impl OssObjRefDao {
                     (model, bucket_option.unwrap(), obj_option.unwrap())
                 })
             })
-    }
-
-    /// # 根据对象ID查询引用数量
-    ///
-    /// 此函数用于统计特定对象ID在OSS对象引用表中的引用次数
-    ///
-    /// ## 参数
-    /// * `obj_id` - 要查询的对象ID
-    /// * `db` - 数据库连接 trait 对象
-    ///
-    /// ## 返回值
-    /// 返回指定对象ID的引用数量，如果查询失败则返回相应的错误信息
-    pub async fn count_by_obj_id<C>(obj_id: i64, db: &C) -> Result<u64, DbErr>
-    where
-        C: ConnectionTrait,
-    {
-        Entity::find()
-            .filter(<Entity as EntityTrait>::Column::ObjId.eq(obj_id))
-            .count(db)
-            .await
     }
 }

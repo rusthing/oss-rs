@@ -2,7 +2,7 @@ use crate::id_worker::ID_WORKER;
 use crate::model::oss_bucket::{ActiveModel, Column, Entity, Model};
 use crate::utils::time_utils::get_current_timestamp;
 use once_cell::sync::Lazy;
-use sea_orm::{ActiveModelTrait, ActiveValue, ConnectionTrait, DbErr, EntityTrait};
+use sea_orm::{ActiveModelTrait, ActiveValue, ConnectionTrait, DbErr, DeleteResult, EntityTrait};
 use sea_orm::{ColumnTrait, QueryFilter};
 use std::collections::HashMap;
 
@@ -86,12 +86,11 @@ impl OssBucketDao {
     ///
     /// ## 返回值
     /// 如果删除成功则返回 Ok(())，如果删除失败则返回相应的错误信息
-    pub async fn delete<C>(active_model: ActiveModel, db: &C) -> Result<(), DbErr>
+    pub async fn delete<C>(active_model: ActiveModel, db: &C) -> Result<DeleteResult, DbErr>
     where
         C: ConnectionTrait,
     {
-        active_model.delete(db).await?;
-        Ok(())
+        active_model.delete(db).await
     }
 
     /// # 根据ID查询相应记录

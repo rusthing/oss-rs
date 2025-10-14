@@ -162,7 +162,7 @@ pub async fn del(
 
     // 从header中解析当前用户ID，如果没有或解析失败则抛出ApiError
     let current_user_id = get_current_user_id(req)?;
-    Ok(HttpResponse::Ok().json(OssObjRefSvc::del(id, current_user_id, None).await?))
+    Ok(HttpResponse::Ok().json(OssObjRefSvc::del_with_obj(id, current_user_id, None).await?))
 }
 
 /// # 根据ID获取记录的信息

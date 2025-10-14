@@ -6,7 +6,7 @@ use crate::ro::ro::Ro;
 use crate::svc::oss_obj_svc::OssObjSvc;
 use crate::to::oss_obj_ref::{OssObjRefAddTo, OssObjRefModifyTo, OssObjRefSaveTo};
 use crate::vo::oss_obj_ref::OssObjRefVo;
-use log::{error, warn};
+use log::warn;
 use sea_orm::DatabaseConnection;
 
 pub struct OssObjRefSvc;
@@ -86,7 +86,7 @@ impl OssObjRefSvc {
 
     /// # 删除记录
     ///
-    /// 根据提供的ID删除数据库中的相应记录，删除完成后删除对应的对象，如果对象没有其他引用则会顺利删除，否则会记录日志
+    /// 根据提供的ID删除数据库中的相应记录
     ///
     /// ## 参数
     /// * `id` - 要删除的记录的ID
@@ -101,10 +101,12 @@ impl OssObjRefSvc {
         db: Option<&DatabaseConnection>,
     ) -> Result<Ro<OssObjRefVo>, SvcError> {
         let db = db.unwrap_or_else(|| DB_CONN.get().unwrap());
-        let del_model = Self::get_by_id(id, Some(db)).await?.get_extra().unwrap();
-        let obj_id = del_model.oss_obj.id.parse::<u64>().unwrap();
+        let del_model = Self::get_by_id(id, Some(db))
+            .await?
+            .get_extra()
+            .ok_or(SvcError::NotFound(id.to_string()))?;
         warn!(
-            "ID为<{}>的用户将删除oss_obj中的记录: {:?}",
+            "ID为<{}>的用户将删除oss_obj_ref中的记录: {:?}",
             current_user_id,
             del_model.clone()
         );
@@ -117,17 +119,58 @@ impl OssObjRefSvc {
         )
         .await
         .map_err(|e| handle_db_err_to_svc_error(e, &UNIQUE_FIELD_HASHMAP))?;
+        Ok(Ro::success("删除成功".to_string()).extra(Some(del_model)))
+    }
 
-        let ro = Ro::success("删除成功".to_string()).extra(Some(del_model));
+    /// # 删除对象引用及对象
+    ///
+    /// 根据提供的ID删除数据库中的相应记录，并删除对应的对象，如果对象没有其他引用则会顺利删除，否则不做任何事
+    ///
+    /// ## 参数
+    /// * `id` - 要删除的记录的ID
+    /// * `current_user_id` - 当前用户ID
+    /// * `db` - 数据库连接，如果未提供则使用全局数据库连接
+    ///
+    /// ## 返回值
+    /// * `Ok(Ro<Vo>)` - 删除成功，返回封装了Vo的Ro对象
+    pub async fn del_with_obj(
+        id: u64,
+        current_user_id: u64,
+        db: Option<&DatabaseConnection>,
+    ) -> Result<Ro<OssObjRefVo>, SvcError> {
+        let db = db.unwrap_or_else(|| DB_CONN.get().unwrap());
+        let ro = Self::del(id, current_user_id, Some(db)).await?;
         // 删除对象, 如果对象没有其他引用则会顺利删除，否则会失败
-        OssObjSvc::del(obj_id, current_user_id, Some(db))
+        let obj_id = ro.extra.clone().unwrap().oss_obj.id.parse::<u64>().unwrap();
+        OssObjSvc::del_with_file(obj_id, current_user_id, Some(db))
             .await
-            .map_err(|e| match e {
-                SvcError::DeleteViolateConstraint(..) => (),
-                _ => error!("删除对象失败: {}", e),
-            })
             .ok();
         Ok(ro)
+    }
+
+    /// # 根据bucket_id删除对象引用记录
+    ///
+    /// 根据提供的bucket_id从数据库中删除相应的记录
+    ///
+    /// ## 参数
+    /// * `bucket_id` - 要删除符合bucket_id为此值的所有记录
+    /// * `db` - 数据库连接，如果未提供则使用全局数据库连接
+    ///
+    /// ## 返回值
+    /// * `Ok(Ro<Vec<OssObjRefVo>>)` - 删除成功，返回封装了Vo的Ro对象
+    /// * `Err(SvcError)` - 删除失败，可能是数据库错误
+    pub async fn del_by_bucket_id(
+        bucket_id: u64,
+        current_user_id: u64,
+        db: Option<&DatabaseConnection>,
+    ) -> Result<Ro<()>, SvcError> {
+        let db = db.unwrap_or_else(|| DB_CONN.get().unwrap());
+        warn!(
+            "ID为<{}>的用户将删除oss_obj_ref中bucket_id={}的记录",
+            current_user_id, bucket_id
+        );
+        OssObjRefDao::delete_by_bucket_id(bucket_id as i64, db).await?;
+        Ok(Ro::success("删除成功".to_string()))
     }
 
     /// # 根据id获取记录信息

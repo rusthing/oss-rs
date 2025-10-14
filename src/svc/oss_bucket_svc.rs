@@ -3,6 +3,8 @@ use crate::dao::oss_bucket_dao::{OssBucketDao, UNIQUE_FIELD_HASHMAP};
 use crate::db::DB_CONN;
 use crate::model::oss_bucket::ActiveModel;
 use crate::ro::ro::Ro;
+use crate::svc::oss_obj_ref_svc::OssObjRefSvc;
+use crate::svc::oss_obj_svc::OssObjSvc;
 use crate::to::oss_bucket::{OssBucketAddTo, OssBucketModifyTo, OssBucketSaveTo};
 use crate::vo::oss_bucket::OssBucketVo;
 use log::warn;
@@ -101,7 +103,10 @@ impl OssBucketSvc {
         db: Option<&DatabaseConnection>,
     ) -> Result<Ro<OssBucketVo>, SvcError> {
         let db = db.unwrap_or_else(|| DB_CONN.get().unwrap());
-        let del_model = Self::get_by_id(id, Some(db)).await?.get_extra().unwrap();
+        let del_model = Self::get_by_id(id, Some(db))
+            .await?
+            .get_extra()
+            .ok_or(SvcError::NotFound(id.to_string()))?;
         warn!(
             "ID为<{}>的用户将删除oss_bucket中的记录: {:?}",
             current_user_id,
@@ -117,6 +122,30 @@ impl OssBucketSvc {
         .await
         .map_err(|e| handle_db_err_to_svc_error(e, &UNIQUE_FIELD_HASHMAP))?;
         Ok(Ro::success("删除成功".to_string()).extra(Some(del_model)))
+    }
+
+    /// # 级联删除记录
+    ///
+    /// 根据提供的ID删除数据库中的相应记录，并级联删除相关联的数据
+    ///
+    /// ## 参数
+    /// * `id` - 要删除的记录的ID
+    /// * `current_user_id` - 当前操作用户ID
+    /// * `db` - 数据库连接，如果未提供则使用全局数据库连接
+    ///
+    /// ## 返回值
+    /// * `Ok(Ro<Vo>)` - 删除成功，返回封装了Vo的Ro对象
+    /// * `Err(SvcError)` - 删除失败，可能因为记录不存在或其他数据库错误
+    pub async fn del_cascade(
+        id: u64,
+        current_user_id: u64,
+        db: Option<&DatabaseConnection>,
+    ) -> Result<Ro<OssBucketVo>, SvcError> {
+        let db = db.unwrap_or_else(|| DB_CONN.get().unwrap());
+        OssObjRefSvc::del_by_bucket_id(id, current_user_id, Some(db)).await?;
+        OssObjSvc::delete_orphaned(current_user_id, Some(db)).await?;
+        let ro = Self::del(id, current_user_id, Some(db)).await?;
+        Ok(ro)
     }
 
     /// # 根据id获取记录信息

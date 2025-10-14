@@ -19,6 +19,7 @@ pub fn init_api_config(cfg: &mut web::ServiceConfig) {
             .service(oss_bucket_api::modify) // 根据id获取实体
             .service(oss_bucket_api::save) // 根据id获取实体
             .service(oss_bucket_api::del) // 删除
+            .service(oss_bucket_api::del_cascade) // 级联删除
             .service(oss_bucket_api::get_by_id), // 根据id获取实体
     );
     cfg.service(

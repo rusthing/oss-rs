@@ -165,6 +165,51 @@ pub async fn del(
     Ok(HttpResponse::Ok().json(OssBucketSvc::del(id, current_user_id, None).await?))
 }
 
+/// # 级联删除记录
+///
+/// 该接口用于级联删除一个已存在的记录及其关联数据
+///
+/// ## 请求参数
+/// * `id` - 待删除记录的唯一标识符，类型为u64
+///
+/// ## 错误处理
+/// * 当缺少参数`id`时，返回`ValidationError`错误
+/// * 当参数`id`格式不正确时，返回`ValidationError`错误
+/// * 当根据ID找不到对应记录时，返回相应的错误信息
+#[utoipa::path(
+    path = "/oss/bucket/cascade",
+    params(
+        ("id", description = "记录的唯一标识符，类型为u64")
+    ),
+    responses((status = OK, body = Ro<String>))
+)]
+#[delete("/cascade")]
+pub async fn del_cascade(
+    query: web::Query<HashMap<String, String>>,
+    req: HttpRequest,
+) -> Result<HttpResponse, ApiError> {
+    let id = match query.get("id") {
+        Some(id_str) => match id_str.parse::<u64>() {
+            Ok(id_val) => id_val,
+            Err(_) => {
+                let msg = format!("参数<id>格式错误: {}", id_str);
+                return Err(ApiError::from(validator::ValidationError::new(Box::leak(
+                    msg.into_boxed_str(),
+                ))));
+            }
+        },
+        None => {
+            return Err(ApiError::from(validator::ValidationError::new(
+                "缺少必要参数<id>",
+            )));
+        }
+    };
+
+    // 从header中解析当前用户ID，如果没有或解析失败则抛出ApiError
+    let current_user_id = get_current_user_id(req)?;
+    Ok(HttpResponse::Ok().json(OssBucketSvc::del_cascade(id, current_user_id, None).await?))
+}
+
 /// # 根据ID获取记录的信息
 ///
 /// 该接口通过查询参数中的ID获取对应记录的详细信息

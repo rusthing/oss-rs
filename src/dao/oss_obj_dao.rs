@@ -1,9 +1,11 @@
 use crate::id_worker::ID_WORKER;
 use crate::model::oss_obj::{ActiveModel, Column, Entity, Model};
+use crate::model::oss_obj_ref;
 use crate::utils::time_utils::get_current_timestamp;
 use once_cell::sync::Lazy;
 use sea_orm::{
-    ActiveModelTrait, ActiveValue, ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter,
+    ActiveModelTrait, ActiveValue, ColumnTrait, ConnectionTrait, DbErr, DeleteResult, EntityTrait,
+    QueryFilter, QuerySelect, QueryTrait,
 };
 use std::collections::HashMap;
 
@@ -89,12 +91,39 @@ impl OssObjDao {
     ///
     /// ## 返回值
     /// 如果删除成功则返回 Ok(())，如果删除失败则返回相应的错误信息
-    pub async fn delete<C>(active_model: ActiveModel, db: &C) -> Result<(), DbErr>
+    pub async fn delete<C>(active_model: ActiveModel, db: &C) -> Result<DeleteResult, DbErr>
     where
         C: ConnectionTrait,
     {
-        active_model.delete(db).await?;
-        Ok(())
+        active_model.delete(db).await
+    }
+
+    /// # 获取孤立没有关联对象引用的记录
+    ///
+    /// 此函数负责获取那些在 `oss_obj_ref` 表中没有关联记录的 `oss_obj` 记录。
+    /// 这有助于清理孤立的数据，释放存储空间。
+    ///
+    /// ## 参数
+    /// * `db` - 数据库连接 trait 对象
+    ///
+    /// ## 返回值
+    /// 返回查询到的记录列表
+    pub async fn find_orphaned<C>(db: &C) -> Result<Vec<Model>, DbErr>
+    where
+        C: ConnectionTrait,
+    {
+        // 使用子查询删除没有关联记录的oss_obj记录
+        Entity::find()
+            .filter(
+                Column::Id.not_in_subquery(
+                    oss_obj_ref::Entity::find()
+                        .select_only()
+                        .column(oss_obj_ref::Column::ObjId)
+                        .into_query(),
+                ),
+            )
+            .all(db)
+            .await
     }
 
     /// # 根据ID查询相应记录

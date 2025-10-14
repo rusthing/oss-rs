@@ -87,10 +87,11 @@ impl OssObjSvc {
 
     /// # 删除记录
     ///
-    /// 根据提供的ID删除数据库中的相应记录，删除完成后会删除对象对应的文件，如果文件删除不成功则会回滚
+    /// 根据提供的ID删除数据库中的相应记录
     ///
     /// ## 参数
     /// * `id` - 要删除的记录的ID
+    /// * `current_user_id` - 当前用户ID，用于记录操作
     /// * `db` - 数据库连接，如果未提供则使用全局数据库连接
     ///
     /// ## 返回值
@@ -102,11 +103,12 @@ impl OssObjSvc {
         db: Option<&DatabaseConnection>,
     ) -> Result<Ro<OssObjVo>, SvcError> {
         let db = db.unwrap_or_else(|| DB_CONN.get().unwrap());
-        // 开启事务
-        let tx = db.begin().await?;
 
-        let del_model = Self::get_by_id(id, Some(db)).await?.get_extra().unwrap();
-        let path = del_model.path.clone();
+        let del_model = Self::get_by_id(id, Some(db))
+            .await?
+            .get_extra()
+            .ok_or(SvcError::NotFound(id.to_string()))?;
+
         warn!(
             "ID为<{}>的用户将删除oss_obj中的记录: {:?}",
             current_user_id,
@@ -122,13 +124,69 @@ impl OssObjSvc {
         .await
         .map_err(|e| handle_db_err_to_svc_error(e, &UNIQUE_FIELD_HASHMAP))?;
 
+        Ok(Ro::success("删除成功".to_string()).extra(Some(del_model)))
+    }
+
+    /// # 删除记录及文件
+    ///
+    /// 根据提供的ID删除数据库中的相应记录，删除完成后会删除对象对应的文件，如果文件删除不成功则会回滚
+    ///
+    /// ## 参数
+    /// * `id` - 要删除的记录的ID
+    /// * `current_user_id` - 当前用户ID，用于记录操作
+    /// * `db` - 数据库连接，如果未提供则使用全局数据库连接
+    ///
+    /// ## 返回值
+    /// * `Ok(Ro<Vo>)` - 删除成功，返回封装了Vo的Ro对象
+    /// * `Err(SvcError)` - 删除失败，可能因为记录不存在或其他数据库错误
+    pub async fn del_with_file(
+        id: u64,
+        current_user_id: u64,
+        db: Option<&DatabaseConnection>,
+    ) -> Result<Ro<OssObjVo>, SvcError> {
+        let db = db.unwrap_or_else(|| DB_CONN.get().unwrap());
+        // 开启事务
+        let tx = db.begin().await?;
+        let ro = Self::del(id, current_user_id, Some(db)).await?;
+        let path = ro.extra.clone().unwrap().path.clone();
         // 删除文件
         fs::remove_file(path)?;
-
         // 提交事务
         tx.commit().await?;
+        Ok(ro)
+    }
 
-        Ok(Ro::success("删除成功".to_string()).extra(Some(del_model)))
+    /// # 删除孤立数据
+    ///
+    /// 删除那些在 `oss_obj_ref` 表中没有关联记录的 `oss_obj` 记录。
+    /// 这有助于清理孤立的数据，释放存储空间。
+    ///
+    /// ## 参数
+    /// * `current_user_id` - 当前用户ID，用于记录操作
+    /// * `db` - 数据库连接，如果未提供则使用全局数据库连接
+    ///
+    /// ## 返回值
+    /// * `Ok(Ro<String>)` - 删除成功，返回删除记录数
+    /// * `Err(SvcError)` - 删除失败，可能因为数据库错误
+    pub async fn delete_orphaned(
+        current_user_id: u64,
+        db: Option<&DatabaseConnection>,
+    ) -> Result<Ro<String>, SvcError> {
+        let db = db.unwrap_or_else(|| DB_CONN.get().unwrap());
+
+        warn!(
+            "ID为<{}>的用户将删除oss_obj中孤立无对象引用的记录",
+            current_user_id
+        );
+
+        let result = OssObjDao::find_orphaned(db)
+            .await
+            .map_err(|e| handle_db_err_to_svc_error(e, &UNIQUE_FIELD_HASHMAP))?;
+        for item in result.into_iter() {
+            Self::del_with_file(item.id as u64, current_user_id, Some(db)).await?;
+        }
+
+        Ok(Ro::success("删除孤立数据成功".to_string()))
     }
 
     /// # 根据id获取记录信息
