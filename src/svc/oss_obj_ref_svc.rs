@@ -1,5 +1,5 @@
 use crate::base::svc::svc_error::{handle_db_err_to_svc_error, SvcError};
-use crate::dao::oss_obj_ref_dao::{OssObjRefDao, UNIQUE_FIELD_HASHMAP};
+use crate::dao::oss_obj_ref_dao::{OssObjRefDao, UNIQUE_FIELDS};
 use crate::db::DB_CONN;
 use crate::model::oss_obj_ref::ActiveModel;
 use crate::ro::ro::Ro;
@@ -30,7 +30,7 @@ impl OssObjRefSvc {
         let active_model: ActiveModel = add_to.into();
         let one = OssObjRefDao::insert(active_model, db)
             .await
-            .map_err(|e| handle_db_err_to_svc_error(e, &UNIQUE_FIELD_HASHMAP))?;
+            .map_err(|e| handle_db_err_to_svc_error(e, &UNIQUE_FIELDS))?;
         Ok(Self::get_by_id(one.id as u64, Some(db))
             .await?
             .msg("添加成功".to_string()))
@@ -56,7 +56,7 @@ impl OssObjRefSvc {
         let active_model: ActiveModel = modify_to.into();
         OssObjRefDao::update(active_model, db)
             .await
-            .map_err(|e| handle_db_err_to_svc_error(e, &UNIQUE_FIELD_HASHMAP))?;
+            .map_err(|e| handle_db_err_to_svc_error(e, &UNIQUE_FIELDS))?;
         Ok(Self::get_by_id(id, Some(db))
             .await?
             .msg("修改成功".to_string()))
@@ -118,7 +118,7 @@ impl OssObjRefSvc {
             db,
         )
         .await
-        .map_err(|e| handle_db_err_to_svc_error(e, &UNIQUE_FIELD_HASHMAP))?;
+        .map_err(|e| handle_db_err_to_svc_error(e, &UNIQUE_FIELDS))?;
         Ok(Ro::success("删除成功".to_string()).extra(Some(del_model)))
     }
 

@@ -1,5 +1,5 @@
 use crate::base::svc::svc_error::{handle_db_err_to_svc_error, SvcError};
-use crate::dao::oss_obj_dao::{OssObjDao, UNIQUE_FIELD_HASHMAP};
+use crate::dao::oss_obj_dao::{OssObjDao, UNIQUE_FIELDS};
 use crate::db::DB_CONN;
 use crate::model::oss_obj::ActiveModel;
 use crate::ro::ro::Ro;
@@ -31,7 +31,7 @@ impl OssObjSvc {
         let active_model: ActiveModel = add_to.into();
         let one = OssObjDao::insert(active_model, db)
             .await
-            .map_err(|e| handle_db_err_to_svc_error(e, &UNIQUE_FIELD_HASHMAP))?;
+            .map_err(|e| handle_db_err_to_svc_error(e, &UNIQUE_FIELDS))?;
         Ok(Self::get_by_id(one.id as u64, Some(db))
             .await?
             .msg("添加成功".to_string()))
@@ -57,7 +57,7 @@ impl OssObjSvc {
         let active_model: ActiveModel = modify_to.into();
         OssObjDao::update(active_model, db)
             .await
-            .map_err(|e| handle_db_err_to_svc_error(e, &UNIQUE_FIELD_HASHMAP))?;
+            .map_err(|e| handle_db_err_to_svc_error(e, &UNIQUE_FIELDS))?;
         Ok(Self::get_by_id(id, Some(db))
             .await?
             .msg("修改成功".to_string()))
@@ -122,7 +122,7 @@ impl OssObjSvc {
             db,
         )
         .await
-        .map_err(|e| handle_db_err_to_svc_error(e, &UNIQUE_FIELD_HASHMAP))?;
+        .map_err(|e| handle_db_err_to_svc_error(e, &UNIQUE_FIELDS))?;
 
         Ok(Ro::success("删除成功".to_string()).extra(Some(del_model)))
     }
@@ -181,7 +181,7 @@ impl OssObjSvc {
 
         let result = OssObjDao::find_orphaned(db)
             .await
-            .map_err(|e| handle_db_err_to_svc_error(e, &UNIQUE_FIELD_HASHMAP))?;
+            .map_err(|e| handle_db_err_to_svc_error(e, &UNIQUE_FIELDS))?;
         for item in result.into_iter() {
             Self::del_with_file(item.id as u64, current_user_id, Some(db)).await?;
         }

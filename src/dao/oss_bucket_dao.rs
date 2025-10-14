@@ -9,11 +9,8 @@ use std::collections::HashMap;
 /// # 存储unique字段的HashMap
 ///
 /// 在捕获到数据库重复键异常时，提取字段名称时可据此获取到字段的中文意义，方便提示给用户
-pub static UNIQUE_FIELD_HASHMAP: Lazy<HashMap<&'static str, &'static str>> = Lazy::new(|| {
-    let mut hashmap = HashMap::new();
-    hashmap.insert("name", "桶名称");
-    hashmap
-});
+pub static UNIQUE_FIELDS: Lazy<HashMap<&'static str, &'static str>> =
+    Lazy::new(|| HashMap::from([("name", "桶名称")]));
 
 pub struct OssBucketDao;
 
