@@ -1,6 +1,6 @@
 use crate::id_worker::ID_WORKER;
 use crate::model::oss_obj::{ActiveModel, Column, Entity, Model};
-use crate::model::oss_obj_ref;
+use crate::model::oss_obj_ref::{Column as OssObjRefColumn, Entity as OssObjRefEntity};
 use crate::utils::time_utils::get_current_timestamp;
 use once_cell::sync::Lazy;
 use sea_orm::{
@@ -116,9 +116,9 @@ impl OssObjDao {
         Entity::find()
             .filter(
                 Column::Id.not_in_subquery(
-                    oss_obj_ref::Entity::find()
+                    OssObjRefEntity::find()
                         .select_only()
-                        .column(oss_obj_ref::Column::ObjId)
+                        .column(OssObjRefColumn::ObjId)
                         .into_query(),
                 ),
             )
