@@ -40,7 +40,6 @@ pub fn init_api_config(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/oss/file")
             .app_data(MultipartFormConfig::default().total_limit(total_limit)) // 限制文件大小
-            .service(oss_file_api::del) // 删除文件
             .service(oss_file_api::upload) // 上传文件
             .service(oss_file_api::download) // 下载文件
             .service(oss_file_api::preview), // 预览

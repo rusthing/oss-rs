@@ -6,7 +6,8 @@ use crate::ro::ro::Ro;
 use crate::to::oss_obj::{OssObjAddTo, OssObjModifyTo, OssObjSaveTo};
 use crate::vo::oss_obj::OssObjVo;
 use log::warn;
-use sea_orm::DatabaseConnection;
+use sea_orm::{DatabaseConnection, TransactionTrait};
+use std::fs;
 
 pub struct OssObjSvc;
 
@@ -86,25 +87,30 @@ impl OssObjSvc {
 
     /// # 删除记录
     ///
-    /// 根据提供的ID删除数据库中的相应记录
+    /// 根据提供的ID删除数据库中的相应记录，删除完成后会删除对象对应的文件，如果文件删除不成功则会回滚
     ///
     /// ## 参数
     /// * `id` - 要删除的记录的ID
     /// * `db` - 数据库连接，如果未提供则使用全局数据库连接
     ///
     /// ## 返回值
-    /// * `Ok(Ro<()>)` - 删除成功，返回封装了成功消息的Ro对象
+    /// * `Ok(Ro<Vo>)` - 删除成功，返回封装了Vo的Ro对象
     /// * `Err(SvcError)` - 删除失败，可能因为记录不存在或其他数据库错误
     pub async fn del(
         id: u64,
         current_user_id: u64,
         db: Option<&DatabaseConnection>,
-    ) -> Result<Ro<()>, SvcError> {
+    ) -> Result<Ro<OssObjVo>, SvcError> {
         let db = db.unwrap_or_else(|| DB_CONN.get().unwrap());
+        // 开启事务
+        let tx = db.begin().await?;
+
         let del_model = Self::get_by_id(id, Some(db)).await?.get_extra().unwrap();
+        let path = del_model.path.clone();
         warn!(
             "ID为<{}>的用户将删除oss_obj中的记录: {:?}",
-            current_user_id, del_model
+            current_user_id,
+            del_model.clone()
         );
         OssObjDao::delete(
             ActiveModel {
@@ -115,29 +121,55 @@ impl OssObjSvc {
         )
         .await
         .map_err(|e| handle_db_err_to_svc_error(e, &UNIQUE_FIELD_HASHMAP))?;
-        Ok(Ro::success("删除成功".to_string()))
+
+        // 删除文件
+        fs::remove_file(path)?;
+
+        // 提交事务
+        tx.commit().await?;
+
+        Ok(Ro::success("删除成功".to_string()).extra(Some(del_model)))
     }
 
     /// # 根据id获取记录信息
     ///
-    /// 通过提供的ID从数据库中查询相应的记录，如果找到则返回封装在Ro中的Vo对象，否则返回NotFound错误
+    /// 通过提供的ID从数据库中查询相应的记录，如果找到则返回封装了Vo的Ro对象，否则返回对象的extra为None
     ///
     /// ## 参数
     /// * `id` - 要查询的桶的ID
     /// * `db` - 数据库连接，如果未提供则使用全局数据库连接
     ///
     /// ## 返回值
-    /// * `Ok(Ro<OssObjVo>)` - 查询成功，返回封装在Ro中的OssObjVo对象
-    /// * `Err(SvcError)` - 查询失败，可能是因为记录不存在或其他数据库错误
+    /// * `Ok(Ro<Vo>)` - 查询成功，如果记录存在，返回封装了Vo的Ro对象，如果不存在则返回对象的extra为None
+    /// * `Err(SvcError)` - 查询失败，可能是数据库错误
     pub async fn get_by_id(
         id: u64,
         db: Option<&DatabaseConnection>,
     ) -> Result<Ro<OssObjVo>, SvcError> {
         let db = db.unwrap_or_else(|| DB_CONN.get().unwrap());
         let one = OssObjDao::get_by_id(id as i64, db).await?;
-        Ok(Ro::success("查询成功".to_string()).extra(match one {
-            Some(one) => Some(OssObjVo::from(one)),
-            _ => return Err(SvcError::NotFound(format!("id: {}", id))),
-        }))
+        Ok(Ro::success("查询成功".to_string()).extra(one.map(|value| OssObjVo::from(value))))
+    }
+
+    /// # 根据哈希值和大小获取记录信息
+    ///
+    /// 通过提供的哈希值和文件大小从数据库中查询相应的记录，如果找到则返回封装了Vo的Ro对象，否则返回对象的extra为None
+    ///
+    /// ## 参数
+    /// * `hash` - 文件的哈希值
+    /// * `size` - 文件的大小
+    /// * `db` - 数据库连接，如果未提供则使用全局数据库连接
+    ///
+    /// ## 返回值
+    /// * `Ok(Ro<Vo>)` - 查询成功，如果记录存在，返回封装了Vo的Ro对象，如果不存在则返回对象的extra为None
+    /// * `Err(SvcError)` - 查询失败，可能是数据库错误
+    pub async fn get_by_hash_and_size(
+        hash: &str,
+        size: i64,
+        db: Option<&DatabaseConnection>,
+    ) -> Result<Ro<OssObjVo>, SvcError> {
+        let db = db.unwrap_or_else(|| DB_CONN.get().unwrap());
+        let one = OssObjDao::get_by_hash_and_size(hash, size, db).await?;
+        Ok(Ro::success("查询成功".to_string()).extra(one.map(|value| OssObjVo::from(value))))
     }
 }

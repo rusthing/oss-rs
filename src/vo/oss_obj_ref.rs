@@ -7,7 +7,7 @@ use serde_with::skip_serializing_none;
 use utoipa::ToSchema;
 
 #[skip_serializing_none] // 忽略空字段(好像必须放在#[derive(o2o, Serialize)]的上方才能起效)
-#[derive(o2o, ToSchema, Debug, Serialize)]
+#[derive(o2o, ToSchema, Debug, Serialize, Clone)]
 #[from((oss_obj_ref::Model, oss_bucket::Model, oss_obj::Model))]
 #[serde(rename_all = "camelCase")]
 pub struct OssObjRefVo {
@@ -35,8 +35,8 @@ pub struct OssObjRefVo {
 
     /// 对象存储桶
     #[from(1,OssBucketVo::from(~.clone()))]
-    oss_bucket: OssBucketVo,
+    pub oss_bucket: OssBucketVo,
     /// 对象
     #[from(2,OssObjVo::from(~.clone()))]
-    oss_obj: OssObjVo,
+    pub oss_obj: OssObjVo,
 }

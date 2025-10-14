@@ -9,12 +9,13 @@ use validator::Validate;
 #[serde(rename_all = "camelCase")]
 #[into(ActiveModel)]
 #[ghosts(
-    id: Default::default(),
     updator_id: Default::default(),
     create_timestamp: Default::default(),
     update_timestamp: Default::default(),
 )]
 pub struct OssObjRefAddTo {
+    #[into(match ~.clone() {Some(value)=>ActiveValue::Set(value.parse::<i64>().unwrap()),None=>ActiveValue::NotSet})]
+    pub id: Option<String>,
     #[validate(
         required(message = "对象ID不能为空"),
         length(min = 1, message = "对象ID不能为空")
@@ -74,8 +75,7 @@ pub struct OssObjRefModifyTo {
 #[into(OssObjRefAddTo)]
 #[into(OssObjRefModifyTo)]
 pub struct OssObjRefSaveTo {
-    #[into(OssObjRefModifyTo| ~.clone())]
-    #[ghost(OssObjRefAddTo)]
+    #[into(~.clone())]
     pub id: Option<String>,
     #[into(~.clone())]
     pub obj_id: Option<String>,

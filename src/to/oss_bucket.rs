@@ -9,12 +9,13 @@ use validator::Validate;
 #[serde(rename_all = "camelCase")]
 #[into(ActiveModel)]
 #[ghosts(
-    id: Default::default(),
     updator_id: Default::default(),
     create_timestamp: Default::default(),
     update_timestamp: Default::default(),
 )]
 pub struct OssBucketAddTo {
+    #[into(match ~.clone() {Some(value)=>ActiveValue::Set(value.parse::<i64>().unwrap()),None=>ActiveValue::NotSet})]
+    pub id: Option<String>,
     #[validate(
         required(message = "名称不能为空"),
         length(min = 1, message = "名称不能为空")
@@ -54,8 +55,7 @@ pub struct OssBucketModifyTo {
 #[into(OssBucketAddTo)]
 #[into(OssBucketModifyTo)]
 pub struct OssBucketSaveTo {
-    #[into(OssBucketModifyTo| ~.clone())]
-    #[ghost(OssBucketAddTo)]
+    #[into(~.clone())]
     pub id: Option<String>,
     #[into(~.clone())]
     pub name: Option<String>,

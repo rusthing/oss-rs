@@ -1,58 +1,14 @@
 use crate::base::api::api_error::ApiError;
+use crate::base::api::api_utils::get_current_user_id;
 use crate::ro::ro::Ro;
 use crate::svc::oss_file_svc::OssFileSvc;
 use crate::utils::file_utils::calc_hash;
 use crate::utils::upload::UploadForm;
 use crate::vo::oss_obj_ref::OssObjRefVo;
 use actix_multipart::form::MultipartForm;
-use actix_web::{delete, get, post, web, HttpRequest, HttpResponse, Result};
+use actix_web::{get, post, web, HttpRequest, HttpResponse, Result};
 use once_cell::sync::Lazy;
 use regex::Regex;
-use std::collections::HashMap;
-
-/// # 删除文件
-///
-/// 该接口根据文件ID删除对应的文件记录
-///
-/// ## 参数
-/// - `id`: 查询参数，指定要删除的文件ID，必须为有效的数字格式
-///
-/// ## 返回值
-/// 成功时返回操作结果的`Ro`对象
-///
-/// ## 错误处理
-/// - 如果缺少参数`id`，返回验证错误
-/// - 如果参数`id`格式不正确，返回验证错误
-/// - 如果找不到对应的文件记录，由服务层返回相应错误
-#[utoipa::path(
-    path = "/oss/file",
-    params(
-        ("id" = u64, Query, description = "文件ID")
-    ),
-    responses((status = OK, body = Ro<String>))
-)]
-#[delete("")]
-pub async fn del(query: web::Query<HashMap<String, String>>) -> Result<HttpResponse, ApiError> {
-    let id = match query.get("id") {
-        Some(id_str) => match id_str.parse::<u64>() {
-            Ok(id_val) => id_val,
-            Err(_) => {
-                let msg = format!("参数<id>格式错误: {}", id_str);
-                return Err(ApiError::from(validator::ValidationError::new(Box::leak(
-                    msg.into_boxed_str(),
-                ))));
-            }
-        },
-        None => {
-            return Err(ApiError::from(validator::ValidationError::new(
-                "缺少必要参数<id>",
-            )));
-        }
-    };
-
-    let ro = OssFileSvc::del(id).await?;
-    Ok(HttpResponse::Ok().json(ro))
-}
 
 /// # 上传文件到指定的存储桶
 ///
@@ -80,7 +36,11 @@ pub async fn del(query: web::Query<HashMap<String, String>>) -> Result<HttpRespo
 pub async fn upload(
     bucket: web::Path<String>,
     MultipartForm(form): MultipartForm<UploadForm>,
+    req: HttpRequest,
 ) -> Result<HttpResponse, ApiError> {
+    // 从header中解析当前用户ID，如果没有或解析失败则抛出ApiError
+    let current_user_id = get_current_user_id(req)?;
+
     let bucket = bucket.into_inner();
     if bucket.is_empty() {
         return Err(ApiError::from(validator::ValidationError::new(
@@ -100,7 +60,16 @@ pub async fn upload(
     }
     let hash = computed_hash;
 
-    let ro = OssFileSvc::upload(&bucket, &file_name, file_size, &hash, temp_file).await?;
+    let ro = OssFileSvc::upload(
+        &bucket,
+        &file_name,
+        file_size,
+        &hash,
+        temp_file,
+        current_user_id,
+        None,
+    )
+    .await?;
 
     Ok(HttpResponse::Ok().json(ro))
 }
@@ -129,8 +98,14 @@ pub async fn upload(
 pub async fn download(obj_id: web::Path<String>) -> Result<HttpResponse, ApiError> {
     let (obj_id, ext) = parse_obj_id(&obj_id.into_inner())?;
 
-    let (file_name, _file_size, length, content, ..) =
-        OssFileSvc::download(obj_id.parse::<u64>().unwrap(), ext.unwrap(), None, None).await?;
+    let (file_name, _file_size, length, content, ..) = OssFileSvc::download(
+        obj_id.parse::<u64>().unwrap(),
+        ext.unwrap(),
+        None,
+        None,
+        None,
+    )
+    .await?;
 
     Ok(response_octet_stream(file_name, length, content))
 }
@@ -190,8 +165,14 @@ pub async fn preview(
         .parse::<u64>()
         .map_err(|_| ApiError::from(validator::ValidationError::new("无效的ID")))?;
 
-    let (file_name, file_size, length, content, start, end) =
-        OssFileSvc::download(obj_id_num, ext.clone().unwrap_or_default(), start, end).await?;
+    let (file_name, file_size, length, content, start, end) = OssFileSvc::download(
+        obj_id_num,
+        ext.clone().unwrap_or_default(),
+        start,
+        end,
+        None,
+    )
+    .await?;
 
     match ext.as_deref() {
         Some(ext) => {

@@ -9,13 +9,13 @@ use validator::Validate;
 #[serde(rename_all = "camelCase")]
 #[into(ActiveModel)]
 #[ghosts(
-    id: Default::default(),
-    is_completed: Default::default(),
     updator_id: Default::default(),
     create_timestamp: Default::default(),
     update_timestamp: Default::default(),
 )]
 pub struct OssObjAddTo {
+    #[into(match ~.clone() {Some(value)=>ActiveValue::Set(value.parse::<i64>().unwrap()),None=>ActiveValue::NotSet})]
+    pub id: Option<String>,
     #[validate(
         required(message = "路径不能为空"),
         length(min = 1, message = "路径不能为空")
@@ -40,6 +40,8 @@ pub struct OssObjAddTo {
     )]
     #[into(ActiveValue::Set(~.clone().unwrap()))]
     pub url: Option<String>,
+    #[into(match ~ {Some(value)=>ActiveValue::Set(value),None=>ActiveValue::NotSet})]
+    pub is_completed: Option<bool>,
     #[serde(skip_deserializing)]
     #[into(creator_id, ActiveValue::Set(~ as i64))]
     pub current_user_id: u64,
@@ -49,7 +51,6 @@ pub struct OssObjAddTo {
 #[serde(rename_all = "camelCase")]
 #[into(ActiveModel)]
 #[ghosts(
-    is_completed: Default::default(),
     creator_id: Default::default(),
     create_timestamp: Default::default(),
     update_timestamp: Default::default(),
@@ -66,6 +67,8 @@ pub struct OssObjModifyTo {
     pub hash: Option<String>,
     #[into(ActiveValue::Set(~.clone().unwrap()))]
     pub url: Option<String>,
+    #[into(match ~ {Some(value)=>ActiveValue::Set(value),None=>ActiveValue::NotSet})]
+    pub is_completed: Option<bool>,
     #[serde(skip_deserializing)]
     #[into(updator_id, ActiveValue::Set(~ as i64))]
     pub current_user_id: u64,
@@ -76,8 +79,7 @@ pub struct OssObjModifyTo {
 #[into(OssObjAddTo)]
 #[into(OssObjModifyTo)]
 pub struct OssObjSaveTo {
-    #[into(OssObjModifyTo| ~.clone())]
-    #[ghost(OssObjAddTo)]
+    #[into(~.clone())]
     pub id: Option<String>,
     #[into(~.clone())]
     pub path: Option<String>,
@@ -87,6 +89,7 @@ pub struct OssObjSaveTo {
     pub hash: Option<String>,
     #[into(~.clone())]
     pub url: Option<String>,
+    pub is_completed: Option<bool>,
     #[serde(skip_deserializing)]
     pub current_user_id: u64,
 }

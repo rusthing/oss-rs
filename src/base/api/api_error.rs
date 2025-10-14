@@ -15,7 +15,8 @@ use validator;
 ///
 /// ## Variants
 ///
-/// * `ValidationError(String)` - 参数校验失败时的错误，通常返回400状态码
+/// * `ValidationError(String)` - 参数校验错误，通常返回400状态码
+/// * `ValidationErrors(validator::ValidationErrors)` - 参数校验错误，通常返回400状态码
 /// * `IoError(std::io::Error)` - IO操作错误，通常返回500状态码
 /// * `SvcError(SvcError)` - 服务层错误，根据具体错误类型返回相应状态码
 ///
@@ -41,19 +42,17 @@ pub enum ApiError {
 
 /// # 为 ApiError 实现错误转换方法
 ///
-/// 该实现定义了如何将不同类型的 API 错误转换为统一的 Ro 响应对象，
-/// 以便在 HTTP 接口中返回标准化的错误信息格式。
-///
-/// 转换规则如下：
-/// - ValidationError: 转换为非法参数错误，状态码 400
-/// - IoError: 转换为系统错误，状态码 500
-/// - SvcError: 根据具体的业务错误类型转换为相应的 Ro 错误对象
+/// 该实现定义了如何将不同类型的 API 错误转换为统一的 Ro 响应对象，以便在 HTTP 接口中返回标准化的错误信息格式
 impl ApiError {
     /// 将错误转换为Ro对象
     fn to_ro(&self) -> Ro<()> {
         match self {
-            ApiError::ValidationError(error) => Ro::illegal_argument(error.to_string()),
-            ApiError::ValidationErrors(errors) => Ro::illegal_argument(errors.to_string()),
+            ApiError::ValidationError(error) => {
+                Ro::illegal_argument(format!("参数校验错误: {}", error.code))
+            }
+            ApiError::ValidationErrors(errors) => {
+                Ro::illegal_argument(format!("参数校验错误: {}", errors))
+            }
             ApiError::IoError(error) => {
                 Ro::fail("磁盘异常".to_string()).detail(Some(error.to_string()))
             }

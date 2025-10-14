@@ -103,7 +103,7 @@ impl OssBucketDao {
     /// * `db` - 数据库连接 trait 对象
     ///
     /// ## 返回值
-    /// 返回查询到的完整 Model 实例（如果存在），如果查询失败则返回相应的错误信息
+    /// 查询成功，如果记录存在，返回查询到的完整 Model 实例，如果不存在返回None; 查询失败则返回相应的错误信息
     pub async fn get_by_id<C>(id: i64, db: &C) -> Result<Option<Model>, DbErr>
     where
         C: ConnectionTrait,
@@ -120,7 +120,7 @@ impl OssBucketDao {
     /// * `db` - 数据库连接 trait 对象
     ///
     /// ## 返回值
-    /// 返回查询到的完整 Model 实例（如果存在），如果查询失败则返回相应的错误信息
+    /// 查询成功，如果记录存在，返回查询到的完整 Model 实例，如果不存在返回None; 查询失败则返回相应的错误信息
     pub async fn get_by_name<C>(name: &str, db: &C) -> Result<Option<Model>, DbErr>
     where
         C: ConnectionTrait,
