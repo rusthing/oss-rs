@@ -1,5 +1,5 @@
 use crate::base::api::api_error::ApiError;
-use crate::base::api::api_utils::get_current_user_id;
+use crate::base::api::api_utils::{get_current_user_id, get_id_from_query_params};
 use crate::ro::ro::Ro;
 use crate::svc::oss_obj_ref_svc::OssObjRefSvc;
 use crate::to::oss_obj_ref::{OssObjRefAddTo, OssObjRefModifyTo, OssObjRefSaveTo};
@@ -143,22 +143,7 @@ pub async fn del(
     query: web::Query<HashMap<String, String>>,
     req: HttpRequest,
 ) -> Result<HttpResponse, ApiError> {
-    let id = match query.get("id") {
-        Some(id_str) => match id_str.parse::<u64>() {
-            Ok(id_val) => id_val,
-            Err(_) => {
-                let msg = format!("参数<id>格式错误: {}", id_str);
-                return Err(ApiError::from(validator::ValidationError::new(Box::leak(
-                    msg.into_boxed_str(),
-                ))));
-            }
-        },
-        None => {
-            return Err(ApiError::from(validator::ValidationError::new(
-                "缺少必要参数<id>",
-            )));
-        }
-    };
+    let id = get_id_from_query_params(query)?;
 
     // 从header中解析当前用户ID，如果没有或解析失败则抛出ApiError
     let current_user_id = get_current_user_id(req)?;
@@ -193,22 +178,7 @@ pub async fn del(
 pub async fn get_by_id(
     query: web::Query<HashMap<String, String>>,
 ) -> Result<HttpResponse, ApiError> {
-    let id = match query.get("id") {
-        Some(id_str) => match id_str.parse::<u64>() {
-            Ok(id_val) => id_val,
-            Err(_) => {
-                let msg = format!("参数<id>格式错误: {}", id_str);
-                return Err(ApiError::from(validator::ValidationError::new(Box::leak(
-                    msg.into_boxed_str(),
-                ))));
-            }
-        },
-        None => {
-            return Err(ApiError::from(validator::ValidationError::new(
-                "缺少必要参数<id>",
-            )));
-        }
-    };
+    let id = get_id_from_query_params(query)?;
 
     let ro = OssObjRefSvc::get_by_id(id, None).await?;
     Ok(HttpResponse::Ok().json(ro))
