@@ -3,7 +3,7 @@ use crate::base::api::api_utils::get_current_user_id;
 use crate::ro::ro::Ro;
 use crate::svc::oss_file_svc::OssFileSvc;
 use crate::utils::file_utils::calc_hash;
-use crate::utils::upload::UploadForm;
+use crate::base::api::upload_form::UploadForm;
 use crate::vo::oss_obj_ref::OssObjRefVo;
 use actix_multipart::form::MultipartForm;
 use actix_web::{get, post, web, HttpRequest, HttpResponse, Result};
