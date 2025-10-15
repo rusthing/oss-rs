@@ -1,10 +1,8 @@
-[package]
-name = "oss-rs"
-version = "0.1.0"
-edition = "2024"
-authors = ["zbz"]
+[workspace]
+members = ["oss-api", "oss-svr"]
+resolver = "3"
 
-[dependencies]
+[workspace.dependencies]
 log = "0.4.28"
 clap = { version = "4.5.49", features = ["derive"] }
 chrono = "0.4.42"
@@ -15,7 +13,6 @@ tokio = { version = "1.47.1", features = ["rt", "rt-multi-thread", "macros", "si
 actix-web = "4.11.0"
 actix-multipart = "0.7.2"
 sea-orm = { version = "1.1.16", features = ["sqlx-postgres", "runtime-actix-rustls", "debug-print"] }
-thiserror = "2.0.17"
 bytesize = { version = "2.1.0", features = ["serde"] }
 regex = "1.12.2"
 tempfile = "3.23.0"
@@ -34,4 +31,6 @@ validator = { version = "0.20.0", features = ["derive"] }
 strum = { version = "0.27.2", features = ["derive"] }
 utoipa = { version = "5.4.0", features = ["actix_extras"] }
 utoipa-swagger-ui = { version = "9.0.2", features = ["actix-web"] }
-
+robotech-api = "0.1.0"
+robotech-svr = "0.1.0"
+oss-api = { version = "0.1.0", path = "oss-api" }
