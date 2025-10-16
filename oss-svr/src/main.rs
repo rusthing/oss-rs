@@ -1,12 +1,12 @@
 use clap::Parser;
 use idworker::init_id_worker;
 use log::info;
-use oss_svr::db::init_db;
 use oss_svr::env::init_env;
 use oss_svr::log::init_log;
 use oss_svr::migration::migrate;
 use oss_svr::settings::{init_settings, SETTINGS};
 use oss_svr::web_service_config::web_service_config;
+use robotech::db::init_db;
 use robotech::web_server::start_web_server;
 
 /// 网络监控工具
@@ -57,9 +57,10 @@ async fn main() -> std::io::Result<()> {
     let id_worker_settings = SETTINGS.get().unwrap().id_worker.clone();
     init_id_worker(id_worker_settings);
 
-    info!("初始化数据库...");
-    init_db().await;
+    // 初始化数据库连接
+    init_db(SETTINGS.get().unwrap().db.clone()).await;
 
+    // 启动Web服务
     let web_server_settings = SETTINGS.get().unwrap().web_server.clone();
     start_web_server(web_server_settings, web_service_config).await;
 

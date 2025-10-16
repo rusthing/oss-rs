@@ -1,9 +1,9 @@
 use crate::dao::oss_obj_dao::{OssObjDao, UNIQUE_FIELDS};
-use crate::db::DB_CONN;
 use crate::model::oss_obj::ActiveModel;
 use crate::to::oss_obj::{OssObjAddTo, OssObjModifyTo, OssObjSaveTo};
 use crate::vo::oss_obj::OssObjVo;
 use log::warn;
+use robotech::db::DB_CONN;
 use robotech::ro::Ro;
 use robotech::svc::svc_error::{handle_db_err_to_svc_error, SvcError};
 use sea_orm::{DatabaseConnection, TransactionTrait};

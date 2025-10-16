@@ -2,7 +2,6 @@ pub mod api_doc;
 pub mod base;
 pub mod ctrl;
 pub mod dao;
-pub mod db;
 pub mod env;
 pub mod log;
 pub mod migration;
