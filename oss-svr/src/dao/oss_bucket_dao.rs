@@ -1,5 +1,5 @@
-use crate::id_worker::ID_WORKER;
 use crate::model::oss_bucket::{ActiveModel, Column, Entity, Model};
+use idworker::ID_WORKER;
 use once_cell::sync::Lazy;
 use sea_orm::{ActiveModelTrait, ActiveValue, ConnectionTrait, DbErr, DeleteResult, EntityTrait};
 use sea_orm::{ColumnTrait, QueryFilter};

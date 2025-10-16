@@ -1,8 +1,8 @@
 use clap::Parser;
+use idworker::init_id_worker;
 use log::info;
 use oss_svr::db::init_db;
 use oss_svr::env::init_env;
-use oss_svr::id_worker::init_id_worker;
 use oss_svr::log::init_log;
 use oss_svr::migration::migrate;
 use oss_svr::settings::{init_settings, SETTINGS};
@@ -53,8 +53,9 @@ async fn main() -> std::io::Result<()> {
     info!("升级数据库版本...");
     migrate().await.expect("升级数据库版本失败");
 
-    info!("初始化ID生成器...");
-    init_id_worker();
+    // 初始化ID生成器...;
+    let id_worker_settings = SETTINGS.get().unwrap().id_worker.clone();
+    init_id_worker(id_worker_settings);
 
     info!("初始化数据库...");
     init_db().await;

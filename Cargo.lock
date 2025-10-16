@@ -1498,10 +1498,11 @@ dependencies = [
 
 [[package]]
 name = "idworker"
-version = "0.3.2"
+version = "0.3.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4789b6d2bd222600610559dcc16bedf012e424e8c1e90fb3e24f3d7ca5300e0b"
+checksum = "40a224c6919ffde7f3c287aaae7108c0b07d80e8972e65253ddc4e7c92585da8"
 dependencies = [
+ "log",
  "serde",
 ]
 

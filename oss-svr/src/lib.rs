@@ -4,7 +4,6 @@ pub mod ctrl;
 pub mod dao;
 pub mod db;
 pub mod env;
-pub mod id_worker;
 pub mod log;
 pub mod migration;
 pub mod model;

@@ -1,6 +1,6 @@
-use crate::id_worker::ID_WORKER;
 use crate::model::oss_obj_ref::{ActiveModel, Column, Entity, Model};
 use crate::model::{oss_bucket, oss_obj};
+use idworker::ID_WORKER;
 use once_cell::sync::Lazy;
 use sea_orm::{
     ActiveModelTrait, ActiveValue, ColumnTrait, ConnectionTrait, DbErr, DeleteResult, EntityTrait,
