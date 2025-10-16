@@ -1,4 +1,4 @@
-use crate::api::oss_file_api::{__path_download, __path_preview, __path_upload};
+use crate::ctrl::oss_file_ctrl::{__path_download, __path_preview, __path_upload};
 use utoipa::OpenApi;
 
 #[derive(OpenApi)]

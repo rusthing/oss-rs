@@ -6,7 +6,7 @@ use oss_svr::id_worker::init_id_worker;
 use oss_svr::log::init_log;
 use oss_svr::migration::migrate;
 use oss_svr::settings::init_settings;
-use oss_svr::web_server::WebServer;
+use oss_svr::web_server::start_web_server;
 
 /// 网络监控工具
 ///
@@ -58,7 +58,7 @@ async fn main() -> std::io::Result<()> {
     info!("初始化数据库...");
     init_db().await;
 
-    WebServer::new().await.run().await;
+    start_web_server().await;
 
     info!("退出程序");
     Ok(())

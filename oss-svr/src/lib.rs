@@ -1,6 +1,6 @@
-pub mod api;
-pub mod api_config;
+pub mod api_doc;
 pub mod base;
+pub mod ctrl;
 pub mod dao;
 pub mod db;
 pub mod env;
@@ -13,3 +13,4 @@ pub mod svc;
 pub mod to;
 pub mod vo;
 pub mod web_server;
+pub mod web_service_config;
