@@ -1897,7 +1897,6 @@ dependencies = [
  "chrono",
  "clap",
  "config",
- "humantime",
  "idworker",
  "log",
  "o2o",
@@ -1908,7 +1907,6 @@ dependencies = [
  "sea-orm",
  "serde",
  "serde_with",
- "sha2",
  "sqlx",
  "strum 0.27.2",
  "tempfile",
@@ -1921,6 +1919,7 @@ dependencies = [
  "utoipa",
  "utoipa-swagger-ui",
  "validator",
+ "wheel-rs",
 ]
 
 [[package]]
@@ -3872,6 +3871,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "32b130c0d2d49f8b6889abc456e795e82525204f27c42cf767cf0d7734e089b8"
 dependencies = [
  "rustls-pki-types",
+]
+
+[[package]]
+name = "wheel-rs"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8179a0a1c70bb5eadb2aeeedab40e2b3c6333fcc892446bf698b1370de3471a4"
+dependencies = [
+ "humantime",
+ "serde",
+ "sha2",
 ]
 
 [[package]]

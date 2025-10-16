@@ -8,7 +8,6 @@ clap = { version = "4.5.49", features = ["derive"] }
 chrono = "0.4.42"
 serde = { version = "1.0.228", features = ["derive"] }
 serde_with = "3.15.0"
-humantime = "2.3.0"
 tokio = { version = "1.47.1", features = ["rt", "rt-multi-thread", "macros", "signal"] }
 actix-web = "4.11.0"
 actix-multipart = "0.7.2"
@@ -18,7 +17,6 @@ regex = "1.12.2"
 tempfile = "3.23.0"
 idworker = "0.3.0"
 once_cell = "1.21.3"
-sha2 = "0.10.9"
 tracing-subscriber = { version = "0.3.20", features = ["env-filter", "json", "chrono", "tracing-log"] }
 tracing-appender = "0.2.3"
 o2o = { version = "0.5.4", default-features = false, features = ["syn2"] }
@@ -31,6 +29,6 @@ validator = { version = "0.20.0", features = ["derive"] }
 strum = { version = "0.27.2", features = ["derive"] }
 utoipa = { version = "5.4.0", features = ["actix_extras"] }
 utoipa-swagger-ui = { version = "9.0.2", features = ["actix-web"] }
+wheel-rs = "0.1.0"
 robotech-api = "0.1.0"
 robotech-svr = "0.1.0"
-oss-api = { version = "0.1.0", path = "oss-api" }
