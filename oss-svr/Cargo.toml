@@ -1,0 +1,37 @@
+[package]
+name = "oss-svr"
+version = "0.1.0"
+edition = "2024"
+authors = ["zbz"]
+
+[dependencies]
+log = { workspace = true }
+clap = { workspace = true }
+chrono = { workspace = true }
+serde = { workspace = true }
+serde_with = { workspace = true }
+humantime = { workspace = true }
+tokio = { workspace = true }
+actix-web = { workspace = true }
+actix-multipart = { workspace = true }
+sea-orm = { workspace = true }
+bytesize = { workspace = true }
+regex = { workspace = true }
+tempfile = { workspace = true }
+idworker = { workspace = true }
+once_cell = { workspace = true }
+sha2 = { workspace = true }
+tracing-subscriber = { workspace = true }
+tracing-appender = { workspace = true }
+o2o = { workspace = true }
+tracing = { workspace = true }
+tracing-core = { workspace = true }
+tracing-log = { workspace = true }
+sqlx = { workspace = true }
+config = { workspace = true }
+validator = { workspace = true }
+strum = { workspace = true }
+utoipa = { workspace = true }
+utoipa-swagger-ui = { workspace = true }
+robotech-api = { workspace = true }
+robotech-svr = { workspace = true }
