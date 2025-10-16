@@ -3,8 +3,6 @@ pub mod base;
 pub mod ctrl;
 pub mod dao;
 pub mod db;
-pub mod env;
-pub mod log;
 pub mod model;
 pub mod settings;
 pub mod svc;

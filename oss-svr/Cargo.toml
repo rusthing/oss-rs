@@ -25,14 +25,8 @@ bytesize = { workspace = true }
 regex = { workspace = true }
 tempfile = { workspace = true }
 once_cell = { workspace = true }
-tracing-subscriber = { workspace = true }
-tracing-appender = { workspace = true }
 o2o = { workspace = true }
-tracing = { workspace = true }
-tracing-core = { workspace = true }
-tracing-log = { workspace = true }
 sqlx = { workspace = true }
-config = { workspace = true }
 validator = { workspace = true }
 strum = { workspace = true }
 utoipa = { workspace = true }

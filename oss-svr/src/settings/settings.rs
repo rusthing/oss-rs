@@ -1,9 +1,8 @@
-use crate::env::ENV;
 use crate::settings::oss_settings::OssSettings;
-use config::Config;
 use idworker::IdWorkerSettings;
 use log::info;
 use robotech::db::DbSettings;
+use robotech::settings::get_settings;
 use robotech::web_server::WebServerSettings;
 use serde::{Deserialize, Serialize};
 use std::sync::OnceLock;
@@ -45,41 +44,7 @@ pub struct Settings {
 /// ## Panics
 /// 当配置文件读取失败或解析失败时会触发panic
 pub fn init_settings(path: Option<String>, port: Option<u16>) {
-    let config = Config::builder();
-    let config = if path.is_some() {
-        let path = path.unwrap();
-        // 判断文件是否存在
-        if !std::path::Path::new(&path).exists() {
-            panic!("指定的配置文件不存在");
-        }
-        // 如果已指定配置文件路径
-        config.add_source(config::File::with_name(path.as_str()).required(false))
-    } else {
-        // 如果未指定配置文件路径
-        let env = ENV.get().unwrap();
-        let path = env
-            .app_dir
-            .join(env.app_file_name.as_str())
-            .to_string_lossy()
-            .to_string();
-
-        // Add in `./Settings.toml`
-        config
-            .add_source(config::File::with_name(format!("{}.toml", path).as_str()).required(false))
-            .add_source(config::File::with_name(format!("{}.yml", path).as_str()).required(false))
-            .add_source(config::File::with_name(format!("{}.json", path).as_str()).required(false))
-            .add_source(config::File::with_name(format!("{}.ini", path).as_str()).required(false))
-            .add_source(config::File::with_name(format!("{}.ron", path).as_str()).required(false))
-    };
-    // 后续添加环境变量，以覆盖配置文件中的设置
-    let config = config
-        // Add in settings from the environment (with a prefix of APP)
-        // E.g. `APP_DEBUG=1 ./target/app` would set the `debug` key
-        .add_source(config::Environment::with_prefix("OSS"))
-        .build()
-        .unwrap();
-
-    let mut settings = config.try_deserialize::<Settings>().unwrap();
+    let mut settings = get_settings::<Settings>(path);
 
     info!("检查命令行是否指定了一些参数，如果有，则以命令行指定的参数为准...");
     // 如果命令行指定了端口，则使用命令行指定的端口

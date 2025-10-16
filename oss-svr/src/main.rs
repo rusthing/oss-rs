@@ -2,11 +2,11 @@ use clap::Parser;
 use idworker::init_id_worker;
 use log::info;
 use oss_svr::db::migrate;
-use oss_svr::env::init_env;
-use oss_svr::log::init_log;
 use oss_svr::settings::{init_settings, SETTINGS};
 use oss_svr::web_service_config::web_service_config;
 use robotech::db::init_db;
+use robotech::env::init_env;
+use robotech::log::log::init_log;
 use robotech::web_server::start_web_server;
 
 /// 网络监控工具

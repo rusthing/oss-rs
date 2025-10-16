@@ -1900,7 +1900,6 @@ dependencies = [
  "bytesize",
  "chrono",
  "clap",
- "config",
  "idworker",
  "log",
  "o2o",
@@ -1914,11 +1913,6 @@ dependencies = [
  "strum 0.27.2",
  "tempfile",
  "tokio",
- "tracing",
- "tracing-appender",
- "tracing-core",
- "tracing-log",
- "tracing-subscriber",
  "utoipa",
  "utoipa-swagger-ui",
  "validator",
@@ -2391,18 +2385,23 @@ dependencies = [
 
 [[package]]
 name = "robotech"
-version = "0.6.0"
+version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3916eff70278504d58bc01ce44f73f705a0d9dff5f03aa0732eda60c4bffc16b"
+checksum = "0f18a0c322ca97ab4ae381cd994a8165f1fc651559916bcffe8917ce6f34feba"
 dependencies = [
  "actix-web",
  "chrono",
+ "config",
  "log",
  "once_cell",
  "regex",
  "sea-orm",
  "serde",
  "thiserror 2.0.17",
+ "tracing-appender",
+ "tracing-core",
+ "tracing-log",
+ "tracing-subscriber",
  "utoipa",
  "validator",
  "wheel-rs 0.2.0",
