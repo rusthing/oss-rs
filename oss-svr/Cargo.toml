@@ -3,6 +3,13 @@ name = "oss-svr"
 version = "0.1.0"
 edition = "2024"
 authors = ["zbz"]
+license = "MIT"
+keywords = ["oss", "server", "upload", "download", "preview"]
+description = "A Rust-based object storage service system that provides functionalities similar to Alibaba Cloud OSS. Supports file upload, download, preview, bucket management and more, using Actix-web as the web framework and SeaORM as the database ORM."
+categories = ["web-programming::http-server"]
+homepage = "https://github.com/rusthing/oss-rs"
+repository = "https://github.com/rusthing/oss-rs"
+readme = "README.md"
 
 [dependencies]
 log = { workspace = true }
