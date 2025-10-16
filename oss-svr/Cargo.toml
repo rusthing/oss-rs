@@ -32,5 +32,4 @@ strum = { workspace = true }
 utoipa = { workspace = true }
 utoipa-swagger-ui = { workspace = true }
 wheel-rs = { workspace = true }
-robotech-api = { workspace = true }
-robotech-svr = { workspace = true }
+robotech = { workspace = true, features = ["svr"] }

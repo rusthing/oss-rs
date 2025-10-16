@@ -30,5 +30,4 @@ strum = { version = "0.27.2", features = ["derive"] }
 utoipa = { version = "5.4.0", features = ["actix_extras"] }
 utoipa-swagger-ui = { version = "9.0.2", features = ["actix-web"] }
 wheel-rs = "0.1.0"
-robotech-api = "0.1.0"
-robotech-svr = "0.1.0"
+robotech = "0.2.0"

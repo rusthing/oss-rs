@@ -1902,8 +1902,7 @@ dependencies = [
  "o2o",
  "once_cell",
  "regex",
- "robotech-api",
- "robotech-svr",
+ "robotech",
  "sea-orm",
  "serde",
  "serde_with",
@@ -2387,29 +2386,20 @@ dependencies = [
 ]
 
 [[package]]
-name = "robotech-api"
-version = "0.1.0"
+name = "robotech"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8973521db6da429edaf546758d9c2d069f3a4badc7a5ef59534c44e04434f05e"
-dependencies = [
- "chrono",
- "serde",
- "utoipa",
-]
-
-[[package]]
-name = "robotech-svr"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f9607f605c322bc37829dcd41fef9f308a2cd7d4a009e6bc5741f29db99457da"
+checksum = "07abf6eb9f7e86e0150f2873cee113d91ba0dc3a3bc07e87fc9e5e6b50df1c24"
 dependencies = [
  "actix-web",
+ "chrono",
  "log",
  "once_cell",
  "regex",
- "robotech-api",
  "sea-orm",
+ "serde",
  "thiserror 2.0.17",
+ "utoipa",
  "validator",
 ]
 
