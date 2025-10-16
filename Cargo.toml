@@ -12,6 +12,7 @@ tokio = { version = "1.47.1", features = ["rt", "rt-multi-thread", "macros", "si
 actix-web = "4.11.0"
 actix-multipart = "0.7.2"
 sea-orm = { version = "1.1.16", features = ["sqlx-postgres", "runtime-actix-rustls", "debug-print"] }
+sqlx = { version = "0.8.6", features = ["any", "postgres"] }
 bytesize = { version = "2.1.0", features = ["serde"] }
 regex = "1.12.2"
 tempfile = "3.23.0"
@@ -22,12 +23,11 @@ o2o = { version = "0.5.4", default-features = false, features = ["syn2"] }
 tracing = "0.1.41"
 tracing-core = "0.1.34"
 tracing-log = "0.2.0"
-sqlx = "0.8.6"
 config = "0.15.18"
 validator = { version = "0.20.0", features = ["derive"] }
 strum = { version = "0.27.2", features = ["derive"] }
 utoipa = { version = "5.4.0", features = ["actix_extras"] }
 utoipa-swagger-ui = { version = "9.0.2", features = ["actix-web"] }
 idworker = "0.3.5"
-wheel-rs = "0.1.0"
-robotech = "0.5.0"
+wheel-rs = "0.1.2"
+robotech = "0.6.0"

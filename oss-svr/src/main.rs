@@ -1,9 +1,9 @@
 use clap::Parser;
 use idworker::init_id_worker;
 use log::info;
+use oss_svr::db::migrate;
 use oss_svr::env::init_env;
 use oss_svr::log::init_log;
-use oss_svr::migration::migrate;
 use oss_svr::settings::{init_settings, SETTINGS};
 use oss_svr::web_service_config::web_service_config;
 use robotech::db::init_db;
@@ -50,7 +50,7 @@ async fn main() -> std::io::Result<()> {
     info!("初始化设置选项...");
     init_settings(args.config_file, args.port);
 
-    info!("升级数据库版本...");
+    // 升级数据库版本...
     migrate().await.expect("升级数据库版本失败");
 
     // 初始化ID生成器...;
