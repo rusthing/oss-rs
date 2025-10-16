@@ -12,7 +12,6 @@ use utoipa_swagger_ui::{SwaggerUi, Url};
 /// # 配置WebService
 pub fn web_service_config(cfg: &mut web::ServiceConfig) {
     let oss_config = SETTINGS.get().unwrap().oss.clone();
-    let total_limit = oss_config.upload_file_limit_size.as_u64() as usize;
     cfg.service(
         web::scope("/oss/bucket")
             .service(oss_bucket_ctrl::add) // 添加
@@ -38,6 +37,7 @@ pub fn web_service_config(cfg: &mut web::ServiceConfig) {
             .service(oss_obj_ref_ctrl::del) // 删除
             .service(oss_obj_ref_ctrl::get_by_id), // 根据id获取实体
     );
+    let total_limit = oss_config.upload_file_limit_size.as_u64() as usize;
     cfg.service(
         web::scope("/oss/file")
             .app_data(MultipartFormConfig::default().total_limit(total_limit)) // 限制文件大小

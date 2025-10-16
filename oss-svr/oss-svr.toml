@@ -6,6 +6,9 @@ download-buffer-size = "2MiB"
 [db]
 url = "postgres://ossrs:ossrs@127.0.0.1/ossrs"
 
+[web-server]
+port = 9840
+
 [id-worker]
 epoch = 1758108749211
 machine-id = 1

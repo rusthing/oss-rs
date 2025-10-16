@@ -17,7 +17,6 @@ sea-orm = { workspace = true }
 bytesize = { workspace = true }
 regex = { workspace = true }
 tempfile = { workspace = true }
-idworker = { workspace = true }
 once_cell = { workspace = true }
 tracing-subscriber = { workspace = true }
 tracing-appender = { workspace = true }
@@ -31,5 +30,6 @@ validator = { workspace = true }
 strum = { workspace = true }
 utoipa = { workspace = true }
 utoipa-swagger-ui = { workspace = true }
+idworker = { workspace = true, features = ["settings"] }
 wheel-rs = { workspace = true }
 robotech = { workspace = true, features = ["svr"] }

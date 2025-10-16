@@ -1,10 +1,10 @@
 use crate::env::ENV;
-use crate::settings::db_settings::DbSettings;
-use crate::settings::id_worker_settings::IdWorkerSettings;
 use crate::settings::oss_settings::OssSettings;
 use config::Config;
+use idworker::IdWorkerSettings;
 use log::info;
-use robotech::web_server::WebServerSettings;
+use robotech::settings::DbSettings;
+use robotech::settings::WebServerSettings;
 use serde::{Deserialize, Serialize};
 use std::sync::OnceLock;
 

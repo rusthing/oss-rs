@@ -1498,9 +1498,12 @@ dependencies = [
 
 [[package]]
 name = "idworker"
-version = "0.3.0"
+version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "487f1c7b676ca21d78f2a8299c58d7a2438a294b730419379e6429f5dba3e88f"
+checksum = "4789b6d2bd222600610559dcc16bedf012e424e8c1e90fb3e24f3d7ca5300e0b"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "impl-more"
@@ -2387,9 +2390,9 @@ dependencies = [
 
 [[package]]
 name = "robotech"
-version = "0.2.2"
+version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6bcae760390423b7bb3c2b5dee8dffaf4bd71a320e6ec6e8083d3c3bd73f9b10"
+checksum = "965eb12df7dce55cfc8561acd7c4d27f3234e572e177cf059210629c0a23c76a"
 dependencies = [
  "actix-web",
  "chrono",
