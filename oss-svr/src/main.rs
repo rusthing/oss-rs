@@ -5,8 +5,9 @@ use oss_svr::env::init_env;
 use oss_svr::id_worker::init_id_worker;
 use oss_svr::log::init_log;
 use oss_svr::migration::migrate;
-use oss_svr::settings::init_settings;
-use oss_svr::web_server::start_web_server;
+use oss_svr::settings::{init_settings, SETTINGS};
+use oss_svr::web_service_config::web_service_config;
+use robotech::web_server::start_web_server;
 
 /// 网络监控工具
 ///
@@ -58,7 +59,8 @@ async fn main() -> std::io::Result<()> {
     info!("初始化数据库...");
     init_db().await;
 
-    start_web_server().await;
+    let web_server_settings = SETTINGS.get().unwrap().web_server.clone();
+    start_web_server(web_server_settings, web_service_config).await;
 
     info!("退出程序");
     Ok(())

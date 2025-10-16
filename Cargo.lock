@@ -2387,9 +2387,9 @@ dependencies = [
 
 [[package]]
 name = "robotech"
-version = "0.2.0"
+version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "07abf6eb9f7e86e0150f2873cee113d91ba0dc3a3bc07e87fc9e5e6b50df1c24"
+checksum = "6bcae760390423b7bb3c2b5dee8dffaf4bd71a320e6ec6e8083d3c3bd73f9b10"
 dependencies = [
  "actix-web",
  "chrono",

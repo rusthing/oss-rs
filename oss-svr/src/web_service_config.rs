@@ -10,7 +10,7 @@ use utoipa::OpenApi;
 use utoipa_swagger_ui::{SwaggerUi, Url};
 
 /// # 配置WebService
-pub fn configure(cfg: &mut web::ServiceConfig) {
+pub fn web_service_config(cfg: &mut web::ServiceConfig) {
     let oss_config = SETTINGS.get().unwrap().oss.clone();
     let total_limit = oss_config.upload_file_limit_size.as_u64() as usize;
     cfg.service(

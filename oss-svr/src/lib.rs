@@ -12,5 +12,4 @@ pub mod settings;
 pub mod svc;
 pub mod to;
 pub mod vo;
-pub mod web_server;
 pub mod web_service_config;
