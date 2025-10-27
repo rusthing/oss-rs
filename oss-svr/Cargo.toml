@@ -33,4 +33,4 @@ utoipa = { workspace = true }
 utoipa-swagger-ui = { workspace = true }
 idworker = { workspace = true, features = ["settings"] }
 wheel-rs = { workspace = true }
-robotech = { workspace = true, features = ["svr"] }
+robotech = { workspace = true, features = ["web", "crud"] }

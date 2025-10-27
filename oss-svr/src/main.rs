@@ -9,9 +9,13 @@ use robotech::env::init_env;
 use robotech::log::log::init_log;
 use robotech::web_server::start_web_server;
 
-/// 网络监控工具
+/// oss - 对象存储服务
 ///
-/// SUMMARY: 这是一个用于网络监控的工具，可以监控各种网络目标并提供指标收集功能
+/// SUMMARY: oss-svr 是一个对象存储服务，提供文件上传、下载、管理等功能。
+/// 该服务支持多种存储后端，包括本地存储和云存储服务。
+/// 通过 RESTful API 接口提供服务，支持 HTTP 和 HTTPS 协议。
+/// 支持基于角色的访问控制(RBAC)和细粒度权限管理。
+/// 提供完善的日志记录和监控功能，便于运维和问题排查。
 ///
 #[derive(Parser, Debug)]
 // 命令行参数使用定义
