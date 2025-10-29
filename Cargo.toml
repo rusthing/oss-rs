@@ -23,5 +23,9 @@ strum = { version = "0.27.2", features = ["derive"] }
 utoipa = { version = "5.4.0", features = ["actix_extras"] }
 utoipa-swagger-ui = { version = "9.0.2", features = ["actix-web"] }
 idworker = "0.3.5"
-wheel-rs = "0.2.4"
-robotech = "0.9.6"
+wheel-rs = "0.3.0"
+robotech = { version = "0.9.8", features = ["web"] }
+
+[patch.crates-io]
+wheel-rs = { path = "../wheel-rs" }
+robotech = { path = "../robotech-rs"}

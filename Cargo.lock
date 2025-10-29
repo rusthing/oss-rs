@@ -1905,7 +1905,7 @@ version = "0.1.0"
 
 [[package]]
 name = "oss-svr"
-version = "0.1.3"
+version = "0.1.4"
 dependencies = [
  "actix-multipart",
  "actix-web",
@@ -2397,9 +2397,7 @@ dependencies = [
 
 [[package]]
 name = "robotech"
-version = "0.9.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d832d827e8ac4c2cd303af9fb3cb9d90f45c6de36631ee47599bc9a89aca6d10"
+version = "0.9.8"
 dependencies = [
  "actix-web",
  "chrono",
@@ -3881,9 +3879,7 @@ dependencies = [
 
 [[package]]
 name = "wheel-rs"
-version = "0.2.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0c058b8245e46de2549737e0b1eeff98fbb7f4aa2adc9f0a1a2d713fd7b7b70e"
+version = "0.3.0"
 dependencies = [
  "dns-lookup",
  "humantime",
