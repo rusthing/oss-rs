@@ -1,5 +1,5 @@
-use crate::svc::oss_bucket_svc::OssBucketSvc;
 use crate::dto::oss_bucket_dto::{OssBucketAddDto, OssBucketModifyDto, OssBucketSaveDto};
+use crate::svc::oss_bucket_svc::OssBucketSvc;
 use crate::vo::oss_bucket::OssBucketVo;
 use actix_web::web::Query;
 use actix_web::{delete, get, post, put, web, HttpRequest, HttpResponse, Result};
@@ -36,14 +36,14 @@ pub async fn add(
     json_body: web::Json<OssBucketAddDto>,
     req: HttpRequest,
 ) -> Result<HttpResponse, CtrlError> {
-    let mut to = json_body.into_inner();
+    let mut dto = json_body.into_inner();
 
-    to.validate()?;
+    dto.validate()?;
 
     // 从header中解析当前用户ID，如果没有或解析失败则抛出ApiError
-    to.current_user_id = get_current_user_id(req)?;
+    dto.current_user_id = get_current_user_id(req)?;
 
-    let result = OssBucketSvc::add(to, None).await?;
+    let result = OssBucketSvc::add(dto, None).await?;
     Ok(HttpResponse::Ok().json(result))
 }
 
@@ -74,14 +74,14 @@ pub async fn modify(
     json_body: web::Json<OssBucketModifyDto>,
     req: HttpRequest,
 ) -> Result<HttpResponse, CtrlError> {
-    let mut to = json_body.into_inner();
+    let mut dto = json_body.into_inner();
 
-    to.validate()?;
+    dto.validate()?;
 
     // 从header中解析当前用户ID，如果没有或解析失败则抛出ApiError
-    to.current_user_id = get_current_user_id(req)?;
+    dto.current_user_id = get_current_user_id(req)?;
 
-    let result = OssBucketSvc::modify(to, None).await?;
+    let result = OssBucketSvc::modify(dto, None).await?;
     Ok(HttpResponse::Ok().json(result))
 }
 
@@ -112,12 +112,12 @@ pub async fn save(
     json_body: web::Json<OssBucketSaveDto>,
     req: HttpRequest,
 ) -> Result<HttpResponse, CtrlError> {
-    let mut to = json_body.into_inner();
+    let mut dto = json_body.into_inner();
 
     // 从header中解析当前用户ID，如果没有或解析失败则抛出ApiError
-    to.current_user_id = get_current_user_id(req)?;
+    dto.current_user_id = get_current_user_id(req)?;
 
-    let result = OssBucketSvc::save(to, None).await?;
+    let result = OssBucketSvc::save(dto, None).await?;
     Ok(HttpResponse::Ok().json(result))
 }
 

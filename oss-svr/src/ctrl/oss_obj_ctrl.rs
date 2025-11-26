@@ -1,5 +1,5 @@
-use crate::svc::oss_obj_svc::OssObjSvc;
 use crate::dto::oss_obj_dto::{OssObjAddDto, OssObjModifyDto, OssObjSaveDto};
+use crate::svc::oss_obj_svc::OssObjSvc;
 use crate::vo::oss_obj::OssObjVo;
 use actix_web::{delete, get, post, put, web, HttpRequest, HttpResponse, Result};
 use robotech::ctrl::ctrl_error::CtrlError;
@@ -35,14 +35,14 @@ pub async fn add(
     json_body: web::Json<OssObjAddDto>,
     req: HttpRequest,
 ) -> Result<HttpResponse, CtrlError> {
-    let mut to = json_body.into_inner();
+    let mut dto = json_body.into_inner();
 
-    to.validate()?;
+    dto.validate()?;
 
     // 从header中解析当前用户ID，如果没有或解析失败则抛出ApiError
-    to.current_user_id = get_current_user_id(req)?;
+    dto.current_user_id = get_current_user_id(req)?;
 
-    let result = OssObjSvc::add(to, None).await?;
+    let result = OssObjSvc::add(dto, None).await?;
     Ok(HttpResponse::Ok().json(result))
 }
 
@@ -73,14 +73,14 @@ pub async fn modify(
     json_body: web::Json<OssObjModifyDto>,
     req: HttpRequest,
 ) -> Result<HttpResponse, CtrlError> {
-    let mut to = json_body.into_inner();
+    let mut dto = json_body.into_inner();
 
-    to.validate()?;
+    dto.validate()?;
 
     // 从header中解析当前用户ID，如果没有或解析失败则抛出ApiError
-    to.current_user_id = get_current_user_id(req)?;
+    dto.current_user_id = get_current_user_id(req)?;
 
-    let result = OssObjSvc::modify(to, None).await?;
+    let result = OssObjSvc::modify(dto, None).await?;
     Ok(HttpResponse::Ok().json(result))
 }
 
@@ -111,12 +111,12 @@ pub async fn save(
     json_body: web::Json<OssObjSaveDto>,
     req: HttpRequest,
 ) -> Result<HttpResponse, CtrlError> {
-    let mut to = json_body.into_inner();
+    let mut dto = json_body.into_inner();
 
     // 从header中解析当前用户ID，如果没有或解析失败则抛出ApiError
-    to.current_user_id = get_current_user_id(req)?;
+    dto.current_user_id = get_current_user_id(req)?;
 
-    let result = OssObjSvc::save(to, None).await?;
+    let result = OssObjSvc::save(dto, None).await?;
     Ok(HttpResponse::Ok().json(result))
 }
 

@@ -25,11 +25,11 @@ impl OssBucketSvc {
     /// * `Ok(Ro<Vo>)` - 添加成功，返回封装了新增Vo的Ro对象
     /// * `Err(SvcError)` - 添加失败，可能是因为违反唯一约束或其他数据库错误
     pub async fn add(
-        add_to: OssBucketAddDto,
+        add_dto: OssBucketAddDto,
         db: Option<&DatabaseConnection>,
     ) -> Result<Ro<OssBucketVo>, SvcError> {
         let db = db.unwrap_or_else(|| DB_CONN.get().unwrap());
-        let active_model: ActiveModel = add_to.into();
+        let active_model: ActiveModel = add_dto.into();
         let one = OssBucketDao::insert(active_model, db)
             .await
             .map_err(|e| handle_db_err_to_svc_error(e, &UNIQUE_FIELDS))?;
@@ -50,12 +50,12 @@ impl OssBucketSvc {
     /// * `Ok(Ro<Vo>)` - 修改成功，返回封装了更新后Vo的Ro对象
     /// * `Err(SvcError)` - 修改失败，可能因为记录不存在、违反唯一约束或其他数据库错误
     pub async fn modify(
-        modify_to: OssBucketModifyDto,
+        modify_dto: OssBucketModifyDto,
         db: Option<&DatabaseConnection>,
     ) -> Result<Ro<OssBucketVo>, SvcError> {
         let db = db.unwrap_or_else(|| DB_CONN.get().unwrap());
-        let id = modify_to.id.clone().unwrap().parse::<u64>().unwrap();
-        let active_model: ActiveModel = modify_to.into();
+        let id = modify_dto.id.clone().unwrap().parse::<u64>().unwrap();
+        let active_model: ActiveModel = modify_dto.into();
         OssBucketDao::update(active_model, db)
             .await
             .map_err(|e| handle_db_err_to_svc_error(e, &UNIQUE_FIELDS))?;
@@ -76,13 +76,13 @@ impl OssBucketSvc {
     /// * `Ok(Ro<Vo>)` - 保存成功，返回封装了Vo的Ro对象
     /// * `Err(SvcError)` - 保存失败，可能因为违反唯一约束、记录不存在或其他数据库错误
     pub async fn save(
-        save_to: OssBucketSaveDto,
+        save_dto: OssBucketSaveDto,
         db: Option<&DatabaseConnection>,
     ) -> Result<Ro<OssBucketVo>, SvcError> {
-        if save_to.id.clone().is_some() {
-            Self::modify(save_to.into(), db).await
+        if save_dto.id.clone().is_some() {
+            Self::modify(save_dto.into(), db).await
         } else {
-            Self::add(save_to.into(), db).await
+            Self::add(save_dto.into(), db).await
         }
     }
 
