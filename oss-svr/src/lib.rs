@@ -6,6 +6,6 @@ pub mod db;
 pub mod model;
 pub mod settings;
 pub mod svc;
-pub mod to;
+pub mod dto;
 pub mod vo;
 pub mod web_service_config;

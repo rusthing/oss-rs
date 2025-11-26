@@ -1,5 +1,5 @@
 use crate::svc::oss_obj_ref_svc::OssObjRefSvc;
-use crate::to::oss_obj_ref::{OssObjRefAddTo, OssObjRefModifyTo, OssObjRefSaveTo};
+use crate::dto::oss_obj_ref_dto::{OssObjRefAddDto, OssObjRefModifyDto, OssObjRefSaveDto};
 use crate::vo::oss_obj_ref::OssObjRefVo;
 use actix_web::{delete, get, post, put, web, HttpRequest, HttpResponse, Result};
 use robotech::ctrl::ctrl_error::CtrlError;
@@ -32,7 +32,7 @@ use validator::Validate;
 )]
 #[post("")]
 pub async fn add(
-    json_body: web::Json<OssObjRefAddTo>,
+    json_body: web::Json<OssObjRefAddDto>,
     req: HttpRequest,
 ) -> Result<HttpResponse, CtrlError> {
     let mut to = json_body.into_inner();
@@ -70,7 +70,7 @@ pub async fn add(
 )]
 #[put("")]
 pub async fn modify(
-    json_body: web::Json<OssObjRefModifyTo>,
+    json_body: web::Json<OssObjRefModifyDto>,
     req: HttpRequest,
 ) -> Result<HttpResponse, CtrlError> {
     let mut to = json_body.into_inner();
@@ -108,7 +108,7 @@ pub async fn modify(
 )]
 #[post("/save")]
 pub async fn save(
-    json_body: web::Json<OssObjRefSaveTo>,
+    json_body: web::Json<OssObjRefSaveDto>,
     req: HttpRequest,
 ) -> Result<HttpResponse, CtrlError> {
     let mut to = json_body.into_inner();

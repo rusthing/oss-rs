@@ -1,8 +1,8 @@
 use crate::dao::oss_bucket_dao::{OssBucketDao, UNIQUE_FIELDS};
+use crate::dto::oss_bucket_dto::{OssBucketAddDto, OssBucketModifyDto, OssBucketSaveDto};
 use crate::model::oss_bucket::ActiveModel;
 use crate::svc::oss_obj_ref_svc::OssObjRefSvc;
 use crate::svc::oss_obj_svc::OssObjSvc;
-use crate::to::oss_bucket::{OssBucketAddTo, OssBucketModifyTo, OssBucketSaveTo};
 use crate::vo::oss_bucket::OssBucketVo;
 use log::warn;
 use robotech::db::DB_CONN;
@@ -25,7 +25,7 @@ impl OssBucketSvc {
     /// * `Ok(Ro<Vo>)` - 添加成功，返回封装了新增Vo的Ro对象
     /// * `Err(SvcError)` - 添加失败，可能是因为违反唯一约束或其他数据库错误
     pub async fn add(
-        add_to: OssBucketAddTo,
+        add_to: OssBucketAddDto,
         db: Option<&DatabaseConnection>,
     ) -> Result<Ro<OssBucketVo>, SvcError> {
         let db = db.unwrap_or_else(|| DB_CONN.get().unwrap());
@@ -50,7 +50,7 @@ impl OssBucketSvc {
     /// * `Ok(Ro<Vo>)` - 修改成功，返回封装了更新后Vo的Ro对象
     /// * `Err(SvcError)` - 修改失败，可能因为记录不存在、违反唯一约束或其他数据库错误
     pub async fn modify(
-        modify_to: OssBucketModifyTo,
+        modify_to: OssBucketModifyDto,
         db: Option<&DatabaseConnection>,
     ) -> Result<Ro<OssBucketVo>, SvcError> {
         let db = db.unwrap_or_else(|| DB_CONN.get().unwrap());
@@ -76,7 +76,7 @@ impl OssBucketSvc {
     /// * `Ok(Ro<Vo>)` - 保存成功，返回封装了Vo的Ro对象
     /// * `Err(SvcError)` - 保存失败，可能因为违反唯一约束、记录不存在或其他数据库错误
     pub async fn save(
-        save_to: OssBucketSaveTo,
+        save_to: OssBucketSaveDto,
         db: Option<&DatabaseConnection>,
     ) -> Result<Ro<OssBucketVo>, SvcError> {
         if save_to.id.clone().is_some() {

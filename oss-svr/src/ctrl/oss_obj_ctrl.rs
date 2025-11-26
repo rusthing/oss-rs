@@ -1,5 +1,5 @@
 use crate::svc::oss_obj_svc::OssObjSvc;
-use crate::to::oss_obj::{OssObjAddTo, OssObjModifyTo, OssObjSaveTo};
+use crate::dto::oss_obj_dto::{OssObjAddDto, OssObjModifyDto, OssObjSaveDto};
 use crate::vo::oss_obj::OssObjVo;
 use actix_web::{delete, get, post, put, web, HttpRequest, HttpResponse, Result};
 use robotech::ctrl::ctrl_error::CtrlError;
@@ -13,7 +13,7 @@ use validator::Validate;
 /// 该接口用于添加一个新的记录
 ///
 /// ## 请求体
-/// * `OssObjAddTo` - 包含记录信息的结构体
+/// * `OssObjAddDto` - 包含记录信息的结构体
 ///
 /// ## 请求头
 /// * `USER_ID_HEADER_NAME` - 当前用户ID，必需项，类型为u64
@@ -32,7 +32,7 @@ use validator::Validate;
 )]
 #[post("")]
 pub async fn add(
-    json_body: web::Json<OssObjAddTo>,
+    json_body: web::Json<OssObjAddDto>,
     req: HttpRequest,
 ) -> Result<HttpResponse, CtrlError> {
     let mut to = json_body.into_inner();
@@ -51,7 +51,7 @@ pub async fn add(
 /// 该接口用于修改一个已存在记录的信息
 ///
 /// ## 请求体
-/// * `OssObjModifyTo` - 包含待修改记录信息的结构体
+/// * `OssObjModifyDto` - 包含待修改记录信息的结构体
 ///
 /// ## 请求头
 /// * `USER_ID_HEADER_NAME` - 当前用户ID，必需项，类型为u64
@@ -70,7 +70,7 @@ pub async fn add(
 )]
 #[put("")]
 pub async fn modify(
-    json_body: web::Json<OssObjModifyTo>,
+    json_body: web::Json<OssObjModifyDto>,
     req: HttpRequest,
 ) -> Result<HttpResponse, CtrlError> {
     let mut to = json_body.into_inner();
@@ -89,7 +89,7 @@ pub async fn modify(
 /// 该接口用于保存记录的信息，如果记录不存在则创建新记录，如果记录已存在则更新记录
 ///
 /// ## 请求体
-/// * `OssObjSaveTo` - 包含记录信息的结构体
+/// * `OssObjSaveDto` - 包含记录信息的结构体
 ///
 /// ## 请求头
 /// * `USER_ID_HEADER_NAME` - 当前用户ID，必需项，类型为u64
@@ -108,7 +108,7 @@ pub async fn modify(
 )]
 #[post("/save")]
 pub async fn save(
-    json_body: web::Json<OssObjSaveTo>,
+    json_body: web::Json<OssObjSaveDto>,
     req: HttpRequest,
 ) -> Result<HttpResponse, CtrlError> {
     let mut to = json_body.into_inner();

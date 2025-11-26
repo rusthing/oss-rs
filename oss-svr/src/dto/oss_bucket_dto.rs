@@ -13,7 +13,7 @@ use validator::Validate;
     create_timestamp: Default::default(),
     update_timestamp: Default::default(),
 )]
-pub struct OssBucketAddTo {
+pub struct OssBucketAddDto {
     #[into(match ~.clone() {Some(value)=>ActiveValue::Set(value.parse::<i64>().unwrap()),None=>ActiveValue::NotSet})]
     pub id: Option<String>,
     #[validate(
@@ -37,7 +37,7 @@ pub struct OssBucketAddTo {
     create_timestamp: Default::default(),
     update_timestamp: Default::default(),
 )]
-pub struct OssBucketModifyTo {
+pub struct OssBucketModifyDto {
     #[validate(required(message = "缺少必要参数<id>"))]
     #[into(ActiveValue::Set(~.clone().unwrap().parse::<i64>().unwrap()))]
     pub id: Option<String>,
@@ -52,9 +52,9 @@ pub struct OssBucketModifyTo {
 
 #[derive(o2o, ToSchema, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
-#[into(OssBucketAddTo)]
-#[into(OssBucketModifyTo)]
-pub struct OssBucketSaveTo {
+#[into(OssBucketAddDto)]
+#[into(OssBucketModifyDto)]
+pub struct OssBucketSaveDto {
     #[into(~.clone())]
     pub id: Option<String>,
     #[into(~.clone())]

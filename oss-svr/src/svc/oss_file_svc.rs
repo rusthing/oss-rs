@@ -1,10 +1,10 @@
 use crate::dao::oss_obj_ref_dao::OssObjRefDao;
+use crate::dto::oss_obj_dto::OssObjAddDto;
+use crate::dto::oss_obj_ref_dto::OssObjRefAddDto;
 use crate::settings::SETTINGS;
 use crate::svc::oss_bucket_svc::OssBucketSvc;
 use crate::svc::oss_obj_ref_svc::OssObjRefSvc;
 use crate::svc::oss_obj_svc::OssObjSvc;
-use crate::to::oss_obj::OssObjAddTo;
-use crate::to::oss_obj_ref::OssObjRefAddTo;
 use crate::vo::oss_obj_ref::OssObjRefVo;
 use chrono::{Local, TimeZone};
 use idworker::ID_WORKER;
@@ -104,7 +104,7 @@ impl OssFileSvc {
 
             // 新增对象
             OssObjSvc::add(
-                OssObjAddTo {
+                OssObjAddDto {
                     id: Some(obj_id.to_string()),
                     hash: Some(hash.to_string()),
                     size: Some(file_size.to_string()),
@@ -121,7 +121,7 @@ impl OssFileSvc {
 
         // 新增对象引用
         let obj_ref_ro = OssObjRefSvc::add(
-            OssObjRefAddTo {
+            OssObjRefAddDto {
                 id: None,
                 name: Some(file_name.to_string()),
                 bucket_id: Some(one_bucket.id),
