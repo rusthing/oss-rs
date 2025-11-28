@@ -13,24 +13,24 @@ readme = "README.md"
 
 [dependencies]
 log = { workspace = true }
-clap = { workspace = true }
+clap = { workspace = true, features = ["derive"] }
 chrono = { workspace = true }
-serde = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
 serde_with = { workspace = true }
-tokio = { workspace = true }
+tokio = { workspace = true, features = ["rt", "rt-multi-thread", "macros", "signal"] }
 actix-web = { workspace = true }
 actix-multipart = { workspace = true }
-sea-orm = { workspace = true }
-bytesize = { workspace = true }
+sea-orm = { workspace = true, features = ["sqlx-postgres", "runtime-actix-rustls", "debug-print"] }
+bytesize = { workspace = true, features = ["serde"] }
 regex = { workspace = true }
 tempfile = { workspace = true }
 once_cell = { workspace = true }
 o2o = { workspace = true }
-sqlx = { workspace = true }
-validator = { workspace = true }
-strum = { workspace = true }
-utoipa = { workspace = true }
-utoipa-swagger-ui = { workspace = true }
+sqlx = { workspace = true, features = ["any", "postgres"] }
+validator = { workspace = true, features = ["derive"] }
+strum = { workspace = true, features = ["derive"] }
+utoipa = { workspace = true, features = ["actix_extras"] }
+utoipa-swagger-ui = { workspace = true, features = ["actix-web"] }
 idworker = { workspace = true, features = ["settings"] }
 wheel-rs = { workspace = true }
 robotech = { workspace = true, features = ["web", "crud"] }

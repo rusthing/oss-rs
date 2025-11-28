@@ -1,0 +1,19 @@
+use crate::api::oss_file_api::OssFileApi;
+use robotech::api::api_settings::ApiSettings;
+use std::collections::HashMap;
+use std::sync::OnceLock;
+
+pub static OSS_FILE_API: OnceLock<OssFileApi> = OnceLock::new();
+
+/// 初始化OssFileApi
+pub fn init_api(api_settings: HashMap<String, ApiSettings>) {
+    let default_settings = ApiSettings {
+        base_url: "http://127.0.0.1:9840".to_string(),
+    };
+    let api_settings = api_settings.get("oss").unwrap_or(&default_settings);
+    OSS_FILE_API
+        .set(OssFileApi {
+            api_settings: api_settings.clone(),
+        })
+        .expect("无法设置OssFileApi的配置信息");
+}
