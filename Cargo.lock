@@ -2141,16 +2141,20 @@ dependencies = [
 
 [[package]]
 name = "oss-api"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
+ "log",
  "reqwest",
  "robotech",
+ "serde",
  "serde_json",
+ "serde_with",
+ "utoipa",
 ]
 
 [[package]]
 name = "oss-svr"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "actix-multipart",
  "actix-web",
@@ -2686,7 +2690,7 @@ dependencies = [
 
 [[package]]
 name = "robotech"
-version = "0.10.0"
+version = "0.10.1"
 dependencies = [
  "actix-web",
  "async-trait",

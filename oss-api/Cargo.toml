@@ -1,6 +1,6 @@
 [package]
 name = "oss-api"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2024"
 authors = ["zbz"]
 license = "MIT"
@@ -13,5 +13,9 @@ readme = "README.md"
 
 [dependencies]
 reqwest = { workspace = true, features = ["multipart", "json", "stream"] }
+serde = { workspace = true, features = ["derive"] }
+serde_with = { workspace = true }
 serde_json = { workspace = true }
+utoipa = { workspace = true, features = ["actix_extras"] }
 robotech = { workspace = true, features = ["api"] }
+log = "0.4.28"
