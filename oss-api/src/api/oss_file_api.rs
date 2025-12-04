@@ -1,6 +1,5 @@
 use robotech::api::api_settings::ApiSettings;
 use robotech::api::base_api::BaseApi;
-use robotech::cst::user_id_cst::SYS_OPERATOR_USER_ID;
 use robotech::ro::Ro;
 use std::fmt::Display;
 use std::string::ToString;
@@ -18,22 +17,21 @@ impl BaseApi for OssFileApi {
 }
 
 impl OssFileApi {
-    /// 上传文件到指定的存储桶
+    /// # 上传文件到指定的存储桶
     ///
-    /// # Arguments
-    ///
+    /// ## 参数
     /// * `bucket` - 存储桶名称
     /// * `file_path` - 要上传的本地文件路径
     /// * `file_name` - 上传后的文件名
     ///
-    /// # Returns
-    ///
+    /// ## 返回值
     /// 返回上传结果
     pub async fn upload_file(
         &self,
         bucket: &str,
         file_path: &str,
         file_name: &str,
+        current_user_id: u64,
     ) -> Result<Ro<serde_json::Value>, Box<dyn std::error::Error + Send + Sync>> {
         let url = format!("/oss/file/upload/{}", bucket);
         let form = reqwest::multipart::Form::new()
@@ -41,32 +39,30 @@ impl OssFileApi {
             .await?
             .text("fileName", file_name.to_string());
 
-        self.multipart_with_current_user_id(&url, form, SYS_OPERATOR_USER_ID)
-            .await
+        self.multipart(&url, form, current_user_id).await
     }
 
-    /// 上传文件内容到指定的存储桶
+    /// # 上传文件内容到指定的存储桶
     ///
-    /// # Arguments
-    ///
+    /// ## 参数
     /// * `bucket` - 存储桶名称
     /// * `file_path` - 要上传的本地文件路径
     /// * `file_name` - 上传后的文件名
+    /// * `data` - 文件内容
     ///
-    /// # Returns
-    ///
+    /// ## 返回值
     /// 返回上传结果
     pub async fn upload_file_content(
         &self,
         bucket: &str,
         file_name: &str,
         data: Vec<u8>,
+        current_user_id: u64,
     ) -> Result<Ro<serde_json::Value>, Box<dyn std::error::Error + Send + Sync>> {
         let url = format!("/oss/file/upload/{}", bucket);
         let part = reqwest::multipart::Part::bytes(data).file_name(file_name.to_string());
         let form = reqwest::multipart::Form::new().part("file", part);
-        self.multipart_with_current_user_id(&url, form, SYS_OPERATOR_USER_ID)
-            .await
+        self.multipart(&url, form, current_user_id).await
     }
 
     /// 下载文件
@@ -81,25 +77,27 @@ impl OssFileApi {
     pub async fn download_file(
         &self,
         obj_id: impl Display,
+        current_user_id: u64,
     ) -> Result<Vec<u8>, Box<dyn std::error::Error + Send + Sync>> {
         let url = format!("/oss/file/download/{}", obj_id);
-        self.get_bytes(&url).await
+        self.get_bytes(&url, current_user_id).await
     }
 
-    /// 预览文件
+    /// # 预览文件
     ///
-    /// # Arguments
+    /// ## Arguments
     ///
     /// * `obj_id` - 对象ID
     ///
-    /// # Returns
+    /// ## Returns
     ///
     /// 返回预览的文件内容
     pub async fn preview_file(
         &self,
         obj_id: impl Display,
+        current_user_id: u64,
     ) -> Result<Vec<u8>, Box<dyn std::error::Error + Send + Sync>> {
         let url = format!("/oss/file/preview/{}", obj_id);
-        self.get_bytes(&url).await
+        self.get_bytes(&url, current_user_id).await
     }
 }
