@@ -1,6 +1,6 @@
 use crate::model::{oss_bucket, oss_obj, oss_obj_ref};
-use crate::vo::oss_bucket::OssBucketVo;
-use crate::vo::oss_obj::OssObjVo;
+use crate::vo::oss_bucket_vo::OssBucketVo;
+use crate::vo::oss_obj_vo::OssObjVo;
 use o2o::o2o;
 use serde::Serialize;
 use serde_with::skip_serializing_none;

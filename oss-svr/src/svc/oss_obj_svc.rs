@@ -1,7 +1,7 @@
 use crate::dao::oss_obj_dao::{OssObjDao, UNIQUE_FIELDS};
 use crate::dto::oss_obj_dto::{OssObjAddDto, OssObjModifyDto, OssObjSaveDto};
 use crate::model::oss_obj::ActiveModel;
-use crate::vo::oss_obj::OssObjVo;
+use crate::vo::oss_obj_vo::OssObjVo;
 use log::warn;
 use robotech::db::DB_CONN;
 use robotech::ro::Ro;

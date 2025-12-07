@@ -3,7 +3,7 @@ use crate::dto::oss_bucket_dto::{OssBucketAddDto, OssBucketModifyDto, OssBucketS
 use crate::model::oss_bucket::ActiveModel;
 use crate::svc::oss_obj_ref_svc::OssObjRefSvc;
 use crate::svc::oss_obj_svc::OssObjSvc;
-use crate::vo::oss_bucket::OssBucketVo;
+use crate::vo::oss_bucket_vo::OssBucketVo;
 use log::warn;
 use robotech::db::DB_CONN;
 use robotech::ro::Ro;

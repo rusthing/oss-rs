@@ -1,18 +1,26 @@
-use robotech::api::api_settings::ApiSettings;
-use robotech::api::base_api::BaseApi;
+use robotech::api::ApiError::FileError;
+use robotech::api::{ApiError, CrudApi};
 use robotech::ro::Ro;
 use std::fmt::Display;
+use std::ops::{Deref, DerefMut};
 use std::string::ToString;
 
 /// OSS FILE API
 #[derive(Debug)]
 pub struct OssFileApi {
-    pub api_settings: ApiSettings,
+    pub api: CrudApi,
 }
 
-impl BaseApi for OssFileApi {
-    fn get_api_settings(&self) -> &ApiSettings {
-        &self.api_settings
+impl Deref for OssFileApi {
+    type Target = CrudApi;
+
+    fn deref(&self) -> &Self::Target {
+        &self.api
+    }
+}
+impl DerefMut for OssFileApi {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.api
     }
 }
 
@@ -32,11 +40,12 @@ impl OssFileApi {
         file_path: &str,
         file_name: &str,
         current_user_id: u64,
-    ) -> Result<Ro<serde_json::Value>, Box<dyn std::error::Error + Send + Sync>> {
+    ) -> Result<Ro<serde_json::Value>, ApiError> {
         let url = format!("/oss/file/upload/{}", bucket);
         let form = reqwest::multipart::Form::new()
             .file("file", file_path)
-            .await?
+            .await
+            .map_err(|e| FileError(url.clone(), e))?
             .text("fileName", file_name.to_string());
 
         self.multipart(&url, form, current_user_id).await
@@ -58,7 +67,7 @@ impl OssFileApi {
         file_name: &str,
         data: Vec<u8>,
         current_user_id: u64,
-    ) -> Result<Ro<serde_json::Value>, Box<dyn std::error::Error + Send + Sync>> {
+    ) -> Result<Ro<serde_json::Value>, ApiError> {
         let url = format!("/oss/file/upload/{}", bucket);
         let part = reqwest::multipart::Part::bytes(data).file_name(file_name.to_string());
         let form = reqwest::multipart::Form::new().part("file", part);
@@ -78,7 +87,7 @@ impl OssFileApi {
         &self,
         obj_id: impl Display,
         current_user_id: u64,
-    ) -> Result<Vec<u8>, Box<dyn std::error::Error + Send + Sync>> {
+    ) -> Result<Vec<u8>, ApiError> {
         let url = format!("/oss/file/download/{}", obj_id);
         self.get_bytes(&url, current_user_id).await
     }
@@ -96,7 +105,7 @@ impl OssFileApi {
         &self,
         obj_id: impl Display,
         current_user_id: u64,
-    ) -> Result<Vec<u8>, Box<dyn std::error::Error + Send + Sync>> {
+    ) -> Result<Vec<u8>, ApiError> {
         let url = format!("/oss/file/preview/{}", obj_id);
         self.get_bytes(&url, current_user_id).await
     }

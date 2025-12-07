@@ -1,6 +1,6 @@
 use crate::base::api::upload_form::UploadForm;
 use crate::svc::oss_file_svc::OssFileSvc;
-use crate::vo::oss_obj_ref::OssObjRefVo;
+use crate::vo::oss_obj_ref_vo::OssObjRefVo;
 use actix_multipart::form::MultipartForm;
 use actix_web::{get, post, web, HttpRequest, HttpResponse, Result};
 use once_cell::sync::Lazy;

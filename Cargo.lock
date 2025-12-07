@@ -1532,7 +1532,7 @@ dependencies = [
  "libc",
  "percent-encoding",
  "pin-project-lite",
- "socket2 0.6.1",
+ "socket2 0.5.10",
  "system-configuration",
  "tokio",
  "tower-service",
@@ -2690,10 +2690,9 @@ dependencies = [
 
 [[package]]
 name = "robotech"
-version = "0.12.0"
+version = "0.13.0"
 dependencies = [
  "actix-web",
- "async-trait",
  "chrono",
  "config",
  "log",
@@ -4321,7 +4320,7 @@ dependencies = [
 
 [[package]]
 name = "wheel-rs"
-version = "0.4.1"
+version = "0.4.2"
 dependencies = [
  "dns-lookup",
  "humantime",

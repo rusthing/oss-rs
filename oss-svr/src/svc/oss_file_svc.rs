@@ -5,7 +5,7 @@ use crate::settings::SETTINGS;
 use crate::svc::oss_bucket_svc::OssBucketSvc;
 use crate::svc::oss_obj_ref_svc::OssObjRefSvc;
 use crate::svc::oss_obj_svc::OssObjSvc;
-use crate::vo::oss_obj_ref::OssObjRefVo;
+use crate::vo::oss_obj_ref_vo::OssObjRefVo;
 use chrono::{Local, TimeZone};
 use idworker::ID_WORKER;
 use robotech::db::DB_CONN;

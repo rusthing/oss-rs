@@ -1,6 +1,6 @@
 use crate::dto::oss_obj_dto::{OssObjAddDto, OssObjModifyDto, OssObjSaveDto};
 use crate::svc::oss_obj_svc::OssObjSvc;
-use crate::vo::oss_obj::OssObjVo;
+use crate::vo::oss_obj_vo::OssObjVo;
 use actix_web::{delete, get, post, put, web, HttpRequest, HttpResponse, Result};
 use robotech::ctrl::ctrl_error::CtrlError;
 use robotech::ctrl::ctrl_utils::{get_current_user_id, get_id_from_query_params};
