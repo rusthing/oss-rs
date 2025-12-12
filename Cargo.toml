@@ -25,8 +25,8 @@ strum = "0.27.2"
 utoipa = "5.4.0"
 utoipa-swagger-ui = "9.0.2"
 idworker = "0.3.5"
-wheel-rs = "0.4.2"
-robotech = "0.13.0"
+wheel-rs = "0.4.3"
+robotech = "0.13.1"
 
 [patch.crates-io]
 wheel-rs = { path = "../wheel-rs" }
