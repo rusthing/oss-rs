@@ -2109,6 +2109,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d05e27ee213611ffe7d6348b942e8f942b37114c00cc03cec254295a4a17852e"
 
 [[package]]
+name = "openssl-src"
+version = "300.5.4+3.5.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a507b3792995dae9b0df8a1c1e3771e8418b7c2d9f0baeba32e6fe8b06c7cb72"
+dependencies = [
+ "cc",
+]
+
+[[package]]
 name = "openssl-sys"
 version = "0.9.111"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2116,6 +2125,7 @@ checksum = "82cab2d520aa75e3c58898289429321eb788c3106963d0dc886ec7a5f4adc321"
 dependencies = [
  "cc",
  "libc",
+ "openssl-src",
  "pkg-config",
  "vcpkg",
 ]
@@ -2141,7 +2151,7 @@ dependencies = [
 
 [[package]]
 name = "oss-api"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "log",
  "reqwest",
@@ -2154,7 +2164,7 @@ dependencies = [
 
 [[package]]
 name = "oss-svr"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "actix-multipart",
  "actix-web",
@@ -2165,6 +2175,7 @@ dependencies = [
  "log",
  "o2o",
  "once_cell",
+ "openssl",
  "regex",
  "robotech",
  "sea-orm",
@@ -2603,9 +2614,9 @@ dependencies = [
 
 [[package]]
 name = "reqwest"
-version = "0.12.25"
+version = "0.12.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b6eff9328d40131d43bd911d42d79eb6a47312002a4daefc9e37f17e74a7701a"
+checksum = "3b4c14b2d9afca6a60277086b0cc6a6ae0b568f6f7916c943a8cdc79f8be240f"
 dependencies = [
  "base64",
  "bytes",
@@ -2690,7 +2701,7 @@ dependencies = [
 
 [[package]]
 name = "robotech"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "actix-web",
  "chrono",

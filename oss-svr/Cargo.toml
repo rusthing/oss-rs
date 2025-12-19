@@ -1,6 +1,6 @@
 [package]
 name = "oss-svr"
-version = "1.0.0"
+version = "1.0.1"
 edition = "2024"
 authors = ["zbz"]
 license = "MIT"
@@ -31,6 +31,8 @@ validator = { workspace = true, features = ["derive"] }
 strum = { workspace = true, features = ["derive"] }
 utoipa = { workspace = true, features = ["actix_extras"] }
 utoipa-swagger-ui = { workspace = true, features = ["actix-web"] }
+# cross打包时用，需要开启vendored feature
+openssl = { workspace = true, features = ["vendored"] }
 idworker = { workspace = true, features = ["settings"] }
 wheel-rs = { workspace = true }
 robotech = { workspace = true, features = ["web", "crud"] }
