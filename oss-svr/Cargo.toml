@@ -1,6 +1,6 @@
 [package]
 name = "oss-svr"
-version = "0.3.1"
+version = "1.0.0"
 edition = "2024"
 authors = ["zbz"]
 license = "MIT"
