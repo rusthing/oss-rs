@@ -27,7 +27,7 @@ utoipa-swagger-ui = "9.0.2"
 # cross打包时用，需要开启vendored feature
 openssl = { version = "0.10.75" }
 idworker = "0.3.5"
-wheel-rs = "1.0.0"
+wheel-rs = "1.0.1"
 robotech = "1.0.1"
 
 [patch.crates-io]

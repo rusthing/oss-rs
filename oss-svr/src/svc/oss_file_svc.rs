@@ -8,6 +8,7 @@ use crate::svc::oss_obj_svc::OssObjSvc;
 use crate::vo::oss_obj_ref_vo::OssObjRefVo;
 use chrono::{Local, TimeZone};
 use idworker::ID_WORKER;
+use log::{error, warn};
 use robotech::db::DB_CONN;
 use robotech::env::ENV;
 use robotech::ro::Ro;
@@ -79,7 +80,7 @@ impl OssFileSvc {
             // 生成对象ID
             let obj_id = ID_WORKER.get().unwrap().next_id();
             let name = format!("{}.{}", obj_id, ext);
-            let url = format!("/oss/obj/preview/{}", name);
+            let url = format!("/oss/file/preview/{}", name);
             let is_completed = true;
             // 根据当前时间，创建yyyy/MM/dd/HH的目录，并将文件存入此目录中
             let datetime = Local.timestamp_opt((now / 1000) as i64, 0).unwrap();
@@ -142,11 +143,16 @@ impl OssFileSvc {
             match fs::rename(source, destination) {
                 Ok(_) => {}
                 Err(e) if is_cross_device_error(&e) => {
-                    // 如果为跨设备错误，使用 copy + remove 替代
+                    warn!("跨设备错误，使用 copy + close 替代: {:?}", e);
                     fs::copy(source, destination)?;
                     temp_file.close()?;
                 }
-                Err(e) => return Err(e.into()),
+                Err(e) => {
+                    return {
+                        error!("无法移动临时文件: {:?}", e);
+                        Err(e.into())
+                    };
+                }
             }
         }
 
