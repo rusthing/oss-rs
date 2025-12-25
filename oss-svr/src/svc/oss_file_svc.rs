@@ -8,7 +8,7 @@ use crate::svc::oss_obj_svc::OssObjSvc;
 use crate::vo::oss_obj_ref_vo::OssObjRefVo;
 use chrono::{Local, TimeZone};
 use idworker::ID_WORKER;
-use log::{error, warn};
+use log::{debug, error, warn};
 use robotech::db::DB_CONN;
 use robotech::env::ENV;
 use robotech::ro::Ro;
@@ -65,13 +65,12 @@ impl OssFileSvc {
             None => return Ok(Ro::warn(format!("未找到存储桶<{}>", bucket))),
         };
 
-        // 生成对象引用ID
-        let obj_ref_id = ID_WORKER.get().unwrap().next_id();
         let now = get_current_timestamp();
         let obj_vo = OssObjSvc::get_by_hash_and_size(hash, file_size as i64, Some(db))
             .await?
             .get_extra();
         let ext = get_file_ext(file_name);
+
         // 判断对象是否存在
         let obj_existed = obj_vo.is_some();
         let (obj_id, new_file_path) = if obj_existed {
@@ -80,8 +79,7 @@ impl OssFileSvc {
             (obj_vo.id, obj_vo.path)
         } else {
             // 如果未上传过该文件，则新增对象，并返回新对象ID和新文件的存放路径
-            let name = format!("{}.{}", obj_ref_id, ext);
-            let url = format!("/oss/file/preview/{}", name);
+            let obj_id = ID_WORKER.get().unwrap().next_id();
             let is_completed = true;
             // 根据当前时间，创建yyyy/MM/dd/HH的目录，并将文件存入此目录中
             let datetime = Local.timestamp_opt((now / 1000) as i64, 0).unwrap();
@@ -98,26 +96,23 @@ impl OssFileSvc {
                 .join(&date_path);
             fs::create_dir_all(&storage_dir)?;
             let new_file_path = storage_dir
-                .join(&name)
+                .join(obj_id.to_string())
                 .as_path()
                 .to_str()
                 .unwrap()
                 .to_string();
 
             // 新增对象
-            let add_ro = OssObjSvc::add(
-                OssObjAddDto {
-                    id: None,
-                    hash: Some(hash.to_string()),
-                    size: Some(file_size.to_string()),
-                    path: Some(new_file_path.to_string()),
-                    url: Some(url),
-                    is_completed: Some(is_completed),
-                    current_user_id,
-                },
-                Some(db),
-            )
-            .await?;
+            let oss_obj_add_dto = OssObjAddDto {
+                id: Some(obj_id),
+                hash: Some(hash.to_string()),
+                size: Some(file_size.to_string()),
+                path: Some(new_file_path.to_string()),
+                is_completed: Some(is_completed),
+                current_user_id,
+            };
+            debug!("新增对象: {:?}", oss_obj_add_dto);
+            let add_ro = OssObjSvc::add(oss_obj_add_dto, Some(db)).await?;
             if let Some(obj_vo) = add_ro.extra {
                 (obj_vo.id, new_file_path)
             } else {
@@ -128,18 +123,20 @@ impl OssFileSvc {
         };
 
         // 新增对象引用
-        let obj_ref_ro = OssObjRefSvc::add(
-            OssObjRefAddDto {
-                id: Some(obj_ref_id),
-                name: Some(file_name.to_string()),
-                bucket_id: Some(one_bucket.id),
-                obj_id: Some(obj_id),
-                ext: Some(ext.to_string()),
-                current_user_id,
-            },
-            Some(db),
-        )
-        .await?;
+        let obj_ref_id = ID_WORKER.get().unwrap().next_id();
+        let obj_ref_name = format!("{}.{}", obj_ref_id, ext);
+        let obj_ref_url = format!("/oss/file/preview/{}", obj_ref_name);
+        let oss_obj_ref_add_dto = OssObjRefAddDto {
+            id: Some(obj_ref_id),
+            name: Some(file_name.to_string()),
+            bucket_id: Some(one_bucket.id),
+            obj_id: Some(obj_id),
+            ext: Some(ext.to_string()),
+            url: Some(obj_ref_url),
+            current_user_id,
+        };
+        debug!("新增对象引用: {:?}", oss_obj_ref_add_dto);
+        let obj_ref_ro = OssObjRefSvc::add(oss_obj_ref_add_dto, Some(db)).await?;
 
         if obj_existed {
             // 如果对象已经存在，则直接关闭并删除临时文件
@@ -147,6 +144,10 @@ impl OssFileSvc {
         } else {
             // 如果对象不存在，则移动临时文件到目标目录中
             let (source, destination) = (temp_file.path(), &new_file_path);
+            debug!(
+                "移动临时文件到目标目录中: {:?} -> {:?}",
+                source, destination
+            );
             match fs::rename(source, destination) {
                 Ok(_) => {}
                 Err(e) if is_cross_device_error(&e) => {

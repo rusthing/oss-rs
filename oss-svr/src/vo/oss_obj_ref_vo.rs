@@ -22,6 +22,9 @@ pub struct OssObjRefVo {
     /// 扩展名
     #[from(0,~.ext.to_string())]
     pub ext: String,
+    /// 访问URL地址
+    #[from(0,~.url.to_string())]
+    pub url: String,
     /// 创建者ID
     #[from(0,~.creator_id as u64)]
     #[serde_as(as = "String")]

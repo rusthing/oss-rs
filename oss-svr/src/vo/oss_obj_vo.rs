@@ -24,9 +24,6 @@ pub struct OssObjVo {
     /// 文件大小
     #[from(~.to_string())]
     pub size: String,
-    /// 访问URL地址
-    #[from(~.to_string())]
-    pub url: String,
     /// 是否完成
     pub is_completed: bool,
     /// 创建者ID

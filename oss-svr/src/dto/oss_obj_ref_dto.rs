@@ -39,6 +39,12 @@ pub struct OssObjRefAddDto {
     )]
     #[into(ActiveValue::Set(~.clone().unwrap()))]
     pub ext: Option<String>,
+    #[validate(
+        required(message = "Url不能为空"),
+        length(min = 1, message = "Url不能为空")
+    )]
+    #[into(ActiveValue::Set(~.clone().unwrap()))]
+    pub url: Option<String>,
     #[serde(skip_deserializing)]
     #[into(creator_id, ActiveValue::Set(~ as i64))]
     pub current_user_id: u64,
@@ -68,6 +74,8 @@ pub struct OssObjRefModifyDto {
     pub name: Option<String>,
     #[into(ActiveValue::Set(~.clone().unwrap()))]
     pub ext: Option<String>,
+    #[into(ActiveValue::Set(~.clone().unwrap()))]
+    pub url: Option<String>,
     #[serde(skip_deserializing)]
     #[into(updator_id, ActiveValue::Set(~ as i64))]
     pub current_user_id: u64,
@@ -92,6 +100,8 @@ pub struct OssObjRefSaveDto {
     pub name: Option<String>,
     #[into(~.clone())]
     pub ext: Option<String>,
+    #[into(~.clone())]
+    pub url: Option<String>,
     #[serde(skip_deserializing)]
     pub current_user_id: u64,
 }

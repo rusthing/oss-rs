@@ -37,12 +37,6 @@ pub struct OssObjAddDto {
     )]
     #[into(ActiveValue::Set(~.clone().unwrap()))]
     pub hash: Option<String>,
-    #[validate(
-        required(message = "Url不能为空"),
-        length(min = 1, message = "Url不能为空")
-    )]
-    #[into(ActiveValue::Set(~.clone().unwrap()))]
-    pub url: Option<String>,
     #[into(match ~ {Some(value)=>ActiveValue::Set(value),None=>ActiveValue::NotSet})]
     pub is_completed: Option<bool>,
     #[serde(skip_deserializing)]
@@ -70,8 +64,6 @@ pub struct OssObjModifyDto {
     pub size: Option<String>,
     #[into(ActiveValue::Set(~.clone().unwrap()))]
     pub hash: Option<String>,
-    #[into(ActiveValue::Set(~.clone().unwrap()))]
-    pub url: Option<String>,
     #[into(match ~ {Some(value)=>ActiveValue::Set(value),None=>ActiveValue::NotSet})]
     pub is_completed: Option<bool>,
     #[serde(skip_deserializing)]
@@ -94,8 +86,6 @@ pub struct OssObjSaveDto {
     pub size: Option<String>,
     #[into(~.clone())]
     pub hash: Option<String>,
-    #[into(~.clone())]
-    pub url: Option<String>,
     pub is_completed: Option<bool>,
     #[serde(skip_deserializing)]
     pub current_user_id: u64,
