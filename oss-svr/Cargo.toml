@@ -1,6 +1,6 @@
 [package]
 name = "oss-svr"
-version = "1.0.2"
+version = "1.1.0"
 edition = "2024"
 authors = ["zbz"]
 license = "MIT"
@@ -16,7 +16,7 @@ log = { workspace = true }
 clap = { workspace = true, features = ["derive"] }
 chrono = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
-serde_with = { workspace = true }
+serde_with = { workspace = true}
 tokio = { workspace = true, features = ["rt", "rt-multi-thread", "macros", "signal"] }
 actix-web = { workspace = true }
 actix-multipart = { workspace = true }

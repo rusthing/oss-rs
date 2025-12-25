@@ -19,6 +19,7 @@ use std::fs::File;
 use std::io::{Read, Seek, SeekFrom};
 use tempfile::NamedTempFile;
 use wheel_rs::file_utils::{get_file_ext, is_cross_device_error};
+use wheel_rs::runtime::Error::RuntimeError;
 use wheel_rs::time_utils::get_current_timestamp;
 
 pub struct OssFileSvc;
@@ -64,6 +65,8 @@ impl OssFileSvc {
             None => return Ok(Ro::warn(format!("未找到存储桶<{}>", bucket))),
         };
 
+        // 生成对象引用ID
+        let obj_ref_id = ID_WORKER.get().unwrap().next_id();
         let now = get_current_timestamp();
         let obj_vo = OssObjSvc::get_by_hash_and_size(hash, file_size as i64, Some(db))
             .await?
@@ -74,12 +77,10 @@ impl OssFileSvc {
         let (obj_id, new_file_path) = if obj_existed {
             // 如果已经上传过该文件，则直接返回之前的对象ID和存放路径
             let obj_vo = obj_vo.unwrap();
-            (obj_vo.id.parse::<u64>().unwrap(), obj_vo.path)
+            (obj_vo.id, obj_vo.path)
         } else {
             // 如果未上传过该文件，则新增对象，并返回新对象ID和新文件的存放路径
-            // 生成对象ID
-            let obj_id = ID_WORKER.get().unwrap().next_id();
-            let name = format!("{}.{}", obj_id, ext);
+            let name = format!("{}.{}", obj_ref_id, ext);
             let url = format!("/oss/file/preview/{}", name);
             let is_completed = true;
             // 根据当前时间，创建yyyy/MM/dd/HH的目录，并将文件存入此目录中
@@ -104,9 +105,9 @@ impl OssFileSvc {
                 .to_string();
 
             // 新增对象
-            OssObjSvc::add(
+            let add_ro = OssObjSvc::add(
                 OssObjAddDto {
-                    id: Some(obj_id.to_string()),
+                    id: None,
                     hash: Some(hash.to_string()),
                     size: Some(file_size.to_string()),
                     path: Some(new_file_path.to_string()),
@@ -117,16 +118,22 @@ impl OssFileSvc {
                 Some(db),
             )
             .await?;
-            (obj_id, new_file_path)
+            if let Some(obj_vo) = add_ro.extra {
+                (obj_vo.id, new_file_path)
+            } else {
+                return Err(SvcError::RuntimeError(RuntimeError(
+                    "新增对象失败".to_string(),
+                )));
+            }
         };
 
         // 新增对象引用
         let obj_ref_ro = OssObjRefSvc::add(
             OssObjRefAddDto {
-                id: None,
+                id: Some(obj_ref_id),
                 name: Some(file_name.to_string()),
                 bucket_id: Some(one_bucket.id),
-                obj_id: Some(obj_id.to_string()),
+                obj_id: Some(obj_id),
                 ext: Some(ext.to_string()),
                 current_user_id,
             },

@@ -54,7 +54,7 @@ impl OssBucketSvc {
         db: Option<&DatabaseConnection>,
     ) -> Result<Ro<OssBucketVo>, SvcError> {
         let db = db.unwrap_or_else(|| DB_CONN.get().unwrap());
-        let id = modify_dto.id.clone().unwrap().parse::<u64>().unwrap();
+        let id = modify_dto.id.unwrap();
         let active_model: ActiveModel = modify_dto.into();
         OssBucketDao::update(active_model, db)
             .await

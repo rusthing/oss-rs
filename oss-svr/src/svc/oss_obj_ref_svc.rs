@@ -52,7 +52,7 @@ impl OssObjRefSvc {
         db: Option<&DatabaseConnection>,
     ) -> Result<Ro<OssObjRefVo>, SvcError> {
         let db = db.unwrap_or_else(|| DB_CONN.get().unwrap());
-        let id = modify_dto.id.clone().unwrap().parse::<u64>().unwrap();
+        let id = modify_dto.id.unwrap();
         let active_model: ActiveModel = modify_dto.into();
         OssObjRefDao::update(active_model, db)
             .await
@@ -141,7 +141,7 @@ impl OssObjRefSvc {
         let db = db.unwrap_or_else(|| DB_CONN.get().unwrap());
         let ro = Self::del(id, current_user_id, Some(db)).await?;
         // 删除对象, 如果对象没有其他引用则会顺利删除，否则会失败
-        let obj_id = ro.extra.clone().unwrap().oss_obj.id.parse::<u64>().unwrap();
+        let obj_id = ro.extra.clone().unwrap().oss_obj.id;
         OssObjSvc::del_with_file(obj_id, current_user_id, Some(db))
             .await
             .ok();

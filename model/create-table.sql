@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      PostgreSQL 9.x                               */
-/* Created on:     2025/10/10 15:37:35                          */
+/* Created on:     2025/12/25 15:08:09                          */
 /*==============================================================*/
 
 
@@ -59,15 +59,13 @@ create table oss_obj (
    path                 VARCHAR(100)         not null,
    size                 INT8                 not null,
    hash                 VARCHAR(64)          not null,
-   url                  VARCHAR(200)         not null,
    _creator_id          INT8                 not null,
    _create_timestamp    INT8                 not null,
    _updator_id          INT8                 not null,
    _update_timestamp    INT8                 not null,
    constraint PK_OSS_OBJ primary key (_id),
    constraint AK_PATH_OSS_OBJ unique (path),
-   constraint AK_SIZE_ANE_HASH_OSS_OBJ unique (size, hash),
-   constraint AK_URL_OSS_OBJ unique (url)
+   constraint AK_SIZE_ANE_HASH_OSS_OBJ unique (size, hash)
 );
 
 comment on table oss_obj is
@@ -88,9 +86,6 @@ comment on column oss_obj.size is
 
 comment on column oss_obj.hash is
 'Hash';
-
-comment on column oss_obj.url is
-'URL';
 
 comment on column oss_obj._creator_id is
 '创建人的用户ID';
@@ -120,11 +115,13 @@ create table oss_obj_ref (
    bucket_id            INT8                 not null,
    name                 VARCHAR(100)         not null,
    ext                  VARCHAR(10)          not null,
+   url                  VARCHAR(200)         not null,
    _creator_id          INT8                 not null,
    _create_timestamp    INT8                 not null,
    _updator_id          INT8                 not null,
    _update_timestamp    INT8                 not null,
-   constraint PK_OSS_OBJ_REF primary key (_id)
+   constraint PK_OSS_OBJ_REF primary key (_id),
+   constraint AK_URL_OSS_OBJ_ unique (url)
 );
 
 comment on table oss_obj_ref is
@@ -144,6 +141,9 @@ comment on column oss_obj_ref.name is
 
 comment on column oss_obj_ref.ext is
 '扩展名';
+
+comment on column oss_obj_ref.url is
+'URL';
 
 comment on column oss_obj_ref._creator_id is
 '创建人的用户ID';

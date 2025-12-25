@@ -2,11 +2,13 @@ use crate::model::oss_obj::ActiveModel;
 use o2o::o2o;
 use sea_orm::ActiveValue;
 use serde::Deserialize;
+use serde_with::serde_as;
 use utoipa::ToSchema;
 use validator::Validate;
 
 #[derive(o2o, ToSchema, Debug, Deserialize, Validate)]
 #[serde(rename_all = "camelCase")]
+#[serde_as]
 #[into(ActiveModel)]
 #[ghosts(
     updator_id: Default::default(),
@@ -14,8 +16,9 @@ use validator::Validate;
     update_timestamp: Default::default(),
 )]
 pub struct OssObjAddDto {
-    #[into(match ~.clone() {Some(value)=>ActiveValue::Set(value.parse::<i64>().unwrap()),None=>ActiveValue::NotSet})]
-    pub id: Option<String>,
+    #[into(match ~ {Some(value)=>ActiveValue::Set(value as i64),None=>ActiveValue::NotSet})]
+    #[serde_as(as = "Option<String>")]
+    pub id: Option<u64>,
     #[validate(
         required(message = "路径不能为空"),
         length(min = 1, message = "路径不能为空")
@@ -49,6 +52,7 @@ pub struct OssObjAddDto {
 
 #[derive(o2o, ToSchema, Debug, Deserialize, Validate)]
 #[serde(rename_all = "camelCase")]
+#[serde_as]
 #[into(ActiveModel)]
 #[ghosts(
     creator_id: Default::default(),
@@ -57,8 +61,9 @@ pub struct OssObjAddDto {
 )]
 pub struct OssObjModifyDto {
     #[validate(required(message = "缺少必要参数<id>"))]
-    #[into(ActiveValue::Set(~.clone().unwrap().parse::<i64>().unwrap()))]
-    pub id: Option<String>,
+    #[into(match ~ {Some(value)=>ActiveValue::Set(value as i64),None=>ActiveValue::NotSet})]
+    #[serde_as(as = "Option<String>")]
+    pub id: Option<u64>,
     #[into(ActiveValue::Set(~.clone().unwrap()))]
     pub path: Option<String>,
     #[into(ActiveValue::Set(~.clone().unwrap().parse::<i64>().unwrap()))]
@@ -76,11 +81,13 @@ pub struct OssObjModifyDto {
 
 #[derive(o2o, ToSchema, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[serde_as]
 #[into(OssObjAddDto)]
 #[into(OssObjModifyDto)]
 pub struct OssObjSaveDto {
-    #[into(~.clone())]
-    pub id: Option<String>,
+    // #[into(~ )]
+    #[serde_as(as = "Option<String>")]
+    pub id: Option<u64>,
     #[into(~.clone())]
     pub path: Option<String>,
     #[into(~.clone())]
