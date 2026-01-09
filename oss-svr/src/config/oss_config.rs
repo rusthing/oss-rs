@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "kebab-case")]
-pub struct OssSettings {
+pub struct OssConfig {
     /// 文件根目录
     #[serde(default = "file_root_dir_default")]
     pub file_root_dir: String,
@@ -21,9 +21,9 @@ pub struct OssSettings {
     pub download_buffer_size: ByteSize,
 }
 
-impl Default for OssSettings {
+impl Default for OssConfig {
     fn default() -> Self {
-        OssSettings {
+        OssConfig {
             file_root_dir: file_root_dir_default(),
             file_dir_format: file_dir_format_default(),
             upload_file_limit_size: upload_file_limit_size_default(),

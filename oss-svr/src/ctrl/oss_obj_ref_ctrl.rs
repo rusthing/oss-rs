@@ -2,9 +2,9 @@ use crate::dto::oss_obj_ref_dto::{OssObjRefAddDto, OssObjRefModifyDto, OssObjRef
 use crate::svc::oss_obj_ref_svc::OssObjRefSvc;
 use crate::vo::oss_obj_ref_vo::OssObjRefVo;
 use actix_web::{delete, get, post, put, web, HttpRequest, HttpResponse, Result};
-use robotech::ctrl::ctrl_error::CtrlError;
-use robotech::ctrl::ctrl_utils::{get_current_user_id, get_id_from_query_params};
 use robotech::ro::Ro;
+use robotech::web::ctrl_utils::{get_current_user_id, get_id_from_query_params};
+use robotech::web::CtrlError;
 use std::collections::HashMap;
 use validator::Validate;
 

@@ -1,7 +1,7 @@
+use crate::config::APP_CONFIG;
 use crate::dao::oss_obj_ref_dao::OssObjRefDao;
 use crate::dto::oss_obj_dto::OssObjAddDto;
 use crate::dto::oss_obj_ref_dto::OssObjRefAddDto;
-use crate::settings::SETTINGS;
 use crate::svc::oss_bucket_svc::OssBucketSvc;
 use crate::svc::oss_obj_ref_svc::OssObjRefSvc;
 use crate::svc::oss_obj_svc::OssObjSvc;
@@ -83,15 +83,15 @@ impl OssFileSvc {
             let is_completed = true;
             // 根据当前时间，创建yyyy/MM/dd/HH的目录，并将文件存入此目录中
             let datetime = Local.timestamp_opt((now / 1000) as i64, 0).unwrap();
-            let settings_oss = SETTINGS.get().unwrap().oss.clone();
+            let oss_config = APP_CONFIG.get().unwrap().oss.clone();
 
-            let date_path = datetime.format(&settings_oss.file_dir_format).to_string();
+            let date_path = datetime.format(&oss_config.file_dir_format).to_string();
 
             let storage_dir = ENV
                 .get()
                 .unwrap()
                 .app_dir
-                .join(&settings_oss.file_root_dir)
+                .join(&oss_config.file_root_dir)
                 .join(bucket.to_string())
                 .join(&date_path);
             fs::create_dir_all(&storage_dir)?;
@@ -221,7 +221,7 @@ impl OssFileSvc {
         if let (Some(start_pos), Some(end_pos)) = (start, end) {
             file.seek(SeekFrom::Start(start_pos))?;
             length = end_pos - start_pos + 1;
-            let size = SETTINGS.get().unwrap().oss.download_buffer_size.as_u64();
+            let size = APP_CONFIG.get().unwrap().oss.download_buffer_size.as_u64();
             if length > size {
                 length = size;
                 end = Some(start_pos + length - 1);

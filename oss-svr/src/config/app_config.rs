@@ -1,31 +1,31 @@
-use crate::settings::oss_settings::OssSettings;
-use idworker::IdWorkerSettings;
+use crate::config::oss_config::OssConfig;
+use idworker::IdWorkerConfig;
 use log::info;
-use robotech::db::DbSettings;
-use robotech::settings::get_settings;
-use robotech::web_server::WebServerSettings;
+use robotech::config::get_config;
+use robotech::db::DbConfig;
+use robotech::web::WebServerConfig;
 use serde::{Deserialize, Serialize};
 use std::sync::OnceLock;
 
 /// 全局配置
-pub static SETTINGS: OnceLock<Settings> = OnceLock::new();
+pub static APP_CONFIG: OnceLock<AppConfig> = OnceLock::new();
 
 /// 配置文件结构
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "kebab-case")]
-pub struct Settings {
+pub struct AppConfig {
     /// oss
-    #[serde(default = "OssSettings::default")]
-    pub oss: OssSettings,
+    #[serde(default = "OssConfig::default")]
+    pub oss: OssConfig,
     /// db
-    #[serde(default = "DbSettings::default")]
-    pub db: DbSettings,
+    #[serde(default = "DbConfig::default")]
+    pub db: DbConfig,
     /// Web服务器
-    #[serde(default = "WebServerSettings::default")]
-    pub web_server: WebServerSettings,
+    #[serde(default = "WebServerConfig::default")]
+    pub web_server: WebServerConfig,
     /// id_worker
-    #[serde(default = "IdWorkerSettings::default")]
-    pub id_worker: IdWorkerSettings,
+    #[serde(default = "IdWorkerConfig::default")]
+    pub id_worker: IdWorkerConfig,
 }
 
 /// # 创建新的配置实例
@@ -39,23 +39,23 @@ pub struct Settings {
 /// * `port` - 可选的端口号，如果提供将覆盖配置文件中的端口设置
 ///
 /// ## 返回值
-/// 返回解析后的Settings实例
+/// 返回解析后的AppConfig实例
 ///
 /// ## Panics
 /// 当配置文件读取失败或解析失败时会触发panic
-pub fn init_settings(path: Option<String>, port: Option<u16>) {
-    let mut settings = get_settings::<Settings>(path);
+pub fn init_app_config(path: Option<String>, port: Option<u16>) {
+    let mut config = get_config::<AppConfig>(path);
 
     info!("检查命令行是否指定了一些参数，如果有，则以命令行指定的参数为准...");
     // 如果命令行指定了端口，则使用命令行指定的端口
     if port.is_some() {
-        settings.web_server.port = port;
+        config.web_server.port = port;
     }
 
     info!("检查配置是否符合规范...");
-    if settings.db.url.is_empty() {
+    if config.db.url.is_empty() {
         panic!("尚未配置db.url(数据库连接字符串)项");
     }
 
-    SETTINGS.set(settings).expect("无法设置配置信息");
+    APP_CONFIG.set(config).expect("无法设置配置信息");
 }

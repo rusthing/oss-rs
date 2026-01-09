@@ -5,7 +5,7 @@ pub mod dao;
 pub mod db;
 pub mod dto;
 pub mod model;
-pub mod settings;
+pub mod config;
 pub mod svc;
 pub mod vo;
 pub mod web_service_config;

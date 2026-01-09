@@ -3,7 +3,7 @@ use crate::api_doc::oss_file_api_doc::OssFileApiDoc;
 use crate::api_doc::oss_obj_api_doc::OssObjApiDoc;
 use crate::api_doc::oss_obj_ref_api_doc::OssObjRefApiDoc;
 use crate::ctrl::{oss_bucket_ctrl, oss_file_ctrl, oss_obj_ctrl, oss_obj_ref_ctrl};
-use crate::settings::SETTINGS;
+use crate::config::APP_CONFIG;
 use actix_multipart::form::MultipartFormConfig;
 use actix_web::web;
 use utoipa::OpenApi;
@@ -11,7 +11,7 @@ use utoipa_swagger_ui::{SwaggerUi, Url};
 
 /// # 配置WebService
 pub fn web_service_config(cfg: &mut web::ServiceConfig) {
-    let oss_config = SETTINGS.get().unwrap().oss.clone();
+    let oss_config = APP_CONFIG.get().unwrap().oss.clone();
     cfg.service(
         web::scope("/oss/bucket")
             .service(oss_bucket_ctrl::add) // 添加
