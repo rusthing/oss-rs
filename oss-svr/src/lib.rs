@@ -1,11 +1,12 @@
 pub mod api_doc;
 pub mod base;
+pub mod config;
 pub mod ctrl;
 pub mod dao;
 pub mod db;
 pub mod dto;
+pub mod global;
 pub mod model;
-pub mod config;
 pub mod svc;
 pub mod vo;
 pub mod web_service_config;

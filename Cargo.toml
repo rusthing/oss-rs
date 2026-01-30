@@ -7,7 +7,7 @@ resolver = "3"
 openssl = "0.10.75"
 
 log = "0.4.29"
-clap = "4.5.54"
+clap = "4.5.55"
 chrono = "0.4.43"
 serde = "1.0.228"
 serde_with = "3.16.1"
@@ -30,7 +30,7 @@ utoipa-swagger-ui = "9.0.2"
 
 idworker = "1.0.0"
 wheel-rs = "1.1.1"
-robotech = "1.4.0"
+robotech = "1.5.0"
 
 [patch.crates-io]
 idworker = { path = "../idworker" }

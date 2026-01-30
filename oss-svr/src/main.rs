@@ -1,9 +1,11 @@
 use clap::Parser;
 use idworker::init_id_worker;
 use log::info;
-use oss_svr::config::{init_app_config, APP_CONFIG};
+use oss_svr::config::AppConfig;
 use oss_svr::db::migrate;
+use oss_svr::global::set_app_config;
 use oss_svr::web_service_config::web_service_config;
+use robotech::config::build_app_config;
 use robotech::db::init_db;
 use robotech::env::init_env;
 use robotech::log::init_log;
@@ -51,22 +53,23 @@ async fn main() -> std::io::Result<()> {
     info!("解析命令行参数...");
     let args = Args::parse();
 
-    info!("初始化设置选项...");
-    init_app_config(args.config_file, args.port);
+    info!("构建配置信息...");
+    let app_config: AppConfig = build_app_config(args.config_file);
+    set_app_config(app_config.clone());
 
     // 升级数据库版本...
-    migrate().await.expect("升级数据库版本失败");
+    migrate(app_config.db.clone())
+        .await
+        .expect("升级数据库版本失败");
 
     // 初始化ID生成器...
-    let id_worker_config = APP_CONFIG.get().unwrap().id_worker.clone();
-    init_id_worker(id_worker_config);
+    init_id_worker(app_config.id_worker);
 
     // 初始化数据库连接
-    init_db(APP_CONFIG.get().unwrap().db.clone()).await;
+    init_db(app_config.db).await;
 
     // 启动Web服务
-    let web_server_config = APP_CONFIG.get().unwrap().web_server.clone();
-    start_web_server(web_server_config, web_service_config).await;
+    start_web_server(app_config.web_server, web_service_config, args.port).await;
 
     info!("退出程序");
     Ok(())

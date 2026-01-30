@@ -36,6 +36,6 @@ idworker = { workspace = true, features = ["config"] }
 wheel-rs = { workspace = true }
 robotech = { workspace = true, features = ["web", "crud"] }
 
-[dev-dependencies]
+[build-dependencies]
 # cross打包时用，需要开启vendored feature
 openssl = { workspace = true, features = ["vendored"] }

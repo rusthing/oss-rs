@@ -1,6 +1,6 @@
+use actix_multipart::form::MultipartForm;
 use actix_multipart::form::tempfile::TempFile;
 use actix_multipart::form::text::Text;
-use actix_multipart::form::MultipartForm;
 
 /// # 上传表单结构体，用于处理文件上传请求
 ///
