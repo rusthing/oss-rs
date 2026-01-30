@@ -5,6 +5,7 @@ use oss_svr::config::AppConfig;
 use oss_svr::db::migrate;
 use oss_svr::global::set_app_config;
 use oss_svr::web_service_config::web_service_config;
+use robotech::args::parse_and_handle_signal_args;
 use robotech::config::build_app_config;
 use robotech::db::init_db;
 use robotech::env::init_env;
@@ -38,20 +39,27 @@ struct Args {
     /// Web服务器的端口号
     #[arg(short, long)]
     port: Option<u16>,
+
+    /// 监听信号
+    #[arg(short, long)]
+    signal: Option<String>,
 }
 
 #[tokio::main]
-async fn main() -> std::io::Result<()> {
+async fn main() {
     info!("程序正在启动……");
 
     info!("初始化环境变量...");
     init_env();
 
     info!("初始化日志系统...");
-    init_log()?;
+    init_log();
 
     info!("解析命令行参数...");
     let args = Args::parse();
+
+    // 解析与处理信号参数
+    parse_and_handle_signal_args(args.signal);
 
     info!("构建配置信息...");
     let app_config: AppConfig = build_app_config(args.config_file);
@@ -72,5 +80,4 @@ async fn main() -> std::io::Result<()> {
     start_web_server(app_config.web_server, web_service_config, args.port).await;
 
     info!("退出程序");
-    Ok(())
 }

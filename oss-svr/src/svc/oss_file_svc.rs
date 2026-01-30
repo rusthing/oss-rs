@@ -12,7 +12,7 @@ use log::{debug, error, warn};
 use robotech::db::DB_CONN;
 use robotech::env::ENV;
 use robotech::ro::Ro;
-use robotech::svc::svc_error::SvcError;
+use robotech::svc::SvcError;
 use sea_orm::{DatabaseConnection, TransactionTrait};
 use std::fs;
 use std::fs::File;

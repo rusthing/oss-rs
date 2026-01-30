@@ -6,7 +6,7 @@ use crate::vo::oss_obj_ref_vo::OssObjRefVo;
 use log::warn;
 use robotech::db::DB_CONN;
 use robotech::ro::Ro;
-use robotech::svc::svc_error::{SvcError, handle_db_err_to_svc_error};
+use robotech::svc::{SvcError, handle_db_err_to_svc_error};
 use sea_orm::DatabaseConnection;
 
 pub struct OssObjRefSvc;

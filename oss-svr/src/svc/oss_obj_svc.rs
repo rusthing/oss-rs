@@ -5,7 +5,7 @@ use crate::vo::oss_obj_vo::OssObjVo;
 use log::warn;
 use robotech::db::DB_CONN;
 use robotech::ro::Ro;
-use robotech::svc::svc_error::{SvcError, handle_db_err_to_svc_error};
+use robotech::svc::{handle_db_err_to_svc_error, SvcError};
 use sea_orm::{DatabaseConnection, TransactionTrait};
 use std::fs;
 
