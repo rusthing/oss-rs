@@ -41,6 +41,12 @@ struct Args {
     port: Option<u16>,
 
     /// 监听信号
+    /// start: 启动程序
+    /// restart: 重启程序
+    /// r,reload: 重新加载配置文件
+    /// q,quit: 中断退出程序(Ctrl+C)
+    /// s,stop: 优雅停止程序(kill -15)
+    /// k,kill: 暴力停止程序(kill -9)
     #[arg(short, long)]
     signal: Option<String>,
 }
@@ -58,8 +64,8 @@ async fn main() {
     info!("解析命令行参数...");
     let args = Args::parse();
 
-    // 解析与处理信号参数
-    parse_and_handle_signal_args(args.signal);
+    // 解析与处理信号参数(此变量将在程序优雅退出时释放，释放时删除pid文件)
+    let _pid_file_guard = parse_and_handle_signal_args(args.signal);
 
     info!("构建配置信息...");
     let app_config: AppConfig = build_app_config(args.config_file);
