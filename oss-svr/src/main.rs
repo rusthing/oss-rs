@@ -5,11 +5,11 @@ use oss_svr::config::AppConfig;
 use oss_svr::db::migrate;
 use oss_svr::global::set_app_config;
 use oss_svr::web_service_config::web_service_config;
-use robotech::args::parse_and_handle_signal_args;
 use robotech::config::build_app_config;
 use robotech::db::init_db;
 use robotech::env::init_env;
 use robotech::log::init_log;
+use robotech::signal::parse_and_handle_signal_args;
 use robotech::web::start_web_server;
 
 /// oss - 对象存储服务
