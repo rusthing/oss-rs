@@ -1,4 +1,3 @@
-use robotech::api_client::ApiClientError::FileError;
 use robotech::api_client::{ApiClientError, CrudApiClient};
 use robotech::ro::Ro;
 use std::fmt::Display;
@@ -45,7 +44,7 @@ impl OssFileApiClient {
         let form = reqwest::multipart::Form::new()
             .file("file", file_path)
             .await
-            .map_err(|e| FileError(url.clone(), e))?
+            .map_err(|e| ApiClientError::ReadFile(url.clone(), e))?
             .text("fileName", file_name.to_string());
 
         self.multipart(&url, form, current_user_id).await

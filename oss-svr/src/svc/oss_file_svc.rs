@@ -6,20 +6,20 @@ use crate::svc::oss_bucket_svc::OssBucketSvc;
 use crate::svc::oss_obj_ref_svc::OssObjRefSvc;
 use crate::svc::oss_obj_svc::OssObjSvc;
 use crate::vo::oss_obj_ref_vo::OssObjRefVo;
+use anyhow::anyhow;
 use chrono::{Local, TimeZone};
 use idworker::ID_WORKER;
 use log::{debug, error, warn};
-use robotech::db::DB_CONN;
+use robotech::dao::{begin_transaction, commit_transaction, unwrap_db};
 use robotech::env::ENV;
 use robotech::ro::Ro;
 use robotech::svc::SvcError;
-use sea_orm::{DatabaseConnection, TransactionTrait};
+use sea_orm::DatabaseConnection;
 use std::fs;
 use std::fs::File;
 use std::io::{Read, Seek, SeekFrom};
 use tempfile::NamedTempFile;
 use wheel_rs::file_utils::{get_file_ext, is_cross_device_error};
-use wheel_rs::runtime::Error::RuntimeError;
 use wheel_rs::time_utils::get_current_timestamp;
 
 pub struct OssFileSvc;
@@ -53,10 +53,10 @@ impl OssFileSvc {
         current_user_id: u64,
         db: Option<&DatabaseConnection>,
     ) -> Result<Ro<OssObjRefVo>, SvcError> {
-        let db = db.unwrap_or_else(|| DB_CONN.get().unwrap());
+        let db = unwrap_db(db)?;
 
         // 开启事务
-        let tx = db.begin().await?;
+        let tx = begin_transaction(db).await?;
 
         // 获取存储桶
         let one_bucket = OssBucketSvc::get_by_name(bucket, Some(db)).await?;
@@ -65,7 +65,7 @@ impl OssFileSvc {
             None => return Ok(Ro::warn(format!("未找到存储桶<{}>", bucket))),
         };
 
-        let now = get_current_timestamp();
+        let now = get_current_timestamp()?;
         let obj_vo = OssObjSvc::get_by_hash_and_size(hash, file_size as i64, Some(db))
             .await?
             .get_extra();
@@ -116,9 +116,7 @@ impl OssFileSvc {
             if let Some(obj_vo) = add_ro.extra {
                 (obj_vo.id, new_file_path)
             } else {
-                return Err(SvcError::RuntimeError(RuntimeError(
-                    "新增对象失败".to_string(),
-                )));
+                return Err(SvcError::Runtime(anyhow!("新增对象失败".to_string())));
             }
         };
 
@@ -165,7 +163,7 @@ impl OssFileSvc {
         }
 
         // 提交事务
-        tx.commit().await?;
+        commit_transaction(tx).await?;
 
         Ok(obj_ref_ro.msg("上传成功".to_string()))
     }
@@ -200,7 +198,8 @@ impl OssFileSvc {
         mut end: Option<u64>,
         db: Option<&DatabaseConnection>,
     ) -> Result<(String, u64, u64, Vec<u8>, Option<u64>, Option<u64>), SvcError> {
-        let db = db.unwrap_or_else(|| DB_CONN.get().unwrap());
+        let db = unwrap_db(db)?;
+
         let one = OssObjRefDao::get_by_id(obj_ref_id as i64, db).await?;
         let (obj_ref_model, _, obj_model) =
             one.ok_or(SvcError::NotFound(format!("id: {}", obj_ref_id)))?;

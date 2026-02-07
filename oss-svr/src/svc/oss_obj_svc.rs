@@ -1,12 +1,12 @@
-use crate::dao::oss_obj_dao::{OssObjDao, UNIQUE_FIELDS};
+use crate::dao::oss_obj_dao::OssObjDao;
 use crate::dto::oss_obj_dto::{OssObjAddDto, OssObjModifyDto, OssObjSaveDto};
 use crate::model::oss_obj::ActiveModel;
 use crate::vo::oss_obj_vo::OssObjVo;
 use log::warn;
-use robotech::db::DB_CONN;
+use robotech::dao::{begin_transaction, commit_transaction, unwrap_db};
 use robotech::ro::Ro;
-use robotech::svc::{handle_db_err_to_svc_error, SvcError};
-use sea_orm::{DatabaseConnection, TransactionTrait};
+use robotech::svc::SvcError;
+use sea_orm::DatabaseConnection;
 use std::fs;
 
 pub struct OssObjSvc;
@@ -27,11 +27,10 @@ impl OssObjSvc {
         add_dto: OssObjAddDto,
         db: Option<&DatabaseConnection>,
     ) -> Result<Ro<OssObjVo>, SvcError> {
-        let db = db.unwrap_or_else(|| DB_CONN.get().unwrap());
+        let db = unwrap_db(db)?;
+
         let active_model: ActiveModel = add_dto.into();
-        let one = OssObjDao::insert(active_model, db)
-            .await
-            .map_err(|e| handle_db_err_to_svc_error(e, &UNIQUE_FIELDS))?;
+        let one = OssObjDao::insert(active_model, db).await?;
         Ok(Self::get_by_id(one.id as u64, Some(db))
             .await?
             .msg("添加成功".to_string()))
@@ -52,12 +51,11 @@ impl OssObjSvc {
         modify_dto: OssObjModifyDto,
         db: Option<&DatabaseConnection>,
     ) -> Result<Ro<OssObjVo>, SvcError> {
-        let db = db.unwrap_or_else(|| DB_CONN.get().unwrap());
+        let db = unwrap_db(db)?;
+
         let id = modify_dto.id.unwrap();
         let active_model: ActiveModel = modify_dto.into();
-        OssObjDao::update(active_model, db)
-            .await
-            .map_err(|e| handle_db_err_to_svc_error(e, &UNIQUE_FIELDS))?;
+        OssObjDao::update(active_model, db).await?;
         Ok(Self::get_by_id(id, Some(db))
             .await?
             .msg("修改成功".to_string()))
@@ -102,7 +100,7 @@ impl OssObjSvc {
         current_user_id: u64,
         db: Option<&DatabaseConnection>,
     ) -> Result<Ro<OssObjVo>, SvcError> {
-        let db = db.unwrap_or_else(|| DB_CONN.get().unwrap());
+        let db = unwrap_db(db)?;
 
         let del_model = Self::get_by_id(id, Some(db))
             .await?
@@ -121,8 +119,7 @@ impl OssObjSvc {
             },
             db,
         )
-        .await
-        .map_err(|e| handle_db_err_to_svc_error(e, &UNIQUE_FIELDS))?;
+        .await?;
 
         Ok(Ro::success("删除成功".to_string()).extra(Some(del_model)))
     }
@@ -144,15 +141,16 @@ impl OssObjSvc {
         current_user_id: u64,
         db: Option<&DatabaseConnection>,
     ) -> Result<Ro<OssObjVo>, SvcError> {
-        let db = db.unwrap_or_else(|| DB_CONN.get().unwrap());
+        let db = unwrap_db(db)?;
+
         // 开启事务
-        let tx = db.begin().await?;
+        let tx = begin_transaction(db).await?;
         let ro = Self::del(id, current_user_id, Some(db)).await?;
         let path = ro.extra.clone().unwrap().path.clone();
         // 删除文件
         fs::remove_file(path)?;
         // 提交事务
-        tx.commit().await?;
+        commit_transaction(tx).await?;
         Ok(ro)
     }
 
@@ -172,16 +170,14 @@ impl OssObjSvc {
         current_user_id: u64,
         db: Option<&DatabaseConnection>,
     ) -> Result<Ro<String>, SvcError> {
-        let db = db.unwrap_or_else(|| DB_CONN.get().unwrap());
+        let db = unwrap_db(db)?;
 
         warn!(
             "ID为<{}>的用户将删除oss_obj中孤立无对象引用的记录",
             current_user_id
         );
 
-        let result = OssObjDao::find_orphaned(db)
-            .await
-            .map_err(|e| handle_db_err_to_svc_error(e, &UNIQUE_FIELDS))?;
+        let result = OssObjDao::find_orphaned(db).await?;
         for item in result.into_iter() {
             Self::del_with_file(item.id as u64, current_user_id, Some(db)).await?;
         }
@@ -204,7 +200,8 @@ impl OssObjSvc {
         id: u64,
         db: Option<&DatabaseConnection>,
     ) -> Result<Ro<OssObjVo>, SvcError> {
-        let db = db.unwrap_or_else(|| DB_CONN.get().unwrap());
+        let db = unwrap_db(db)?;
+
         let one = OssObjDao::get_by_id(id as i64, db).await?;
         Ok(Ro::success("查询成功".to_string()).extra(one.map(|value| OssObjVo::from(value))))
     }
@@ -226,7 +223,8 @@ impl OssObjSvc {
         size: i64,
         db: Option<&DatabaseConnection>,
     ) -> Result<Ro<OssObjVo>, SvcError> {
-        let db = db.unwrap_or_else(|| DB_CONN.get().unwrap());
+        let db = unwrap_db(db)?;
+
         let one = OssObjDao::get_by_hash_and_size(hash, size, db).await?;
         Ok(Ro::success("查询成功".to_string()).extra(one.map(|value| OssObjVo::from(value))))
     }

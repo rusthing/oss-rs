@@ -2,12 +2,12 @@ use crate::base::api::upload_form::UploadForm;
 use crate::svc::oss_file_svc::OssFileSvc;
 use crate::vo::oss_obj_ref_vo::OssObjRefVo;
 use actix_multipart::form::MultipartForm;
-use actix_web::{HttpRequest, HttpResponse, Result, get, post, web};
+use actix_web::{get, post, web, HttpRequest, HttpResponse, Result};
 use once_cell::sync::Lazy;
 use regex::Regex;
 use robotech::ro::Ro;
-use robotech::web::CtrlError;
 use robotech::web::ctrl_utils::get_current_user_id;
+use robotech::web::CtrlError;
 use wheel_rs::file_utils::calc_hash;
 
 /// # 上传文件到指定的存储桶
@@ -51,9 +51,11 @@ pub async fn upload(
     let file_name = form.file.file_name.unwrap();
     let file_size = form.file.size;
     let temp_file = form.file.file;
-    let provided_hash: Option<String> = form.hash.map(|t| t.into_inner());
-    let computed_hash = calc_hash(&temp_file.path());
-    if provided_hash.is_some() && provided_hash.unwrap() != computed_hash {
+    let provided_hash = form.hash.map(|t| t.into_inner());
+    let computed_hash = calc_hash(&temp_file.path())?;
+    if let Some(provided_hash) = provided_hash
+        && provided_hash != computed_hash
+    {
         return Err(CtrlError::from(validator::ValidationError::new(
             "文件Hash值不匹配",
         )));

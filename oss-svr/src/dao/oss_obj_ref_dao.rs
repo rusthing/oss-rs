@@ -2,8 +2,9 @@ use crate::model::oss_obj_ref::{ActiveModel, Column, Entity, Model};
 use crate::model::{oss_bucket, oss_obj};
 use idworker::ID_WORKER;
 use once_cell::sync::Lazy;
+use robotech::dao::DaoError;
 use sea_orm::{
-    ActiveModelTrait, ActiveValue, ColumnTrait, ConnectionTrait, DbErr, DeleteResult, EntityTrait,
+    ActiveModelTrait, ActiveValue, ColumnTrait, ConnectionTrait, DeleteResult, EntityTrait,
     QueryFilter,
 };
 use std::collections::HashMap;
@@ -29,7 +30,7 @@ impl OssObjRefDao {
     ///
     /// ## 返回值
     /// 返回插入后的完整 Model 实例，如果插入失败则返回相应的错误信息
-    pub async fn insert<C>(mut active_model: ActiveModel, db: &C) -> Result<Model, DbErr>
+    pub async fn insert<C>(mut active_model: ActiveModel, db: &C) -> Result<Model, DaoError>
     where
         C: ConnectionTrait,
     {
@@ -39,14 +40,17 @@ impl OssObjRefDao {
         }
         // 当创建时间未设置时，设置创建时间和修改时间
         if active_model.create_timestamp == ActiveValue::NotSet {
-            let now = ActiveValue::set(get_current_timestamp() as i64);
+            let now = ActiveValue::set(get_current_timestamp()? as i64);
             active_model.create_timestamp = now.clone();
             active_model.update_timestamp = now;
         }
         // 添加时修改者就是创建者
         active_model.updator_id = active_model.creator_id.clone();
         // 执行数据库插入操作
-        active_model.insert(db).await
+        active_model
+            .insert(db)
+            .await
+            .map_err(|e| DaoError::parse_db_err(e, &UNIQUE_FIELDS))
     }
 
     /// # 更新记录
@@ -61,17 +65,20 @@ impl OssObjRefDao {
     ///
     /// ## 返回值
     /// 返回更新后的完整 Model 实例，如果更新失败则返回相应的错误信息
-    pub async fn update<C>(mut active_model: ActiveModel, db: &C) -> Result<Model, DbErr>
+    pub async fn update<C>(mut active_model: ActiveModel, db: &C) -> Result<Model, DaoError>
     where
         C: ConnectionTrait,
     {
         // 当修改时间未设置时，设置修改时间
         if active_model.update_timestamp == ActiveValue::NotSet {
-            let now = ActiveValue::set(get_current_timestamp() as i64);
+            let now = ActiveValue::set(get_current_timestamp()? as i64);
             active_model.update_timestamp = now;
         }
         // 执行数据库更新操作
-        active_model.update(db).await
+        active_model
+            .update(db)
+            .await
+            .map_err(|e| DaoError::parse_db_err(e, &UNIQUE_FIELDS))
     }
 
     /// # 删除记录
@@ -84,14 +91,17 @@ impl OssObjRefDao {
     ///
     /// ## 返回值
     /// 如果删除成功则返回 Ok(())，如果删除失败则返回相应的错误信息
-    pub async fn delete<C>(active_model: ActiveModel, db: &C) -> Result<DeleteResult, DbErr>
+    pub async fn delete<C>(active_model: ActiveModel, db: &C) -> Result<DeleteResult, DaoError>
     where
         C: ConnectionTrait,
     {
-        active_model.delete(db).await
+        active_model
+            .delete(db)
+            .await
+            .map_err(|e| DaoError::parse_db_err(e, &UNIQUE_FIELDS))
     }
 
-    pub async fn delete_by_bucket_id<C>(bucket_id: i64, db: &C) -> Result<DeleteResult, DbErr>
+    pub async fn delete_by_bucket_id<C>(bucket_id: i64, db: &C) -> Result<DeleteResult, DaoError>
     where
         C: ConnectionTrait,
     {
@@ -99,6 +109,7 @@ impl OssObjRefDao {
             .filter(Column::BucketId.eq(bucket_id))
             .exec(db)
             .await
+            .map_err(|e| DaoError::parse_db_err(e, &UNIQUE_FIELDS))
     }
 
     /// # 根据ID查询记录
@@ -115,7 +126,7 @@ impl OssObjRefDao {
     pub async fn get_by_id<C>(
         id: i64,
         db: &C,
-    ) -> Result<Option<(Model, oss_bucket::Model, oss_obj::Model)>, DbErr>
+    ) -> Result<Option<(Model, oss_bucket::Model, oss_obj::Model)>, DaoError>
     where
         C: ConnectionTrait,
     {
@@ -129,5 +140,6 @@ impl OssObjRefDao {
                     (model, bucket_option.unwrap(), obj_option.unwrap())
                 })
             })
+            .map_err(|e| DaoError::parse_db_err(e, &UNIQUE_FIELDS))
     }
 }

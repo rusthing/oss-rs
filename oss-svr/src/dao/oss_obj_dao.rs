@@ -2,8 +2,9 @@ use crate::model::oss_obj::{ActiveModel, Column, Entity, Model};
 use crate::model::oss_obj_ref::{Column as OssObjRefColumn, Entity as OssObjRefEntity};
 use idworker::ID_WORKER;
 use once_cell::sync::Lazy;
+use robotech::dao::DaoError;
 use sea_orm::{
-    ActiveModelTrait, ActiveValue, ColumnTrait, ConnectionTrait, DbErr, DeleteResult, EntityTrait,
+    ActiveModelTrait, ActiveValue, ColumnTrait, ConnectionTrait, DeleteResult, EntityTrait,
     QueryFilter, QuerySelect, QueryTrait,
 };
 use std::collections::HashMap;
@@ -36,7 +37,7 @@ impl OssObjDao {
     ///
     /// ## 返回值
     /// 返回插入后的完整 Model 实例，如果插入失败则返回相应的错误信息
-    pub async fn insert<C>(mut active_model: ActiveModel, db: &C) -> Result<Model, DbErr>
+    pub async fn insert<C>(mut active_model: ActiveModel, db: &C) -> Result<Model, DaoError>
     where
         C: ConnectionTrait,
     {
@@ -46,14 +47,14 @@ impl OssObjDao {
         }
         // 当创建时间未设置时，设置创建时间和修改时间
         if active_model.create_timestamp == ActiveValue::NotSet {
-            let now = ActiveValue::set(get_current_timestamp() as i64);
+            let now = ActiveValue::set(get_current_timestamp()? as i64);
             active_model.create_timestamp = now.clone();
             active_model.update_timestamp = now;
         }
         // 添加时修改者就是创建者
         active_model.updator_id = active_model.creator_id.clone();
         // 执行数据库插入操作
-        active_model.insert(db).await
+        active_model.insert(db).await.map_err(DaoError::from)
     }
 
     /// # 更新记录
@@ -68,17 +69,17 @@ impl OssObjDao {
     ///
     /// ## 返回值
     /// 返回更新后的完整 Model 实例，如果更新失败则返回相应的错误信息
-    pub async fn update<C>(mut active_model: ActiveModel, db: &C) -> Result<Model, DbErr>
+    pub async fn update<C>(mut active_model: ActiveModel, db: &C) -> Result<Model, DaoError>
     where
         C: ConnectionTrait,
     {
         // 当修改时间未设置时，设置修改时间
         if active_model.update_timestamp == ActiveValue::NotSet {
-            let now = ActiveValue::set(get_current_timestamp() as i64);
+            let now = ActiveValue::set(get_current_timestamp()? as i64);
             active_model.update_timestamp = now;
         }
         // 执行数据库更新操作
-        active_model.update(db).await
+        active_model.update(db).await.map_err(DaoError::from)
     }
 
     /// # 删除记录
@@ -91,11 +92,11 @@ impl OssObjDao {
     ///
     /// ## 返回值
     /// 如果删除成功则返回 Ok(())，如果删除失败则返回相应的错误信息
-    pub async fn delete<C>(active_model: ActiveModel, db: &C) -> Result<DeleteResult, DbErr>
+    pub async fn delete<C>(active_model: ActiveModel, db: &C) -> Result<DeleteResult, DaoError>
     where
         C: ConnectionTrait,
     {
-        active_model.delete(db).await
+        active_model.delete(db).await.map_err(DaoError::from)
     }
 
     /// # 获取孤立没有关联对象引用的记录
@@ -108,7 +109,7 @@ impl OssObjDao {
     ///
     /// ## 返回值
     /// 返回查询到的记录列表
-    pub async fn find_orphaned<C>(db: &C) -> Result<Vec<Model>, DbErr>
+    pub async fn find_orphaned<C>(db: &C) -> Result<Vec<Model>, DaoError>
     where
         C: ConnectionTrait,
     {
@@ -124,6 +125,7 @@ impl OssObjDao {
             )
             .all(db)
             .await
+            .map_err(DaoError::from)
     }
 
     /// # 根据ID查询相应记录
@@ -136,11 +138,11 @@ impl OssObjDao {
     ///
     /// ## 返回值
     /// 返回查询到的完整 Model 实例（如果存在），如果查询失败则返回相应的错误信息
-    pub async fn get_by_id<C>(id: i64, db: &C) -> Result<Option<Model>, DbErr>
+    pub async fn get_by_id<C>(id: i64, db: &C) -> Result<Option<Model>, DaoError>
     where
         C: ConnectionTrait,
     {
-        Entity::find_by_id(id).one(db).await
+        Entity::find_by_id(id).one(db).await.map_err(DaoError::from)
     }
 
     /// # 根据哈希值和大小查询记录
@@ -159,7 +161,7 @@ impl OssObjDao {
         hash: &str,
         size: i64,
         db: &C,
-    ) -> Result<Option<Model>, DbErr>
+    ) -> Result<Option<Model>, DaoError>
     where
         C: ConnectionTrait,
     {
@@ -168,5 +170,6 @@ impl OssObjDao {
             .filter(Column::Size.eq(size))
             .one(db)
             .await
+            .map_err(DaoError::from)
     }
 }
