@@ -12,6 +12,7 @@ use robotech::env::init_env;
 use robotech::log::init_log;
 use robotech::signal::SignalManager;
 use robotech::web::start_web_server;
+use tokio::sync::oneshot;
 
 /// oss - 对象存储服务
 ///
@@ -74,10 +75,10 @@ async fn main() -> anyhow::Result<()> {
         port,
     } = Args::parse();
 
-    // 初始化信号(_pid_file_guard变量将在程序优雅退出时释放，释放时删除pid文件)
-    let signal_manager = SignalManager::new(signal)?;
+    // 初始化信号(_signal_manager变量将在程序优雅退出时释放，释放时删除pid文件)
+    let (_signal_manager, old_pid, app_started_sender) = SignalManager::new(signal)?;
 
-    apply_config(config_file, port, signal_manager.old_pid).await?;
+    apply_config(config_file, port, old_pid, app_started_sender).await?;
     Ok(())
 }
 
@@ -113,6 +114,7 @@ async fn apply_config(
     config_file: Option<String>,
     port: Option<u16>,
     old_pid: Option<i32>,
+    app_started_sender: oneshot::Sender<()>,
 ) -> anyhow::Result<()> {
     info!("初始化应用程序配置...");
     let app_config: AppConfig = build_app_config(config_file)?;
@@ -130,6 +132,13 @@ async fn apply_config(
     init_db(app_config.db).await?;
 
     // 启动Web服务器
-    start_web_server(app_config.web_server, web_service_config, port, old_pid).await?;
+    start_web_server(
+        app_config.web_server,
+        web_service_config,
+        port,
+        old_pid,
+        app_started_sender,
+    )
+    .await?;
     Ok(())
 }
