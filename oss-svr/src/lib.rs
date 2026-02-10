@@ -1,6 +1,6 @@
 pub mod api_doc;
 pub mod base;
-pub mod config;
+pub mod app;
 pub mod ctrl;
 pub mod dao;
 pub mod db;

@@ -8,10 +8,10 @@ use crate::svc::oss_obj_svc::OssObjSvc;
 use crate::vo::oss_obj_ref_vo::OssObjRefVo;
 use anyhow::anyhow;
 use chrono::{Local, TimeZone};
-use idworker::ID_WORKER;
+use idworker::{IdWorkerError, ID_WORKER};
 use log::{debug, error, warn};
 use robotech::dao::{begin_transaction, commit_transaction, unwrap_db};
-use robotech::env::ENV;
+use robotech::env::{EnvError, APP_ENV};
 use robotech::ro::Ro;
 use robotech::svc::SvcError;
 use sea_orm::DatabaseConnection;
@@ -79,7 +79,10 @@ impl OssFileSvc {
             (obj_vo.id, obj_vo.path)
         } else {
             // 如果未上传过该文件，则新增对象，并返回新对象ID和新文件的存放路径
-            let obj_id = ID_WORKER.get().unwrap().next_id();
+            let obj_id = ID_WORKER
+                .get()
+                .ok_or(IdWorkerError::SetIdWorker())?
+                .next_id()?;
             let is_completed = true;
             // 根据当前时间，创建yyyy/MM/dd/HH的目录，并将文件存入此目录中
             let datetime = Local.timestamp_opt((now / 1000) as i64, 0).unwrap();
@@ -87,9 +90,9 @@ impl OssFileSvc {
 
             let date_path = datetime.format(&oss_config.file_dir_format).to_string();
 
-            let storage_dir = ENV
+            let storage_dir = APP_ENV
                 .get()
-                .unwrap()
+                .ok_or(EnvError::GetAppEnv())?
                 .app_dir
                 .join(&oss_config.file_root_dir)
                 .join(bucket.to_string())
@@ -121,7 +124,10 @@ impl OssFileSvc {
         };
 
         // 新增对象引用
-        let obj_ref_id = ID_WORKER.get().unwrap().next_id();
+        let obj_ref_id = ID_WORKER
+            .get()
+            .ok_or(IdWorkerError::SetIdWorker())?
+            .next_id()?;
         let obj_ref_name = format!("{}.{}", obj_ref_id, ext);
         let obj_ref_url = format!("/oss/file/preview/{}", obj_ref_name);
         let oss_obj_ref_add_dto = OssObjRefAddDto {

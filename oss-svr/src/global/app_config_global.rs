@@ -1,4 +1,4 @@
-use crate::config::AppConfig;
+use crate::app::AppConfig;
 use std::sync::RwLock;
 
 static APP_CONFIG: RwLock<Option<AppConfig>> = RwLock::new(None);

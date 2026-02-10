@@ -1,4 +1,4 @@
-use crate::config::oss_config::OssConfig;
+use crate::app::oss_config::OssConfig;
 use idworker::IdWorkerConfig;
 use robotech::db::DbConfig;
 use robotech::web::WebServerConfig;

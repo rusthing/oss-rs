@@ -8,6 +8,7 @@ openssl = "0.10.75"
 
 anyhow = "1.0.101"
 log = "0.4.29"
+tracing = "0.1.44"
 clap = "4.5.57"
 chrono = "0.4.43"
 serde = "1.0.228"

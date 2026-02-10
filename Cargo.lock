@@ -2308,6 +2308,7 @@ dependencies = [
  "strum 0.27.2",
  "tempfile",
  "tokio",
+ "tracing",
  "utoipa",
  "utoipa-swagger-ui",
  "validator",
@@ -2898,6 +2899,7 @@ dependencies = [
  "anyhow",
  "chrono",
  "config",
+ "idworker",
  "libc",
  "log",
  "once_cell",
@@ -2910,6 +2912,7 @@ dependencies = [
  "socket2 0.6.2",
  "thiserror 2.0.18",
  "tokio",
+ "tracing",
  "tracing-appender",
  "tracing-core",
  "tracing-log",
@@ -4619,6 +4622,8 @@ dependencies = [
  "sha2",
  "thiserror 2.0.18",
  "tokio",
+ "tracing",
+ "tracing-appender",
 ]
 
 [[package]]

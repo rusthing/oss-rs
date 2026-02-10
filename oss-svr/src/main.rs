@@ -1,18 +1,19 @@
 use anyhow::anyhow;
 use clap::Parser;
 use idworker::init_id_worker;
-use log::info;
-use oss_svr::config::AppConfig;
+use log::debug;
+use oss_svr::app::AppConfig;
 use oss_svr::db::migrate;
 use oss_svr::global::set_app_config;
 use oss_svr::web_service_config::web_service_config;
-use robotech::config::build_app_config;
+use robotech::app::build_app_config;
 use robotech::db::init_db;
 use robotech::env::init_env;
 use robotech::log::init_log;
 use robotech::signal::SignalManager;
 use robotech::web::start_web_server;
 use tokio::sync::oneshot;
+use tracing::instrument;
 
 /// oss - 对象存储服务
 ///
@@ -62,18 +63,19 @@ struct Args {
 }
 
 #[tokio::main]
+#[instrument(level = "debug", err)]
 async fn main() -> anyhow::Result<()> {
-    // 初始化环境变量;
-    init_env()?;
-    // 初始化日志系统
-    init_log()?;
-
-    info!("解析命令行参数...");
+    // 解析命令行参数
     let Args {
         signal,
         config_file,
         port,
     } = Args::parse();
+
+    // 初始化环境变量;
+    init_env()?;
+    // 初始化日志系统
+    init_log(config_file.clone())?;
 
     // 初始化信号(_signal_manager变量将在程序优雅退出时释放，释放时删除pid文件)
     let (_signal_manager, old_pid, app_started_sender) = SignalManager::new(signal)?;
@@ -107,16 +109,17 @@ async fn main() -> anyhow::Result<()> {
 /// init_config(None, None, None).await;
 ///
 /// // 指定配置文件路径、自定义端口和旧进程ID来初始化配置
-/// init_config(Some(String::from("path/to/config.toml")), Some(8080), Some(1234)).await;
+/// init_config(Some(String::from("path/to/app.toml")), Some(8080), Some(1234)).await;
 /// ```
 ///
+#[instrument(level = "debug", err)]
 async fn apply_config(
     config_file: Option<String>,
     port: Option<u16>,
     old_pid: Option<i32>,
     app_started_sender: oneshot::Sender<()>,
 ) -> anyhow::Result<()> {
-    info!("初始化应用程序配置...");
+    debug!("初始化应用程序配置...");
     let app_config: AppConfig = build_app_config(config_file)?;
     set_app_config(app_config.clone());
 
