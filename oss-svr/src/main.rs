@@ -75,12 +75,12 @@ async fn main() -> anyhow::Result<()> {
     // 初始化环境变量;
     init_env()?;
     // 初始化日志系统
-    init_log(config_file.clone())?;
+    init_log()?;
 
     // 初始化信号(_signal_manager变量将在程序优雅退出时释放，释放时删除pid文件)
     let (_signal_manager, old_pid, app_started_sender) = SignalManager::new(signal)?;
 
-    apply_config(config_file, port, old_pid, app_started_sender).await?;
+    apply_app_config(config_file, port, old_pid, app_started_sender).await?;
     Ok(())
 }
 
@@ -113,13 +113,13 @@ async fn main() -> anyhow::Result<()> {
 /// ```
 ///
 #[instrument(level = "debug", err)]
-async fn apply_config(
+async fn apply_app_config(
     config_file: Option<String>,
     port: Option<u16>,
     old_pid: Option<i32>,
     app_started_sender: oneshot::Sender<()>,
 ) -> anyhow::Result<()> {
-    debug!("初始化应用程序配置...");
+    debug!("应用App配置...");
     let app_config: AppConfig = build_app_config(config_file)?;
     set_app_config(app_config.clone());
 
