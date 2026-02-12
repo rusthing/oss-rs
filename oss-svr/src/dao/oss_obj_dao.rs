@@ -1,6 +1,6 @@
 use crate::model::oss_obj::{ActiveModel, Column, Entity, Model};
 use crate::model::oss_obj_ref::{Column as OssObjRefColumn, Entity as OssObjRefEntity};
-use idworker::{IdWorkerError, ID_WORKER};
+use idworker::get_id_worker;
 use once_cell::sync::Lazy;
 use robotech::dao::DaoError;
 use sea_orm::{
@@ -43,12 +43,7 @@ impl OssObjDao {
     {
         // 当id为默认值(0)时生成ID
         if active_model.id == ActiveValue::NotSet {
-            active_model.id = ActiveValue::set(
-                ID_WORKER
-                    .get()
-                    .ok_or(IdWorkerError::SetIdWorker())?
-                    .next_id()? as i64,
-            );
+            active_model.id = ActiveValue::set(get_id_worker()?.next_id()? as i64);
         }
         // 当创建时间未设置时，设置创建时间和修改时间
         if active_model.create_timestamp == ActiveValue::NotSet {

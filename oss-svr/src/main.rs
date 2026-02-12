@@ -2,9 +2,8 @@ use anyhow::anyhow;
 use clap::Parser;
 use idworker::init_id_worker;
 use log::debug;
-use oss_svr::app::AppConfig;
+use oss_svr::app::{set_app_config, AppConfig};
 use oss_svr::db::migrate;
-use oss_svr::global::set_app_config;
 use oss_svr::web_service_config::web_service_config;
 use robotech::app::build_app_config;
 use robotech::db::init_db;
@@ -121,7 +120,7 @@ async fn apply_app_config(
 ) -> anyhow::Result<()> {
     debug!("应用App配置...");
     let (app_config, _) = build_app_config::<AppConfig>(config_file)?;
-    set_app_config(app_config.clone());
+    set_app_config(app_config.clone())?;
 
     // 升级数据库版本...
     migrate(app_config.db.clone())

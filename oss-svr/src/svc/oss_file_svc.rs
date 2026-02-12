@@ -1,14 +1,14 @@
+use crate::app::get_app_config;
 use crate::dao::oss_obj_ref_dao::OssObjRefDao;
 use crate::dto::oss_obj_dto::OssObjAddDto;
 use crate::dto::oss_obj_ref_dto::OssObjRefAddDto;
-use crate::global::get_app_config;
 use crate::svc::oss_bucket_svc::OssBucketSvc;
 use crate::svc::oss_obj_ref_svc::OssObjRefSvc;
 use crate::svc::oss_obj_svc::OssObjSvc;
 use crate::vo::oss_obj_ref_vo::OssObjRefVo;
 use anyhow::anyhow;
 use chrono::{Local, TimeZone};
-use idworker::{IdWorkerError, ID_WORKER};
+use idworker::get_id_worker;
 use log::{debug, error, warn};
 use robotech::dao::{begin_transaction, commit_transaction, unwrap_db};
 use robotech::env::{EnvError, APP_ENV};
@@ -79,14 +79,11 @@ impl OssFileSvc {
             (obj_vo.id, obj_vo.path)
         } else {
             // 如果未上传过该文件，则新增对象，并返回新对象ID和新文件的存放路径
-            let obj_id = ID_WORKER
-                .get()
-                .ok_or(IdWorkerError::SetIdWorker())?
-                .next_id()?;
+            let obj_id = get_id_worker()?.next_id()?;
             let is_completed = true;
             // 根据当前时间，创建yyyy/MM/dd/HH的目录，并将文件存入此目录中
             let datetime = Local.timestamp_opt((now / 1000) as i64, 0).unwrap();
-            let oss_config = get_app_config().oss;
+            let oss_config = get_app_config()?.oss;
 
             let date_path = datetime.format(&oss_config.file_dir_format).to_string();
 
@@ -124,10 +121,7 @@ impl OssFileSvc {
         };
 
         // 新增对象引用
-        let obj_ref_id = ID_WORKER
-            .get()
-            .ok_or(IdWorkerError::SetIdWorker())?
-            .next_id()?;
+        let obj_ref_id = get_id_worker()?.next_id()?;
         let obj_ref_name = format!("{}.{}", obj_ref_id, ext);
         let obj_ref_url = format!("/oss/file/preview/{}", obj_ref_name);
         let oss_obj_ref_add_dto = OssObjRefAddDto {
@@ -226,7 +220,7 @@ impl OssFileSvc {
         if let (Some(start_pos), Some(end_pos)) = (start, end) {
             file.seek(SeekFrom::Start(start_pos))?;
             length = end_pos - start_pos + 1;
-            let size = get_app_config().oss.download_buffer_size.as_u64();
+            let size = get_app_config()?.oss.download_buffer_size.as_u64();
             if length > size {
                 length = size;
                 end = Some(start_pos + length - 1);
