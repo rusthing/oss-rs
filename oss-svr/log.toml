@@ -1,3 +1,4 @@
 level = "debug"
 rotation = "minutely"
 show-spans = false
+console-time-format = "%H:%M:%S%.3f"

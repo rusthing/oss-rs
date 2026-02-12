@@ -120,7 +120,7 @@ async fn apply_app_config(
     app_started_sender: oneshot::Sender<()>,
 ) -> anyhow::Result<()> {
     debug!("应用App配置...");
-    let app_config: AppConfig = build_app_config(config_file)?;
+    let (app_config, _) = build_app_config::<AppConfig>(config_file)?;
     set_app_config(app_config.clone());
 
     // 升级数据库版本...
