@@ -8,6 +8,7 @@ use robotech::dao::unwrap_db;
 use robotech::ro::Ro;
 use robotech::svc::SvcError;
 use sea_orm::DatabaseConnection;
+use std::sync::Arc;
 
 pub struct OssObjRefSvc;
 impl OssObjRefSvc {
@@ -24,12 +25,12 @@ impl OssObjRefSvc {
     /// * `Err(SvcError)` - 添加失败，可能是因为违反唯一约束或其他数据库错误
     pub async fn add(
         add_dto: OssObjRefAddDto,
-        db: Option<&DatabaseConnection>,
+        db: Option<Arc<DatabaseConnection>>,
     ) -> Result<Ro<OssObjRefVo>, SvcError> {
         let db = unwrap_db(db)?;
 
         let active_model: ActiveModel = add_dto.into();
-        let one = OssObjRefDao::insert(active_model, db).await?;
+        let one = OssObjRefDao::insert(active_model, db.as_ref()).await?;
         Ok(Self::get_by_id(one.id as u64, Some(db))
             .await?
             .msg("添加成功".to_string()))
@@ -48,13 +49,13 @@ impl OssObjRefSvc {
     /// * `Err(SvcError)` - 修改失败，可能因为记录不存在、违反唯一约束或其他数据库错误
     pub async fn modify(
         modify_dto: OssObjRefModifyDto,
-        db: Option<&DatabaseConnection>,
+        db: Option<Arc<DatabaseConnection>>,
     ) -> Result<Ro<OssObjRefVo>, SvcError> {
         let db = unwrap_db(db)?;
 
         let id = modify_dto.id.unwrap();
         let active_model: ActiveModel = modify_dto.into();
-        OssObjRefDao::update(active_model, db).await?;
+        OssObjRefDao::update(active_model, db.as_ref()).await?;
         Ok(Self::get_by_id(id, Some(db))
             .await?
             .msg("修改成功".to_string()))
@@ -73,10 +74,10 @@ impl OssObjRefSvc {
     /// * `Err(SvcError)` - 保存失败，可能因为违反唯一约束、记录不存在或其他数据库错误
     pub async fn save(
         save_dto: OssObjRefSaveDto,
-        db: Option<&DatabaseConnection>,
+        db: Option<Arc<DatabaseConnection>>,
     ) -> Result<Ro<OssObjRefVo>, SvcError> {
         if save_dto.id.clone().is_some() {
-            Self::modify(save_dto.into(), db).await
+            Self::modify(save_dto.into(), db.clone()).await
         } else {
             Self::add(save_dto.into(), db).await
         }
@@ -96,7 +97,7 @@ impl OssObjRefSvc {
     pub async fn del(
         id: u64,
         current_user_id: u64,
-        db: Option<&DatabaseConnection>,
+        db: Option<Arc<DatabaseConnection>>,
     ) -> Result<Ro<OssObjRefVo>, SvcError> {
         let db = unwrap_db(db)?;
 
@@ -114,7 +115,7 @@ impl OssObjRefSvc {
                 id: sea_orm::ActiveValue::Set(id as i64),
                 ..Default::default()
             },
-            db,
+            db.as_ref(),
         )
         .await?;
         Ok(Ro::success("删除成功".to_string()).extra(Some(del_model)))
@@ -134,7 +135,7 @@ impl OssObjRefSvc {
     pub async fn del_with_obj(
         id: u64,
         current_user_id: u64,
-        db: Option<&DatabaseConnection>,
+        db: Option<Arc<DatabaseConnection>>,
     ) -> Result<Ro<OssObjRefVo>, SvcError> {
         let db = unwrap_db(db)?;
 
@@ -161,7 +162,7 @@ impl OssObjRefSvc {
     pub async fn del_by_bucket_id(
         bucket_id: u64,
         current_user_id: u64,
-        db: Option<&DatabaseConnection>,
+        db: Option<Arc<DatabaseConnection>>,
     ) -> Result<Ro<()>, SvcError> {
         let db = unwrap_db(db)?;
 
@@ -169,7 +170,7 @@ impl OssObjRefSvc {
             "ID为<{}>的用户将删除oss_obj_ref中bucket_id={}的记录",
             current_user_id, bucket_id
         );
-        OssObjRefDao::delete_by_bucket_id(bucket_id as i64, db).await?;
+        OssObjRefDao::delete_by_bucket_id(bucket_id as i64, db.as_ref()).await?;
         Ok(Ro::success("删除成功".to_string()))
     }
 
@@ -186,11 +187,11 @@ impl OssObjRefSvc {
     /// * `Err(SvcError)` - 查询失败，可能是数据库错误
     pub async fn get_by_id(
         id: u64,
-        db: Option<&DatabaseConnection>,
+        db: Option<Arc<DatabaseConnection>>,
     ) -> Result<Ro<OssObjRefVo>, SvcError> {
         let db = unwrap_db(db)?;
 
-        let one = OssObjRefDao::get_by_id(id as i64, db).await?;
+        let one = OssObjRefDao::get_by_id(id as i64, db.as_ref()).await?;
         Ok(Ro::success("查询成功".to_string()).extra(one.map(|value| OssObjRefVo::from(value))))
     }
 }

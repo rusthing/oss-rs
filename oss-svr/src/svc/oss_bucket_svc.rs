@@ -6,9 +6,12 @@ use crate::svc::oss_obj_svc::OssObjSvc;
 use crate::vo::oss_bucket_vo::OssBucketVo;
 use log::warn;
 use robotech::dao::unwrap_db;
+use robotech::db::get_db_conn;
+use robotech::db_conn::get_db_conn;
 use robotech::ro::Ro;
 use robotech::svc::SvcError;
-use sea_orm::DatabaseConnection;
+use sea_orm::{ConnectionTrait, DatabaseConnection, DatabaseTransaction, TransactionTrait};
+use std::sync::Arc;
 
 pub struct OssBucketSvc;
 
@@ -26,12 +29,12 @@ impl OssBucketSvc {
     /// * `Err(SvcError)` - 添加失败，可能是因为违反唯一约束或其他数据库错误
     pub async fn add(
         add_dto: OssBucketAddDto,
-        db: Option<&DatabaseConnection>,
+        db: Option<Arc<DatabaseConnection>>,
     ) -> Result<Ro<OssBucketVo>, SvcError> {
         let db = unwrap_db(db)?;
 
         let active_model: ActiveModel = add_dto.into();
-        let one = OssBucketDao::insert(active_model, db).await?;
+        let one = OssBucketDao::insert(active_model, db.as_ref()).await?;
         Ok(Self::get_by_id(one.id as u64, Some(db))
             .await?
             .msg("添加成功".to_string()))
@@ -50,13 +53,13 @@ impl OssBucketSvc {
     /// * `Err(SvcError)` - 修改失败，可能因为记录不存在、违反唯一约束或其他数据库错误
     pub async fn modify(
         modify_dto: OssBucketModifyDto,
-        db: Option<&DatabaseConnection>,
+        db: Option<Arc<DatabaseConnection>>,
     ) -> Result<Ro<OssBucketVo>, SvcError> {
         let db = unwrap_db(db)?;
 
         let id = modify_dto.id.unwrap();
         let active_model: ActiveModel = modify_dto.into();
-        OssBucketDao::update(active_model, db).await?;
+        OssBucketDao::update(active_model, db.as_ref()).await?;
         Ok(Self::get_by_id(id, Some(db))
             .await?
             .msg("修改成功".to_string()))
@@ -75,7 +78,7 @@ impl OssBucketSvc {
     /// * `Err(SvcError)` - 保存失败，可能因为违反唯一约束、记录不存在或其他数据库错误
     pub async fn save(
         save_dto: OssBucketSaveDto,
-        db: Option<&DatabaseConnection>,
+        db: Option<Arc<DatabaseConnection>>,
     ) -> Result<Ro<OssBucketVo>, SvcError> {
         if save_dto.id.clone().is_some() {
             Self::modify(save_dto.into(), db).await
@@ -98,7 +101,7 @@ impl OssBucketSvc {
     pub async fn del(
         id: u64,
         current_user_id: u64,
-        db: Option<&DatabaseConnection>,
+        db: Option<Arc<DatabaseConnection>>,
     ) -> Result<Ro<OssBucketVo>, SvcError> {
         let db = unwrap_db(db)?;
 
@@ -116,7 +119,7 @@ impl OssBucketSvc {
                 id: sea_orm::ActiveValue::Set(id as i64),
                 ..Default::default()
             },
-            db,
+            db.as_ref(),
         )
         .await?;
         Ok(Ro::success("删除成功".to_string()).extra(Some(del_model)))
@@ -137,7 +140,7 @@ impl OssBucketSvc {
     pub async fn del_cascade(
         id: u64,
         current_user_id: u64,
-        db: Option<&DatabaseConnection>,
+        db: Option<Arc<DatabaseConnection>>,
     ) -> Result<Ro<OssBucketVo>, SvcError> {
         let db = unwrap_db(db)?;
 
@@ -160,11 +163,11 @@ impl OssBucketSvc {
     /// * `Err(SvcError)` - 查询失败，可能是数据库错误
     pub async fn get_by_id(
         id: u64,
-        db: Option<&DatabaseConnection>,
+        db: Option<Arc<DatabaseConnection>>,
     ) -> Result<Ro<OssBucketVo>, SvcError> {
         let db = unwrap_db(db)?;
 
-        let one = OssBucketDao::get_by_id(id as i64, db).await?;
+        let one = OssBucketDao::get_by_id(id as i64, db.as_ref()).await?;
         Ok(Ro::success("查询成功".to_string()).extra(one.map(|value| OssBucketVo::from(value))))
     }
 
@@ -179,13 +182,37 @@ impl OssBucketSvc {
     /// ## 返回值
     /// * `Ok(Ro<Vo>)` - 查询成功，如果记录存在，返回封装了Vo的Ro对象，如果不存在则返回对象的extra为None
     /// * `Err(SvcError)` - 查询失败，可能是数据库错误
-    pub async fn get_by_name(
+    pub async fn get_by_name<C>(
         name: &str,
-        db: Option<&DatabaseConnection>,
-    ) -> Result<Ro<OssBucketVo>, SvcError> {
-        let db = unwrap_db(db)?;
+        transaction: Option<&DatabaseTransaction>,
+        db: Option<&C>,
+    ) -> Result<Ro<OssBucketVo>, SvcError>
+    where
+        C: ConnectionTrait,
+    {
+        // let db = unwrap_db(db)?;
+        // let db: Box<&dyn ConnectionTrait> = if let Some(transaction) = transaction {
+        //     Box::new(transaction)
+        // } else {
+        //     if let Some(db) = db {
+        //         Box::new(db)
+        //     } else {
+        //         let db_conn = get_db_conn()?;
+        //         let db_trait: &dyn ConnectionTrait = db_conn.as_ref();
+        //         Box::new(db_trait)
+        //     }
+        // };
 
-        let one = OssBucketDao::get_by_name(name, db).await?;
+        let one = if let Some(transaction) = transaction {
+            OssBucketDao::get_by_name(name, transaction).await?
+        } else {
+            if let Some(db) = db {
+                OssBucketDao::get_by_name(name, db).await?
+            } else {
+                let db_conn = get_db_conn()?;
+                OssBucketDao::get_by_name(name, db_conn.as_ref()).await?
+            }
+        };
         Ok(Ro::success("查询成功".to_string()).extra(one.map(|value| OssBucketVo::from(value))))
     }
 }

@@ -6,8 +6,9 @@ use log::warn;
 use robotech::dao::{begin_transaction, commit_transaction, unwrap_db};
 use robotech::ro::Ro;
 use robotech::svc::SvcError;
-use sea_orm::DatabaseConnection;
+use sea_orm::{ConnectionTrait, DatabaseConnection, TransactionTrait};
 use std::fs;
+use std::sync::Arc;
 
 pub struct OssObjSvc;
 
@@ -95,11 +96,14 @@ impl OssObjSvc {
     /// ## 返回值
     /// * `Ok(Ro<Vo>)` - 删除成功，返回封装了Vo的Ro对象
     /// * `Err(SvcError)` - 删除失败，可能因为记录不存在或其他数据库错误
-    pub async fn del(
+    pub async fn del<C>(
         id: u64,
         current_user_id: u64,
-        db: Option<&DatabaseConnection>,
-    ) -> Result<Ro<OssObjVo>, SvcError> {
+        db: Option<Arc<C>>,
+    ) -> Result<Ro<OssObjVo>, SvcError>
+    where
+        C: ConnectionTrait,
+    {
         let db = unwrap_db(db)?;
 
         let del_model = Self::get_by_id(id, Some(db))
@@ -139,13 +143,13 @@ impl OssObjSvc {
     pub async fn del_with_file(
         id: u64,
         current_user_id: u64,
-        db: Option<&DatabaseConnection>,
+        db: Option<Arc<impl TransactionTrait + ConnectionTrait>>,
     ) -> Result<Ro<OssObjVo>, SvcError> {
         let db = unwrap_db(db)?;
 
         // 开启事务
-        let tx = begin_transaction(db).await?;
-        let ro = Self::del(id, current_user_id, Some(db)).await?;
+        let tx = begin_transaction(db.as_ref()).await?;
+        let ro = Self::del(id, current_user_id, Some(tx)).await?;
         let path = ro.extra.clone().unwrap().path.clone();
         // 删除文件
         fs::remove_file(path)?;
@@ -196,10 +200,10 @@ impl OssObjSvc {
     /// ## 返回值
     /// * `Ok(Ro<Vo>)` - 查询成功，如果记录存在，返回封装了Vo的Ro对象，如果不存在则返回对象的extra为None
     /// * `Err(SvcError)` - 查询失败，可能是数据库错误
-    pub async fn get_by_id(
-        id: u64,
-        db: Option<&DatabaseConnection>,
-    ) -> Result<Ro<OssObjVo>, SvcError> {
+    pub async fn get_by_id<C>(id: u64, db: Option<Arc<C>>) -> Result<Ro<OssObjVo>, SvcError>
+    where
+        C: ConnectionTrait,
+    {
         let db = unwrap_db(db)?;
 
         let one = OssObjDao::get_by_id(id as i64, db).await?;
