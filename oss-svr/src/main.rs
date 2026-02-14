@@ -62,7 +62,7 @@ struct Args {
 }
 
 #[tokio::main]
-#[instrument(level = "debug", err)]
+// #[instrument(level = "debug", err)]
 // #[log_call]
 async fn main() -> anyhow::Result<()> {
     // 解析命令行参数
@@ -76,6 +76,7 @@ async fn main() -> anyhow::Result<()> {
     init_env()?;
     // 初始化日志系统
     init_log()?;
+
 
     // 初始化信号(_signal_manager变量将在程序优雅退出时释放，释放时删除pid文件)
     let (_signal_manager, old_pid, app_started_sender) = SignalManager::new(signal)?;
