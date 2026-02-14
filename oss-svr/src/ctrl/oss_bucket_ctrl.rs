@@ -6,6 +6,7 @@ use actix_web::{HttpRequest, HttpResponse, Result, delete, get, post, put, web};
 use robotech::ro::Ro;
 use robotech::web::CtrlError;
 use robotech::web::ctrl_utils::{get_current_user_id, get_id_from_query_params};
+use sea_orm::{DatabaseConnection, DatabaseTransaction};
 use std::collections::HashMap;
 use validator::Validate;
 
@@ -43,7 +44,7 @@ pub async fn add(
     // 从header中解析当前用户ID，如果没有或解析失败则抛出ApiError
     dto.current_user_id = get_current_user_id(req)?;
 
-    let result = OssBucketSvc::add(dto, None).await?;
+    let result = OssBucketSvc::add::<DatabaseTransaction>(dto, None).await?;
     Ok(HttpResponse::Ok().json(result))
 }
 
@@ -81,7 +82,7 @@ pub async fn modify(
     // 从header中解析当前用户ID，如果没有或解析失败则抛出ApiError
     dto.current_user_id = get_current_user_id(req)?;
 
-    let result = OssBucketSvc::modify(dto, None).await?;
+    let result = OssBucketSvc::modify::<DatabaseTransaction>(dto, None).await?;
     Ok(HttpResponse::Ok().json(result))
 }
 
@@ -117,7 +118,7 @@ pub async fn save(
     // 从header中解析当前用户ID，如果没有或解析失败则抛出ApiError
     dto.current_user_id = get_current_user_id(req)?;
 
-    let result = OssBucketSvc::save(dto, None).await?;
+    let result = OssBucketSvc::save::<DatabaseTransaction>(dto, None).await?;
     Ok(HttpResponse::Ok().json(result))
 }
 
@@ -148,7 +149,8 @@ pub async fn del(
 
     // 从header中解析当前用户ID，如果没有或解析失败则抛出ApiError
     let current_user_id = get_current_user_id(req)?;
-    Ok(HttpResponse::Ok().json(OssBucketSvc::del(id, current_user_id, None).await?))
+    Ok(HttpResponse::Ok()
+        .json(OssBucketSvc::del::<DatabaseTransaction>(id, current_user_id, None).await?))
 }
 
 /// # 级联删除记录
@@ -178,7 +180,8 @@ pub async fn del_cascade(
 
     // 从header中解析当前用户ID，如果没有或解析失败则抛出ApiError
     let current_user_id = get_current_user_id(req)?;
-    Ok(HttpResponse::Ok().json(OssBucketSvc::del_cascade(id, current_user_id, None).await?))
+    Ok(HttpResponse::Ok()
+        .json(OssBucketSvc::del_cascade::<DatabaseTransaction>(id, current_user_id, None).await?))
 }
 
 /// # 根据ID获取记录的信息
@@ -209,6 +212,6 @@ pub async fn del_cascade(
 pub async fn get_by_id(query: Query<HashMap<String, String>>) -> Result<HttpResponse, CtrlError> {
     let id = get_id_from_query_params(query)?;
 
-    let ro = OssBucketSvc::get_by_id(id, None).await?;
+    let ro = OssBucketSvc::get_by_id::<DatabaseConnection>(id, None).await?;
     Ok(HttpResponse::Ok().json(ro))
 }

@@ -5,6 +5,7 @@ use actix_web::{HttpRequest, HttpResponse, Result, delete, get, post, put, web};
 use robotech::ro::Ro;
 use robotech::web::CtrlError;
 use robotech::web::ctrl_utils::{get_current_user_id, get_id_from_query_params};
+use sea_orm::{DatabaseConnection, DatabaseTransaction};
 use std::collections::HashMap;
 use validator::Validate;
 
@@ -42,7 +43,7 @@ pub async fn add(
     // 从header中解析当前用户ID，如果没有或解析失败则抛出ApiError
     dto.current_user_id = get_current_user_id(req)?;
 
-    let result = OssObjRefSvc::add(dto, None).await?;
+    let result = OssObjRefSvc::add::<DatabaseTransaction>(dto, None).await?;
     Ok(HttpResponse::Ok().json(result))
 }
 
@@ -80,7 +81,7 @@ pub async fn modify(
     // 从header中解析当前用户ID，如果没有或解析失败则抛出ApiError
     dto.current_user_id = get_current_user_id(req)?;
 
-    let result = OssObjRefSvc::modify(dto, None).await?;
+    let result = OssObjRefSvc::modify::<DatabaseTransaction>(dto, None).await?;
     Ok(HttpResponse::Ok().json(result))
 }
 
@@ -116,7 +117,7 @@ pub async fn save(
     // 从header中解析当前用户ID，如果没有或解析失败则抛出ApiError
     dto.current_user_id = get_current_user_id(req)?;
 
-    let result = OssObjRefSvc::save(dto, None).await?;
+    let result = OssObjRefSvc::save::<DatabaseTransaction>(dto, None).await?;
     Ok(HttpResponse::Ok().json(result))
 }
 
@@ -147,7 +148,8 @@ pub async fn del(
 
     // 从header中解析当前用户ID，如果没有或解析失败则抛出ApiError
     let current_user_id = get_current_user_id(req)?;
-    Ok(HttpResponse::Ok().json(OssObjRefSvc::del_with_obj(id, current_user_id, None).await?))
+    Ok(HttpResponse::Ok()
+        .json(OssObjRefSvc::del_with_obj::<DatabaseTransaction>(id, current_user_id, None).await?))
 }
 
 /// # 根据ID获取记录的信息
@@ -180,6 +182,6 @@ pub async fn get_by_id(
 ) -> Result<HttpResponse, CtrlError> {
     let id = get_id_from_query_params(query)?;
 
-    let ro = OssObjRefSvc::get_by_id(id, None).await?;
+    let ro = OssObjRefSvc::get_by_id::<DatabaseConnection>(id, None).await?;
     Ok(HttpResponse::Ok().json(ro))
 }

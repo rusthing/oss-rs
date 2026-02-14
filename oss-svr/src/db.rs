@@ -1,7 +1,7 @@
 use log::debug;
-use robotech::db::DbConfig;
-use sqlx::any::install_default_drivers;
+use robotech::db_conn::DbConfig;
 use sqlx::AnyPool;
+use sqlx::any::install_default_drivers;
 use tracing::instrument;
 
 #[instrument(level = "debug", err)]

@@ -3,12 +3,12 @@ use crate::dto::oss_obj_dto::{OssObjAddDto, OssObjModifyDto, OssObjSaveDto};
 use crate::model::oss_obj::ActiveModel;
 use crate::vo::oss_obj_vo::OssObjVo;
 use log::warn;
-use robotech::dao::{begin_transaction, commit_transaction, unwrap_db};
+use robotech::dao::{begin_transaction, commit_transaction};
+use robotech::db_conn::get_db_conn;
 use robotech::ro::Ro;
 use robotech::svc::SvcError;
-use sea_orm::{ConnectionTrait, DatabaseConnection, TransactionTrait};
+use sea_orm::ConnectionTrait;
 use std::fs;
-use std::sync::Arc;
 
 pub struct OssObjSvc;
 
@@ -24,17 +24,25 @@ impl OssObjSvc {
     /// ## 返回值
     /// * `Ok(Ro<Vo>)` - 添加成功，返回封装了新增Vo的Ro对象
     /// * `Err(SvcError)` - 添加失败，可能是因为违反唯一约束或其他数据库错误
-    pub async fn add(
-        add_dto: OssObjAddDto,
-        db: Option<&DatabaseConnection>,
-    ) -> Result<Ro<OssObjVo>, SvcError> {
-        let db = unwrap_db(db)?;
-
-        let active_model: ActiveModel = add_dto.into();
-        let one = OssObjDao::insert(active_model, db).await?;
-        Ok(Self::get_by_id(one.id as u64, Some(db))
-            .await?
-            .msg("添加成功".to_string()))
+    pub async fn add<C>(add_dto: OssObjAddDto, db: Option<&C>) -> Result<Ro<OssObjVo>, SvcError>
+    where
+        C: ConnectionTrait,
+    {
+        if let Some(db) = db {
+            let active_model: ActiveModel = add_dto.into();
+            let one = OssObjDao::insert(active_model, db).await?;
+            Ok(Self::get_by_id(one.id as u64, Some(db))
+                .await?
+                .msg("添加成功".to_string()))
+        } else {
+            let db_conn = get_db_conn()?;
+            let db = db_conn.as_ref();
+            let active_model: ActiveModel = add_dto.into();
+            let one = OssObjDao::insert(active_model, db).await?;
+            Ok(Self::get_by_id(one.id as u64, Some(db))
+                .await?
+                .msg("添加成功".to_string()))
+        }
     }
 
     /// # 修改记录
@@ -48,18 +56,31 @@ impl OssObjSvc {
     /// ## 返回值
     /// * `Ok(Ro<Vo>)` - 修改成功，返回封装了更新后Vo的Ro对象
     /// * `Err(SvcError)` - 修改失败，可能因为记录不存在、违反唯一约束或其他数据库错误
-    pub async fn modify(
+    pub async fn modify<C>(
         modify_dto: OssObjModifyDto,
-        db: Option<&DatabaseConnection>,
-    ) -> Result<Ro<OssObjVo>, SvcError> {
-        let db = unwrap_db(db)?;
+        db: Option<&C>,
+    ) -> Result<Ro<OssObjVo>, SvcError>
+    where
+        C: ConnectionTrait,
+    {
+        if let Some(db) = db {
+            let id = modify_dto.id.unwrap();
+            let active_model: ActiveModel = modify_dto.into();
+            OssObjDao::update(active_model, db).await?;
+            Ok(Self::get_by_id(id, Some(db))
+                .await?
+                .msg("修改成功".to_string()))
+        } else {
+            let db_conn = get_db_conn()?;
+            let db = db_conn.as_ref();
 
-        let id = modify_dto.id.unwrap();
-        let active_model: ActiveModel = modify_dto.into();
-        OssObjDao::update(active_model, db).await?;
-        Ok(Self::get_by_id(id, Some(db))
-            .await?
-            .msg("修改成功".to_string()))
+            let id = modify_dto.id.unwrap();
+            let active_model: ActiveModel = modify_dto.into();
+            OssObjDao::update(active_model, db).await?;
+            Ok(Self::get_by_id(id, Some(db))
+                .await?
+                .msg("修改成功".to_string()))
+        }
     }
 
     /// # 保存记录
@@ -73,10 +94,10 @@ impl OssObjSvc {
     /// ## 返回值
     /// * `Ok(Ro<Vo>)` - 保存成功，返回封装了Vo的Ro对象
     /// * `Err(SvcError)` - 保存失败，可能因为违反唯一约束、记录不存在或其他数据库错误
-    pub async fn save(
-        save_dto: OssObjSaveDto,
-        db: Option<&DatabaseConnection>,
-    ) -> Result<Ro<OssObjVo>, SvcError> {
+    pub async fn save<C>(save_dto: OssObjSaveDto, db: Option<&C>) -> Result<Ro<OssObjVo>, SvcError>
+    where
+        C: ConnectionTrait,
+    {
         if save_dto.id.clone().is_some() {
             Self::modify(save_dto.into(), db).await
         } else {
@@ -99,33 +120,57 @@ impl OssObjSvc {
     pub async fn del<C>(
         id: u64,
         current_user_id: u64,
-        db: Option<Arc<C>>,
+        db: Option<&C>,
     ) -> Result<Ro<OssObjVo>, SvcError>
     where
         C: ConnectionTrait,
     {
-        let db = unwrap_db(db)?;
+        if let Some(db) = db {
+            let del_model = Self::get_by_id(id, Some(db))
+                .await?
+                .get_extra()
+                .ok_or(SvcError::NotFound(id.to_string()))?;
 
-        let del_model = Self::get_by_id(id, Some(db))
-            .await?
-            .get_extra()
-            .ok_or(SvcError::NotFound(id.to_string()))?;
+            warn!(
+                "ID为<{}>的用户将删除oss_obj中的记录: {:?}",
+                current_user_id,
+                del_model.clone()
+            );
+            OssObjDao::delete(
+                ActiveModel {
+                    id: sea_orm::ActiveValue::Set(id as i64),
+                    ..Default::default()
+                },
+                db,
+            )
+            .await?;
 
-        warn!(
-            "ID为<{}>的用户将删除oss_obj中的记录: {:?}",
-            current_user_id,
-            del_model.clone()
-        );
-        OssObjDao::delete(
-            ActiveModel {
-                id: sea_orm::ActiveValue::Set(id as i64),
-                ..Default::default()
-            },
-            db,
-        )
-        .await?;
+            Ok(Ro::success("删除成功".to_string()).extra(Some(del_model)))
+        } else {
+            let db_conn = get_db_conn()?;
+            let db = db_conn.as_ref();
 
-        Ok(Ro::success("删除成功".to_string()).extra(Some(del_model)))
+            let del_model = Self::get_by_id(id, Some(db))
+                .await?
+                .get_extra()
+                .ok_or(SvcError::NotFound(id.to_string()))?;
+
+            warn!(
+                "ID为<{}>的用户将删除oss_obj中的记录: {:?}",
+                current_user_id,
+                del_model.clone()
+            );
+            OssObjDao::delete(
+                ActiveModel {
+                    id: sea_orm::ActiveValue::Set(id as i64),
+                    ..Default::default()
+                },
+                db,
+            )
+            .await?;
+
+            Ok(Ro::success("删除成功".to_string()).extra(Some(del_model)))
+        }
     }
 
     /// # 删除记录及文件
@@ -140,22 +185,34 @@ impl OssObjSvc {
     /// ## 返回值
     /// * `Ok(Ro<Vo>)` - 删除成功，返回封装了Vo的Ro对象
     /// * `Err(SvcError)` - 删除失败，可能因为记录不存在或其他数据库错误
-    pub async fn del_with_file(
+    pub async fn del_with_file<C>(
         id: u64,
         current_user_id: u64,
-        db: Option<Arc<impl TransactionTrait + ConnectionTrait>>,
-    ) -> Result<Ro<OssObjVo>, SvcError> {
-        let db = unwrap_db(db)?;
-
-        // 开启事务
-        let tx = begin_transaction(db.as_ref()).await?;
-        let ro = Self::del(id, current_user_id, Some(tx)).await?;
-        let path = ro.extra.clone().unwrap().path.clone();
-        // 删除文件
-        fs::remove_file(path)?;
-        // 提交事务
-        commit_transaction(tx).await?;
-        Ok(ro)
+        db: Option<&C>,
+    ) -> Result<Ro<OssObjVo>, SvcError>
+    where
+        C: ConnectionTrait,
+    {
+        if let Some(db) = db {
+            let ro = Self::del(id, current_user_id, Some(db)).await?;
+            let path = ro.extra.clone().unwrap().path.clone();
+            // 删除文件
+            fs::remove_file(path)?;
+            Ok(ro)
+        } else {
+            let db_conn = get_db_conn()?;
+            let db = db_conn.as_ref();
+            // 开启事务
+            let tx = begin_transaction(db).await?;
+            let db = &tx;
+            let ro = Self::del(id, current_user_id, Some(db)).await?;
+            let path = ro.extra.clone().unwrap().path.clone();
+            // 删除文件
+            fs::remove_file(path)?;
+            // 提交事务
+            commit_transaction(tx).await?;
+            Ok(ro)
+        }
     }
 
     /// # 删除孤立数据
@@ -170,23 +227,40 @@ impl OssObjSvc {
     /// ## 返回值
     /// * `Ok(Ro<String>)` - 删除成功，返回删除记录数
     /// * `Err(SvcError)` - 删除失败，可能因为数据库错误
-    pub async fn delete_orphaned(
+    pub async fn delete_orphaned<C>(
         current_user_id: u64,
-        db: Option<&DatabaseConnection>,
-    ) -> Result<Ro<String>, SvcError> {
-        let db = unwrap_db(db)?;
+        db: Option<&C>,
+    ) -> Result<Ro<String>, SvcError>
+    where
+        C: ConnectionTrait,
+    {
+        if let Some(db) = db {
+            warn!(
+                "ID为<{}>的用户将删除oss_obj中孤立无对象引用的记录",
+                current_user_id
+            );
 
-        warn!(
-            "ID为<{}>的用户将删除oss_obj中孤立无对象引用的记录",
-            current_user_id
-        );
+            let result = OssObjDao::find_orphaned(db).await?;
+            for item in result.into_iter() {
+                Self::del_with_file(item.id as u64, current_user_id, Some(db)).await?;
+            }
 
-        let result = OssObjDao::find_orphaned(db).await?;
-        for item in result.into_iter() {
-            Self::del_with_file(item.id as u64, current_user_id, Some(db)).await?;
+            Ok(Ro::success("删除孤立数据成功".to_string()))
+        } else {
+            let db_conn = get_db_conn()?;
+            let db = db_conn.as_ref();
+            warn!(
+                "ID为<{}>的用户将删除oss_obj中孤立无对象引用的记录",
+                current_user_id
+            );
+
+            let result = OssObjDao::find_orphaned(db).await?;
+            for item in result.into_iter() {
+                Self::del_with_file(item.id as u64, current_user_id, Some(db)).await?;
+            }
+
+            Ok(Ro::success("删除孤立数据成功".to_string()))
         }
-
-        Ok(Ro::success("删除孤立数据成功".to_string()))
     }
 
     /// # 根据id获取记录信息
@@ -200,14 +274,19 @@ impl OssObjSvc {
     /// ## 返回值
     /// * `Ok(Ro<Vo>)` - 查询成功，如果记录存在，返回封装了Vo的Ro对象，如果不存在则返回对象的extra为None
     /// * `Err(SvcError)` - 查询失败，可能是数据库错误
-    pub async fn get_by_id<C>(id: u64, db: Option<Arc<C>>) -> Result<Ro<OssObjVo>, SvcError>
+    pub async fn get_by_id<C>(id: u64, db: Option<&C>) -> Result<Ro<OssObjVo>, SvcError>
     where
         C: ConnectionTrait,
     {
-        let db = unwrap_db(db)?;
-
-        let one = OssObjDao::get_by_id(id as i64, db).await?;
-        Ok(Ro::success("查询成功".to_string()).extra(one.map(|value| OssObjVo::from(value))))
+        if let Some(db) = db {
+            let one = OssObjDao::get_by_id(id as i64, db).await?;
+            Ok(Ro::success("查询成功".to_string()).extra(one.map(|value| OssObjVo::from(value))))
+        } else {
+            let db_conn = get_db_conn()?;
+            let db = db_conn.as_ref();
+            let one = OssObjDao::get_by_id(id as i64, db).await?;
+            Ok(Ro::success("查询成功".to_string()).extra(one.map(|value| OssObjVo::from(value))))
+        }
     }
 
     /// # 根据哈希值和大小获取记录信息
@@ -222,14 +301,22 @@ impl OssObjSvc {
     /// ## 返回值
     /// * `Ok(Ro<Vo>)` - 查询成功，如果记录存在，返回封装了Vo的Ro对象，如果不存在则返回对象的extra为None
     /// * `Err(SvcError)` - 查询失败，可能是数据库错误
-    pub async fn get_by_hash_and_size(
+    pub async fn get_by_hash_and_size<C>(
         hash: &str,
         size: i64,
-        db: Option<&DatabaseConnection>,
-    ) -> Result<Ro<OssObjVo>, SvcError> {
-        let db = unwrap_db(db)?;
-
-        let one = OssObjDao::get_by_hash_and_size(hash, size, db).await?;
-        Ok(Ro::success("查询成功".to_string()).extra(one.map(|value| OssObjVo::from(value))))
+        db: Option<&C>,
+    ) -> Result<Ro<OssObjVo>, SvcError>
+    where
+        C: ConnectionTrait,
+    {
+        if let Some(db) = db {
+            let one = OssObjDao::get_by_hash_and_size(hash, size, db).await?;
+            Ok(Ro::success("查询成功".to_string()).extra(one.map(|value| OssObjVo::from(value))))
+        } else {
+            let db_conn = get_db_conn()?;
+            let db = db_conn.as_ref();
+            let one = OssObjDao::get_by_hash_and_size(hash, size, db).await?;
+            Ok(Ro::success("查询成功".to_string()).extra(one.map(|value| OssObjVo::from(value))))
+        }
     }
 }

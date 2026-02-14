@@ -2,11 +2,11 @@ use anyhow::anyhow;
 use clap::Parser;
 use idworker::init_id_worker;
 use log::debug;
-use oss_svr::app::{set_app_config, AppConfig};
+use oss_svr::app::{AppConfig, set_app_config};
 use oss_svr::db::migrate;
 use oss_svr::web_service_config::web_service_config;
 use robotech::app::build_app_config;
-use robotech::db::init_db;
+use robotech::db_conn::init_db;
 use robotech::env::init_env;
 use robotech::log::init_log;
 use robotech::signal::SignalManager;
@@ -63,6 +63,7 @@ struct Args {
 
 #[tokio::main]
 #[instrument(level = "debug", err)]
+// #[log_call]
 async fn main() -> anyhow::Result<()> {
     // 解析命令行参数
     let Args {
