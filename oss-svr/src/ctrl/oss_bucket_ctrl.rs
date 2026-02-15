@@ -9,6 +9,7 @@ use robotech::web::ctrl_utils::{get_current_user_id, get_id_from_query_params};
 use sea_orm::{DatabaseConnection, DatabaseTransaction};
 use std::collections::HashMap;
 use validator::Validate;
+use robotech::macros::log_call;
 
 /// # 添加新的记录
 ///
@@ -33,6 +34,7 @@ use validator::Validate;
     responses((status = OK, body = Ro<OssBucketVo>))
 )]
 #[post("")]
+#[log_call]
 pub async fn add(
     json_body: web::Json<OssBucketAddDto>,
     req: HttpRequest,
@@ -71,6 +73,7 @@ pub async fn add(
     responses((status = OK, body = Ro<OssBucketVo>))
 )]
 #[put("")]
+#[log_call]
 pub async fn modify(
     json_body: web::Json<OssBucketModifyDto>,
     req: HttpRequest,
@@ -109,6 +112,7 @@ pub async fn modify(
     responses((status = OK, body = Ro<OssBucketVo>))
 )]
 #[post("/save")]
+#[log_call]
 pub async fn save(
     json_body: web::Json<OssBucketSaveDto>,
     req: HttpRequest,
@@ -141,6 +145,7 @@ pub async fn save(
     responses((status = OK, body = Ro<String>))
 )]
 #[delete("")]
+#[log_call]
 pub async fn del(
     query: Query<HashMap<String, String>>,
     req: HttpRequest,
@@ -172,6 +177,7 @@ pub async fn del(
     responses((status = OK, body = Ro<String>))
 )]
 #[delete("/cascade")]
+#[log_call]
 pub async fn del_cascade(
     query: Query<HashMap<String, String>>,
     req: HttpRequest,
@@ -209,6 +215,7 @@ pub async fn del_cascade(
     )
 )]
 #[get("/get-by-id")]
+#[log_call]
 pub async fn get_by_id(query: Query<HashMap<String, String>>) -> Result<HttpResponse, CtrlError> {
     let id = get_id_from_query_params(query)?;
 

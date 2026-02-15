@@ -9,6 +9,7 @@ use robotech::app::build_app_config;
 use robotech::db_conn::init_db;
 use robotech::env::init_env;
 use robotech::log::init_log;
+use robotech::macros::log_call;
 use robotech::signal::SignalManager;
 use robotech::web::start_web_server;
 use tokio::sync::oneshot;
@@ -62,8 +63,7 @@ struct Args {
 }
 
 #[tokio::main]
-// #[instrument(level = "debug", err)]
-// #[log_call]
+#[instrument(level = "debug", err)]
 async fn main() -> anyhow::Result<()> {
     // 解析命令行参数
     let Args {
@@ -113,6 +113,7 @@ async fn main() -> anyhow::Result<()> {
 /// ```
 ///
 #[instrument(level = "debug", err)]
+#[log_call]
 async fn apply_app_config(
     config_file: Option<String>,
     port: Option<u16>,

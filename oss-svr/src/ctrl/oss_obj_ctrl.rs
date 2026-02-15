@@ -8,6 +8,7 @@ use robotech::web::ctrl_utils::{get_current_user_id, get_id_from_query_params};
 use sea_orm::{DatabaseConnection, DatabaseTransaction};
 use std::collections::HashMap;
 use validator::Validate;
+use robotech::macros::log_call;
 
 /// # 添加新的记录
 ///
@@ -32,6 +33,7 @@ use validator::Validate;
     responses((status = OK, body = Ro<OssObjVo>))
 )]
 #[post("")]
+#[log_call]
 pub async fn add(
     json_body: web::Json<OssObjAddDto>,
     req: HttpRequest,
@@ -70,6 +72,7 @@ pub async fn add(
     responses((status = OK, body = Ro<OssObjVo>))
 )]
 #[put("")]
+#[log_call]
 pub async fn modify(
     json_body: web::Json<OssObjModifyDto>,
     req: HttpRequest,
@@ -108,6 +111,7 @@ pub async fn modify(
     responses((status = OK, body = Ro<OssObjVo>))
 )]
 #[post("/save")]
+#[log_call]
 pub async fn save(
     json_body: web::Json<OssObjSaveDto>,
     req: HttpRequest,
@@ -140,6 +144,7 @@ pub async fn save(
     responses((status = OK, body = Ro<String>))
 )]
 #[delete("")]
+#[log_call]
 pub async fn del(
     query: web::Query<HashMap<String, String>>,
     req: HttpRequest,
@@ -177,6 +182,7 @@ pub async fn del(
     )
 )]
 #[get("/get-by-id")]
+#[log_call]
 pub async fn get_by_id(
     query: web::Query<HashMap<String, String>>,
 ) -> Result<HttpResponse, CtrlError> {

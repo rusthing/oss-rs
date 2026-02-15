@@ -36,8 +36,7 @@ utoipa-swagger-ui = { workspace = true, features = ["actix-web"] }
 
 idworker = { workspace = true, features = ["config"] }
 wheel-rs = { workspace = true }
-robotech = { workspace = true, features = ["web", "db"] }
-robotech-macros = { workspace = true }
+robotech = { workspace = true, features = ["web", "db", "macros"] }
 
 [build-dependencies]
 # cross打包时用，需要开启vendored feature
