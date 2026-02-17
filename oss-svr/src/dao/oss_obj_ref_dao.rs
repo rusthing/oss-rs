@@ -13,7 +13,7 @@ use std::collections::HashMap;
 /// 在捕获到数据库重复键异常时，提取字段名称时可据此获取到字段的中文意义，方便提示给用户
 pub static UNIQUE_FIELDS: Lazy<HashMap<&'static str, &'static str>> = Lazy::new(|| HashMap::new());
 
-#[dao(insert, update, delete)]
+#[dao(exclude: get_by_id)]
 pub struct OssObjRefDao;
 
 impl OssObjRefDao {
