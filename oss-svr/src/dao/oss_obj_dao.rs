@@ -20,7 +20,7 @@ pub static UNIQUE_FIELDS: Lazy<HashMap<&'static str, &'static str>> = Lazy::new(
     ])
 });
 
-#[dao(all)]
+#[dao]
 pub struct OssObjDao;
 
 impl OssObjDao {

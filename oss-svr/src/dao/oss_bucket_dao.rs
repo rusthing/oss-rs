@@ -13,7 +13,7 @@ use std::collections::HashMap;
 pub static UNIQUE_FIELDS: Lazy<HashMap<&'static str, &'static str>> =
     Lazy::new(|| HashMap::from([("name", "桶名称")]));
 
-#[dao(all)]
+#[dao]
 pub struct OssBucketDao;
 
 impl OssBucketDao {
