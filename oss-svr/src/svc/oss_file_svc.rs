@@ -10,11 +10,11 @@ use anyhow::anyhow;
 use chrono::{Local, TimeZone};
 use idworker::get_id_worker;
 use log::{debug, error, warn};
-use robotech::dao::{begin_transaction, commit_transaction};
-use robotech::db_conn::get_db_conn;
+use robotech::dao::begin_transaction;
 use robotech::env::{APP_ENV, EnvError};
 use robotech::ro::Ro;
 use robotech::svc::SvcError;
+use robotech_macros::db_unwrap;
 use sea_orm::DatabaseConnection;
 use std::fs;
 use std::fs::File;
@@ -45,6 +45,7 @@ impl OssFileSvc {
     /// ## 错误处理
     /// * 如果存储桶不存在，返回警告信息
     /// * 如果文件操作或数据库操作失败，返回相应错误
+    #[db_unwrap(transaction_required)]
     pub async fn upload(
         bucket: &str,
         file_name: &str,
@@ -54,228 +55,111 @@ impl OssFileSvc {
         current_user_id: u64,
         db: Option<&DatabaseConnection>,
     ) -> Result<Ro<OssObjRefVo>, SvcError> {
-        if let Some(db) = db {
-            // 获取存储桶
-            let one_bucket = OssBucketSvc::get_by_name(bucket, Some(db)).await?;
-            let one_bucket = match one_bucket.get_extra() {
-                Some(bucket) => bucket,
-                None => return Ok(Ro::warn(format!("未找到存储桶<{}>", bucket))),
-            };
+        // 获取存储桶
+        let one_bucket = OssBucketSvc::get_by_name(bucket, Some(db)).await?;
+        let one_bucket = match one_bucket.get_extra() {
+            Some(bucket) => bucket,
+            None => return Ok(Ro::warn(format!("未找到存储桶<{}>", bucket))),
+        };
 
-            let now = get_current_timestamp()?;
-            let obj_vo = OssObjSvc::get_by_hash_and_size(hash, file_size as i64, Some(db))
-                .await?
-                .get_extra();
-            let ext = get_file_ext(file_name);
+        let now = get_current_timestamp()?;
+        let obj_vo = OssObjSvc::get_by_hash_and_size(hash, file_size as i64, Some(db))
+            .await?
+            .get_extra();
+        let ext = get_file_ext(file_name);
 
-            // 判断对象是否存在
-            let obj_existed = obj_vo.is_some();
-            let (obj_id, new_file_path) = if obj_existed {
-                // 如果已经上传过该文件，则直接返回之前的对象ID和存放路径
-                let obj_vo = obj_vo.unwrap();
-                (obj_vo.id, obj_vo.path)
-            } else {
-                // 如果未上传过该文件，则新增对象，并返回新对象ID和新文件的存放路径
-                let obj_id = get_id_worker()?.next_id()?;
-                let is_completed = true;
-                // 根据当前时间，创建yyyy/MM/dd/HH的目录，并将文件存入此目录中
-                let datetime = Local.timestamp_opt((now / 1000) as i64, 0).unwrap();
-                let oss_config = get_app_config()?.oss;
-
-                let date_path = datetime.format(&oss_config.file_dir_format).to_string();
-
-                let storage_dir = APP_ENV
-                    .get()
-                    .ok_or(EnvError::GetAppEnv())?
-                    .app_dir
-                    .join(&oss_config.file_root_dir)
-                    .join(bucket.to_string())
-                    .join(&date_path);
-                fs::create_dir_all(&storage_dir)?;
-                let new_file_path = storage_dir
-                    .join(obj_id.to_string())
-                    .as_path()
-                    .to_str()
-                    .unwrap()
-                    .to_string();
-
-                // 新增对象
-                let oss_obj_add_dto = OssObjAddDto {
-                    id: Some(obj_id),
-                    hash: Some(hash.to_string()),
-                    size: Some(file_size.to_string()),
-                    path: Some(new_file_path.to_string()),
-                    is_completed: Some(is_completed),
-                    current_user_id,
-                };
-                debug!("新增对象: {:?}", oss_obj_add_dto);
-                let add_ro = OssObjSvc::add(oss_obj_add_dto, Some(db)).await?;
-                if let Some(obj_vo) = add_ro.extra {
-                    (obj_vo.id, new_file_path)
-                } else {
-                    return Err(SvcError::Runtime(anyhow!("新增对象失败".to_string())));
-                }
-            };
-
-            // 新增对象引用
-            let obj_ref_id = get_id_worker()?.next_id()?;
-            let obj_ref_name = format!("{}.{}", obj_ref_id, ext);
-            let obj_ref_url = format!("/oss/file/preview/{}", obj_ref_name);
-            let oss_obj_ref_add_dto = OssObjRefAddDto {
-                id: Some(obj_ref_id),
-                name: Some(file_name.to_string()),
-                bucket_id: Some(one_bucket.id),
-                obj_id: Some(obj_id),
-                ext: Some(ext.to_string()),
-                url: Some(obj_ref_url),
-                current_user_id,
-            };
-            debug!("新增对象引用: {:?}", oss_obj_ref_add_dto);
-            let obj_ref_ro = OssObjRefSvc::add(oss_obj_ref_add_dto, Some(db)).await?;
-
-            if obj_existed {
-                // 如果对象已经存在，则直接关闭并删除临时文件
-                temp_file.close()?;
-            } else {
-                // 如果对象不存在，则移动临时文件到目标目录中
-                let (source, destination) = (temp_file.path(), &new_file_path);
-                debug!(
-                    "移动临时文件到目标目录中: {:?} -> {:?}",
-                    source, destination
-                );
-                match fs::rename(source, destination) {
-                    Ok(_) => {}
-                    Err(e) if is_cross_device_error(&e) => {
-                        warn!("跨设备错误，使用 copy + close 替代: {:?}", e);
-                        fs::copy(source, destination)?;
-                        temp_file.close()?;
-                    }
-                    Err(e) => {
-                        return {
-                            error!("无法移动临时文件: {:?}", e);
-                            Err(e.into())
-                        };
-                    }
-                }
-            }
-
-            Ok(obj_ref_ro.msg("上传成功".to_string()))
+        // 判断对象是否存在
+        let obj_existed = obj_vo.is_some();
+        let (obj_id, new_file_path) = if obj_existed {
+            // 如果已经上传过该文件，则直接返回之前的对象ID和存放路径
+            let obj_vo = obj_vo.unwrap();
+            (obj_vo.id, obj_vo.path)
         } else {
-            let db_conn = get_db_conn()?;
-            let db = db_conn.as_ref();
-            // 开启事务
-            let tx = begin_transaction(db).await?;
-            let db = &tx;
+            // 如果未上传过该文件，则新增对象，并返回新对象ID和新文件的存放路径
+            let obj_id = get_id_worker()?.next_id()?;
+            let is_completed = true;
+            // 根据当前时间，创建yyyy/MM/dd/HH的目录，并将文件存入此目录中
+            let datetime = Local.timestamp_opt((now / 1000) as i64, 0).unwrap();
+            let oss_config = get_app_config()?.oss;
 
-            // 获取存储桶
-            let one_bucket = OssBucketSvc::get_by_name(bucket, Some(db)).await?;
-            let one_bucket = match one_bucket.get_extra() {
-                Some(bucket) => bucket,
-                None => return Ok(Ro::warn(format!("未找到存储桶<{}>", bucket))),
-            };
+            let date_path = datetime.format(&oss_config.file_dir_format).to_string();
 
-            let now = get_current_timestamp()?;
-            let obj_vo = OssObjSvc::get_by_hash_and_size(hash, file_size as i64, Some(db))
-                .await?
-                .get_extra();
-            let ext = get_file_ext(file_name);
+            let storage_dir = APP_ENV
+                .get()
+                .ok_or(EnvError::GetAppEnv())?
+                .app_dir
+                .join(&oss_config.file_root_dir)
+                .join(bucket.to_string())
+                .join(&date_path);
+            fs::create_dir_all(&storage_dir)?;
+            let new_file_path = storage_dir
+                .join(obj_id.to_string())
+                .as_path()
+                .to_str()
+                .unwrap()
+                .to_string();
 
-            // 判断对象是否存在
-            let obj_existed = obj_vo.is_some();
-            let (obj_id, new_file_path) = if obj_existed {
-                // 如果已经上传过该文件，则直接返回之前的对象ID和存放路径
-                let obj_vo = obj_vo.unwrap();
-                (obj_vo.id, obj_vo.path)
-            } else {
-                // 如果未上传过该文件，则新增对象，并返回新对象ID和新文件的存放路径
-                let obj_id = get_id_worker()?.next_id()?;
-                let is_completed = true;
-                // 根据当前时间，创建yyyy/MM/dd/HH的目录，并将文件存入此目录中
-                let datetime = Local.timestamp_opt((now / 1000) as i64, 0).unwrap();
-                let oss_config = get_app_config()?.oss;
-
-                let date_path = datetime.format(&oss_config.file_dir_format).to_string();
-
-                let storage_dir = APP_ENV
-                    .get()
-                    .ok_or(EnvError::GetAppEnv())?
-                    .app_dir
-                    .join(&oss_config.file_root_dir)
-                    .join(bucket.to_string())
-                    .join(&date_path);
-                fs::create_dir_all(&storage_dir)?;
-                let new_file_path = storage_dir
-                    .join(obj_id.to_string())
-                    .as_path()
-                    .to_str()
-                    .unwrap()
-                    .to_string();
-
-                // 新增对象
-                let oss_obj_add_dto = OssObjAddDto {
-                    id: Some(obj_id),
-                    hash: Some(hash.to_string()),
-                    size: Some(file_size.to_string()),
-                    path: Some(new_file_path.to_string()),
-                    is_completed: Some(is_completed),
-                    current_user_id,
-                };
-                debug!("新增对象: {:?}", oss_obj_add_dto);
-                let add_ro = OssObjSvc::add(oss_obj_add_dto, Some(db)).await?;
-                if let Some(obj_vo) = add_ro.extra {
-                    (obj_vo.id, new_file_path)
-                } else {
-                    return Err(SvcError::Runtime(anyhow!("新增对象失败".to_string())));
-                }
-            };
-
-            // 新增对象引用
-            let obj_ref_id = get_id_worker()?.next_id()?;
-            let obj_ref_name = format!("{}.{}", obj_ref_id, ext);
-            let obj_ref_url = format!("/oss/file/preview/{}", obj_ref_name);
-            let oss_obj_ref_add_dto = OssObjRefAddDto {
-                id: Some(obj_ref_id),
-                name: Some(file_name.to_string()),
-                bucket_id: Some(one_bucket.id),
-                obj_id: Some(obj_id),
-                ext: Some(ext.to_string()),
-                url: Some(obj_ref_url),
+            // 新增对象
+            let oss_obj_add_dto = OssObjAddDto {
+                id: Some(obj_id),
+                hash: Some(hash.to_string()),
+                size: Some(file_size.to_string()),
+                path: Some(new_file_path.to_string()),
+                is_completed: Some(is_completed),
                 current_user_id,
             };
-            debug!("新增对象引用: {:?}", oss_obj_ref_add_dto);
-            let obj_ref_ro = OssObjRefSvc::add(oss_obj_ref_add_dto, Some(db)).await?;
-
-            if obj_existed {
-                // 如果对象已经存在，则直接关闭并删除临时文件
-                temp_file.close()?;
+            debug!("新增对象: {:?}", oss_obj_add_dto);
+            let add_ro = OssObjSvc::add(oss_obj_add_dto, Some(db)).await?;
+            if let Some(obj_vo) = add_ro.extra {
+                (obj_vo.id, new_file_path)
             } else {
-                // 如果对象不存在，则移动临时文件到目标目录中
-                let (source, destination) = (temp_file.path(), &new_file_path);
-                debug!(
-                    "移动临时文件到目标目录中: {:?} -> {:?}",
-                    source, destination
-                );
-                match fs::rename(source, destination) {
-                    Ok(_) => {}
-                    Err(e) if is_cross_device_error(&e) => {
-                        warn!("跨设备错误，使用 copy + close 替代: {:?}", e);
-                        fs::copy(source, destination)?;
-                        temp_file.close()?;
-                    }
-                    Err(e) => {
-                        return {
-                            error!("无法移动临时文件: {:?}", e);
-                            Err(e.into())
-                        };
-                    }
+                return Err(SvcError::Runtime(anyhow!("新增对象失败".to_string())));
+            }
+        };
+
+        // 新增对象引用
+        let obj_ref_id = get_id_worker()?.next_id()?;
+        let obj_ref_name = format!("{}.{}", obj_ref_id, ext);
+        let obj_ref_url = format!("/oss/file/preview/{}", obj_ref_name);
+        let oss_obj_ref_add_dto = OssObjRefAddDto {
+            id: Some(obj_ref_id),
+            name: Some(file_name.to_string()),
+            bucket_id: Some(one_bucket.id),
+            obj_id: Some(obj_id),
+            ext: Some(ext.to_string()),
+            url: Some(obj_ref_url),
+            current_user_id,
+        };
+        debug!("新增对象引用: {:?}", oss_obj_ref_add_dto);
+        let obj_ref_ro = OssObjRefSvc::add(oss_obj_ref_add_dto, Some(db)).await?;
+
+        if obj_existed {
+            // 如果对象已经存在，则直接关闭并删除临时文件
+            temp_file.close()?;
+        } else {
+            // 如果对象不存在，则移动临时文件到目标目录中
+            let (source, destination) = (temp_file.path(), &new_file_path);
+            debug!(
+                "移动临时文件到目标目录中: {:?} -> {:?}",
+                source, destination
+            );
+            match fs::rename(source, destination) {
+                Ok(_) => {}
+                Err(e) if is_cross_device_error(&e) => {
+                    warn!("跨设备错误，使用 copy + close 替代: {:?}", e);
+                    fs::copy(source, destination)?;
+                    temp_file.close()?;
+                }
+                Err(e) => {
+                    return {
+                        error!("无法移动临时文件: {:?}", e);
+                        Err(e.into())
+                    };
                 }
             }
-
-            // 提交事务
-            commit_transaction(tx).await?;
-
-            Ok(obj_ref_ro.msg("上传成功".to_string()))
         }
+
+        Ok(obj_ref_ro.msg("上传成功".to_string()))
     }
 
     /// # 下载文件
@@ -301,6 +185,7 @@ impl OssFileSvc {
     /// ## 错误处理
     /// * 如果对象引用不存在或扩展名不匹配，返回 NotFound 错误
     /// * 如果文件读取过程中发生错误，返回相应错误
+    #[db_unwrap]
     pub async fn download(
         obj_ref_id: u64,
         ext: String,
@@ -308,74 +193,37 @@ impl OssFileSvc {
         mut end: Option<u64>,
         db: Option<&DatabaseConnection>,
     ) -> Result<(String, u64, u64, Vec<u8>, Option<u64>, Option<u64>), SvcError> {
-        if let Some(db) = db {
-            let one = OssObjRefDao::get_by_id(obj_ref_id as i64, db).await?;
-            let (obj_ref_model, _, obj_model) =
-                one.ok_or(SvcError::NotFound(format!("id: {}", obj_ref_id)))?;
-            // 扩展名不对也不行
-            if obj_ref_model.ext.as_str() != &ext {
-                return Err(SvcError::NotFound(format!("id: {}", obj_ref_id)));
-            }
-
-            // 读取文件指定范围内容
-            let mut file = File::open(&obj_model.path)?;
-            let mut content = Vec::new();
-
-            let file_size = file.metadata()?.len();
-            let mut length = file_size;
-            if start.is_some() && end.is_none() {
-                end = Some(length - 1);
-            }
-            if let (Some(start_pos), Some(end_pos)) = (start, end) {
-                file.seek(SeekFrom::Start(start_pos))?;
-                length = end_pos - start_pos + 1;
-                let size = get_app_config()?.oss.download_buffer_size.as_u64();
-                if length > size {
-                    length = size;
-                    end = Some(start_pos + length - 1);
-                }
-                content.resize(length as usize, 0);
-                file.read_exact(&mut content)?;
-            } else {
-                file.read_to_end(&mut content)?;
-            }
-
-            Ok((obj_ref_model.name, file_size, length, content, start, end))
-        } else {
-            let db_conn = get_db_conn()?;
-            let db = db_conn.as_ref();
-            let one = OssObjRefDao::get_by_id(obj_ref_id as i64, db).await?;
-            let (obj_ref_model, _, obj_model) =
-                one.ok_or(SvcError::NotFound(format!("id: {}", obj_ref_id)))?;
-            // 扩展名不对也不行
-            if obj_ref_model.ext.as_str() != &ext {
-                return Err(SvcError::NotFound(format!("id: {}", obj_ref_id)));
-            }
-
-            // 读取文件指定范围内容
-            let mut file = File::open(&obj_model.path)?;
-            let mut content = Vec::new();
-
-            let file_size = file.metadata()?.len();
-            let mut length = file_size;
-            if start.is_some() && end.is_none() {
-                end = Some(length - 1);
-            }
-            if let (Some(start_pos), Some(end_pos)) = (start, end) {
-                file.seek(SeekFrom::Start(start_pos))?;
-                length = end_pos - start_pos + 1;
-                let size = get_app_config()?.oss.download_buffer_size.as_u64();
-                if length > size {
-                    length = size;
-                    end = Some(start_pos + length - 1);
-                }
-                content.resize(length as usize, 0);
-                file.read_exact(&mut content)?;
-            } else {
-                file.read_to_end(&mut content)?;
-            }
-
-            Ok((obj_ref_model.name, file_size, length, content, start, end))
+        let one = OssObjRefDao::get_by_id(obj_ref_id as i64, db).await?;
+        let (obj_ref_model, _, obj_model) =
+            one.ok_or(SvcError::NotFound(format!("id: {}", obj_ref_id)))?;
+        // 扩展名不对也不行
+        if obj_ref_model.ext.as_str() != &ext {
+            return Err(SvcError::NotFound(format!("id: {}", obj_ref_id)));
         }
+
+        // 读取文件指定范围内容
+        let mut file = File::open(&obj_model.path)?;
+        let mut content = Vec::new();
+
+        let file_size = file.metadata()?.len();
+        let mut length = file_size;
+        if start.is_some() && end.is_none() {
+            end = Some(length - 1);
+        }
+        if let (Some(start_pos), Some(end_pos)) = (start, end) {
+            file.seek(SeekFrom::Start(start_pos))?;
+            length = end_pos - start_pos + 1;
+            let size = get_app_config()?.oss.download_buffer_size.as_u64();
+            if length > size {
+                length = size;
+                end = Some(start_pos + length - 1);
+            }
+            content.resize(length as usize, 0);
+            file.read_exact(&mut content)?;
+        } else {
+            file.read_to_end(&mut content)?;
+        }
+
+        Ok((obj_ref_model.name, file_size, length, content, start, end))
     }
 }
