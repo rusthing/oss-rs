@@ -9,6 +9,7 @@ use robotech::macros::log_call;
 use robotech::ro::Ro;
 use robotech::web::CtrlError;
 use robotech::web::ctrl_utils::get_current_user_id;
+use sea_orm::DatabaseTransaction;
 use wheel_rs::file_utils::calc_hash;
 
 /// # 上传文件到指定的存储桶
@@ -64,7 +65,7 @@ pub async fn upload(
     }
     let hash = computed_hash;
 
-    let ro = OssFileSvc::upload(
+    let ro = OssFileSvc::upload::<DatabaseTransaction>(
         &bucket,
         &file_name,
         file_size,
@@ -103,7 +104,7 @@ pub async fn upload(
 pub async fn download(obj_id: web::Path<String>) -> Result<HttpResponse, CtrlError> {
     let (obj_id, ext) = parse_obj_id(&obj_id.into_inner())?;
 
-    let (file_name, _file_size, length, content, ..) = OssFileSvc::download(
+    let (file_name, _file_size, length, content, ..) = OssFileSvc::download::<DatabaseTransaction>(
         obj_id.parse::<u64>().unwrap(),
         ext.unwrap(),
         None,
@@ -171,14 +172,15 @@ pub async fn preview(
         .parse::<u64>()
         .map_err(|_| CtrlError::from(validator::ValidationError::new("无效的ID")))?;
 
-    let (file_name, file_size, length, content, start, end) = OssFileSvc::download(
-        obj_id_num,
-        ext.clone().unwrap_or_default(),
-        start,
-        end,
-        None,
-    )
-    .await?;
+    let (file_name, file_size, length, content, start, end) =
+        OssFileSvc::download::<DatabaseTransaction>(
+            obj_id_num,
+            ext.clone().unwrap_or_default(),
+            start,
+            end,
+            None,
+        )
+        .await?;
 
     match ext.as_deref() {
         Some(ext) => {

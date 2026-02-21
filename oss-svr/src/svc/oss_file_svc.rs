@@ -15,7 +15,7 @@ use robotech::env::{APP_ENV, EnvError};
 use robotech::ro::Ro;
 use robotech::svc::SvcError;
 use robotech_macros::db_unwrap;
-use sea_orm::DatabaseConnection;
+use sea_orm::{ConnectionTrait, };
 use std::fs;
 use std::fs::File;
 use std::io::{Read, Seek, SeekFrom};
@@ -46,15 +46,18 @@ impl OssFileSvc {
     /// * 如果存储桶不存在，返回警告信息
     /// * 如果文件操作或数据库操作失败，返回相应错误
     #[db_unwrap(transaction_required)]
-    pub async fn upload(
+    pub async fn upload<C>(
         bucket: &str,
         file_name: &str,
         file_size: usize,
         hash: &str,
         temp_file: NamedTempFile,
         current_user_id: u64,
-        db: Option<&DatabaseConnection>,
-    ) -> Result<Ro<OssObjRefVo>, SvcError> {
+        db: Option<&C>,
+    ) -> Result<Ro<OssObjRefVo>, SvcError>
+    where
+        C: ConnectionTrait,
+    {
         // 获取存储桶
         let one_bucket = OssBucketSvc::get_by_name(bucket, Some(db)).await?;
         let one_bucket = match one_bucket.get_extra() {
@@ -186,13 +189,16 @@ impl OssFileSvc {
     /// * 如果对象引用不存在或扩展名不匹配，返回 NotFound 错误
     /// * 如果文件读取过程中发生错误，返回相应错误
     #[db_unwrap]
-    pub async fn download(
+    pub async fn download<C>(
         obj_ref_id: u64,
         ext: String,
         start: Option<u64>,
         mut end: Option<u64>,
-        db: Option<&DatabaseConnection>,
-    ) -> Result<(String, u64, u64, Vec<u8>, Option<u64>, Option<u64>), SvcError> {
+        db: Option<&C>,
+    ) -> Result<(String, u64, u64, Vec<u8>, Option<u64>, Option<u64>), SvcError>
+    where
+        C: ConnectionTrait,
+    {
         let one = OssObjRefDao::get_by_id(obj_ref_id as i64, db).await?;
         let (obj_ref_model, _, obj_model) =
             one.ok_or(SvcError::NotFound(format!("id: {}", obj_ref_id)))?;
