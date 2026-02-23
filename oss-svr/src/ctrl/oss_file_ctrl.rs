@@ -10,6 +10,7 @@ use robotech::ro::Ro;
 use robotech::web::CtrlError;
 use robotech::web::ctrl_utils::get_current_user_id;
 use sea_orm::DatabaseTransaction;
+use tracing::instrument;
 use wheel_rs::file_utils::calc_hash;
 
 /// # 上传文件到指定的存储桶
@@ -35,6 +36,7 @@ use wheel_rs::file_utils::calc_hash;
     responses((status = OK, body = Ro<OssObjRefVo>))
 )]
 #[post("/upload/{bucket}")]
+#[instrument(level = "debug", err)]
 #[log_call]
 pub async fn upload(
     bucket: web::Path<String>,
@@ -100,6 +102,7 @@ pub async fn upload(
     responses((status = OK, body = Ro<OssObjRefVo>))
 )]
 #[get("/download/{obj_id}")]
+#[instrument(level = "debug", err)]
 #[log_call]
 pub async fn download(obj_id: web::Path<String>) -> Result<HttpResponse, CtrlError> {
     let (obj_id, ext) = parse_obj_id(&obj_id.into_inner())?;
@@ -143,6 +146,7 @@ pub async fn download(obj_id: web::Path<String>) -> Result<HttpResponse, CtrlErr
     responses((status = OK, body = Ro<OssObjRefVo>))
 )]
 #[get("/preview/{obj_id}")]
+#[instrument(level = "debug", err)]
 #[log_call]
 pub async fn preview(
     req: HttpRequest,

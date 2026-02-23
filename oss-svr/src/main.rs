@@ -1,18 +1,22 @@
 use anyhow::anyhow;
 use clap::Parser;
 use idworker::init_id_worker;
-use log::debug;
+use log::{debug, warn};
 use oss_svr::app::{AppConfig, set_app_config};
 use oss_svr::db::migrate;
 use oss_svr::web_service_config::web_service_config;
 use robotech::app::build_app_config;
+use robotech::cfg::{CfgError, build_config, watch_config_file};
 use robotech::db_conn::init_db;
 use robotech::env::init_env;
 use robotech::log::init_log;
 use robotech::macros::log_call;
 use robotech::signal::SignalManager;
 use robotech::web::start_web_server;
-use tokio::sync::oneshot;
+use robotech_macros::watch_config_file;
+use std::sync::{Arc, mpsc};
+use std::time::Duration;
+use tokio::time::interval;
 use tracing::instrument;
 
 /// oss - 对象存储服务
@@ -79,8 +83,36 @@ async fn main() -> anyhow::Result<()> {
 
     // 初始化信号(_signal_manager变量将在程序优雅退出时释放，释放时删除pid文件)
     let (_signal_manager, old_pid, app_started_sender) = SignalManager::new(signal)?;
+    let app_started_sender = Arc::new(app_started_sender);
+    let (app_config, files) = build_app_config::<AppConfig>(config_file)?;
+    let app_config = Arc::new(app_config);
+    let files = Arc::new(files);
 
-    apply_app_config(config_file, port, old_pid, app_started_sender).await?;
+    watch_config_file!(
+        "app",
+        {
+            let files = files.clone();
+            let app_config = app_config.clone();
+            let app_started_sender = app_started_sender.clone();
+            // let port = port.clone();
+            // let old_pid = old_pid.clone();
+        },
+        {
+            match apply_app_config(
+                app_config.clone(),
+                port,
+                old_pid,
+                app_started_sender.clone(),
+            )
+            .await
+            {
+                Ok(_) => debug!("配置重新加载成功"),
+                Err(e) => warn!("配置重新加载失败: {}", e),
+            }
+        }
+    );
+
+    apply_app_config(app_config, port, old_pid, app_started_sender).await?;
     Ok(())
 }
 
@@ -88,7 +120,6 @@ async fn main() -> anyhow::Result<()> {
 /// # 应用配置
 ///
 /// ## Arguments
-/// * `config_file` - 一个可选的字符串，表示配置文件的路径。如果未提供，则使用默认配置。
 /// * `port` - 一个可选的u16值，指定Web服务器监听的端口。如果未指定，则使用配置文件中的设置或默认值。
 /// * `old_pid` - 一个可选的i32值，代表旧进程ID，用于在重启时清理资源等操作。
 ///
@@ -115,34 +146,40 @@ async fn main() -> anyhow::Result<()> {
 #[instrument(level = "debug", err)]
 #[log_call]
 async fn apply_app_config(
-    config_file: Option<String>,
+    app_config: Arc<AppConfig>,
     port: Option<u16>,
     old_pid: Option<i32>,
-    app_started_sender: oneshot::Sender<()>,
+    app_started_sender: Arc<mpsc::Sender<()>>,
 ) -> anyhow::Result<()> {
     debug!("应用App配置...");
-    let (app_config, _) = build_app_config::<AppConfig>(config_file)?;
-    set_app_config(app_config.clone())?;
+    let AppConfig {
+        web_server,
+        db,
+        id_worker,
+        ..
+    } = &*app_config;
+    set_app_config((*app_config).clone())?;
 
     // 升级数据库版本...
-    migrate(app_config.db.clone())
+    migrate(db.clone())
         .await
         .map_err(|e| anyhow!(format!("升级数据库版本时出错: {e}")))?;
 
     // 初始化ID生成器...
-    init_id_worker(app_config.id_worker)?;
+    init_id_worker(id_worker.clone())?;
 
     // 初始化数据库连接
-    init_db(app_config.db).await?;
+    init_db(db.clone()).await?;
 
     // 启动Web服务器
     start_web_server(
-        app_config.web_server,
+        web_server.clone(),
         web_service_config,
         port,
         old_pid,
         app_started_sender,
     )
     .await?;
+
     Ok(())
 }
