@@ -47,19 +47,19 @@ pub fn web_service_config(cfg: &mut web::ServiceConfig) {
     );
     cfg.service(SwaggerUi::new("/swagger-ui/{_:.*}").urls(vec![
         (
-            Url::new("桶", "/ctrl-docs/bucket-openapi.json"),
+            Url::new("桶", "/web-docs/bucket-openapi.json"),
             OssBucketApiDoc::openapi(),
         ),
         (
-            Url::new("对象", "/ctrl-docs/obj-openapi.json"),
+            Url::new("对象", "/web-docs/obj-openapi.json"),
             OssObjApiDoc::openapi(),
         ),
         (
-            Url::new("对象引用", "/ctrl-docs/obj-ref-openapi.json"),
+            Url::new("对象引用", "/web-docs/obj-ref-openapi.json"),
             OssObjRefApiDoc::openapi(),
         ),
         (
-            Url::new("文件", "/ctrl-docs/file-openapi.json"),
+            Url::new("文件", "/web-docs/file-openapi.json"),
             OssFileApiDoc::openapi(),
         ),
     ]));

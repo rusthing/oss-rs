@@ -1,19 +1,23 @@
+use actix_web::App;
 use anyhow::anyhow;
 use clap::Parser;
 use idworker::init_id_worker;
+use log::error;
 use log::{debug, warn};
 use oss_svr::app::{AppConfig, set_app_config};
 use oss_svr::db::migrate;
 use oss_svr::web_service_config::web_service_config;
-use robotech::app::build_app_config;
-use robotech::cfg::{CfgError, build_config, watch_config_file};
+use robotech::app::build_app_cfg;
+use robotech::cfg::{CfgError, build_cfg, watch_cfg_file};
 use robotech::db_conn::init_db;
 use robotech::env::init_env;
 use robotech::log::init_log;
 use robotech::macros::log_call;
 use robotech::signal::SignalManager;
-use robotech::web::start_web_server;
-use robotech_macros::watch_config_file;
+use robotech::web::WebServerConfig;
+use robotech::web::build_cors;
+use robotech::web::health;
+use robotech_macros::{start_web_server, watch_cfg_file};
 use std::sync::{Arc, mpsc};
 use std::time::Duration;
 use tokio::time::interval;
@@ -84,11 +88,11 @@ async fn main() -> anyhow::Result<()> {
     // 初始化信号(_signal_manager变量将在程序优雅退出时释放，释放时删除pid文件)
     let (_signal_manager, old_pid, app_started_sender) = SignalManager::new(signal)?;
     let app_started_sender = Arc::new(app_started_sender);
-    let (app_config, files) = build_app_config::<AppConfig>(config_file)?;
+    let (app_config, files) = build_app_cfg::<AppConfig>(config_file)?;
     let app_config = Arc::new(app_config);
     let files = Arc::new(files);
 
-    watch_config_file!(
+    watch_cfg_file!(
         "app",
         {
             let files = files.clone();
@@ -172,14 +176,13 @@ async fn apply_app_config(
     init_db(db.clone()).await?;
 
     // 启动Web服务器
-    start_web_server(
-        web_server.clone(),
+    start_web_server!(
+        web_server,
         web_service_config,
         port,
         old_pid,
-        app_started_sender,
-    )
-    .await?;
+        app_started_sender
+    );
 
     Ok(())
 }
