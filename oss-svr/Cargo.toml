@@ -20,6 +20,7 @@ chrono = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_with = { workspace = true }
 tokio = { workspace = true, features = ["rt", "rt-multi-thread", "macros", "signal"] }
+axum = { workspace = true }
 actix-web = { workspace = true }
 actix-multipart = { workspace = true }
 sea-orm = { workspace = true, features = ["sqlx-postgres", "runtime-actix-rustls", "debug-print"] }

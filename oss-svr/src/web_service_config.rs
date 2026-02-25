@@ -1,9 +1,9 @@
-use crate::api_doc::oss_bucket_api_doc::OssBucketApiDoc;
-use crate::api_doc::oss_file_api_doc::OssFileApiDoc;
-use crate::api_doc::oss_obj_api_doc::OssObjApiDoc;
-use crate::api_doc::oss_obj_ref_api_doc::OssObjRefApiDoc;
+use crate::web::api_doc::oss_bucket_api_doc::OssBucketApiDoc;
+use crate::web::api_doc::oss_file_api_doc::OssFileApiDoc;
+use crate::web::api_doc::oss_obj_api_doc::OssObjApiDoc;
+use crate::web::api_doc::oss_obj_ref_api_doc::OssObjRefApiDoc;
 use crate::app::get_app_config;
-use crate::ctrl::{oss_bucket_ctrl, oss_file_ctrl, oss_obj_ctrl, oss_obj_ref_ctrl};
+use crate::web::ctrl::{oss_bucket_ctrl, oss_file_ctrl, oss_obj_ctrl, oss_obj_ref_ctrl};
 use actix_multipart::form::MultipartFormConfig;
 use actix_web::web;
 use utoipa::OpenApi;
