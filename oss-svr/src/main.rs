@@ -5,14 +5,14 @@ use log::{debug, warn};
 use oss_svr::app::{set_app_config, AppConfig};
 use oss_svr::db::migrate;
 use oss_svr::web;
-use robotech::app::build_app_cfg;
+use robotech::app::{build_app_cfg, wait_app_exit};
 use robotech::cfg::watch_cfg_file;
 use robotech::db_conn::init_db;
 use robotech::env::init_env;
 use robotech::log::init_log;
 use robotech::macros::log_call;
 use robotech::signal::SignalManager;
-use robotech::web::{start_web_server, terminate_old_web_server};
+use robotech::web::start_web_server;
 use robotech_macros::watch_cfg_file;
 use std::sync::{mpsc, Arc};
 use std::time::Duration;
@@ -80,8 +80,7 @@ async fn main() -> anyhow::Result<()> {
     init_log()?;
 
     // 初始化信号(_signal_manager变量将在程序优雅退出时释放，释放时删除pid文件)
-    let (_signal_manager, old_pid, app_started_sender) = SignalManager::new(signal)?;
-    let app_started_sender = Arc::new(app_started_sender);
+    let (mut signal_manager, old_pid) = SignalManager::new(signal)?;
     let (app_config, files) = build_app_cfg::<AppConfig>(config_file.clone())?;
     let files = Arc::new(files);
 
@@ -90,7 +89,7 @@ async fn main() -> anyhow::Result<()> {
         {
             let files = files.clone();
             // let app_config = app_config.clone();
-            let app_started_sender = app_started_sender.clone();
+            // let app_started_sender = app_started_sender.clone();
             // let port = port.clone();
             // let old_pid = old_pid.clone();
         },
@@ -98,15 +97,17 @@ async fn main() -> anyhow::Result<()> {
             let config_file = config_file.clone();
             let (app_config, _) =
                 build_app_cfg::<AppConfig>(config_file).expect("无法加载配置文件");
-            apply_app_config(app_config, port, old_pid, app_started_sender.clone())
+            apply_app_config(app_config, port, old_pid)
                 .await
                 .expect("配置无法应用");
             debug!("重新加载配置成功");
         }
     );
 
-    apply_app_config(app_config, port, old_pid, app_started_sender).await?;
-    Ok(())
+    apply_app_config(app_config, port, old_pid).await?;
+
+    let signal_receiver = signal_manager.watch_signal()?;
+    Ok(wait_app_exit(signal_receiver).await)
 }
 
 ///
@@ -141,7 +142,6 @@ async fn apply_app_config(
     app_config: AppConfig,
     port: Option<u16>,
     old_pid: Option<i32>,
-    app_started_sender: Arc<mpsc::Sender<()>>,
 ) -> anyhow::Result<()> {
     debug!("应用App配置...");
     let AppConfig {
@@ -164,14 +164,7 @@ async fn apply_app_config(
     init_db(db_config.clone()).await?;
 
     // 启动Web服务器
-    start_web_server(
-        web_server_config,
-        web::router::register(),
-        port,
-        old_pid,
-        app_started_sender,
-    )
-    .await?;
+    start_web_server(web_server_config, web::router::register(), port, old_pid).await?;
 
     Ok(())
 }
