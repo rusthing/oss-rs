@@ -21,12 +21,14 @@ serde = { workspace = true, features = ["derive"] }
 serde_with = { workspace = true }
 tokio = { workspace = true, features = ["rt", "rt-multi-thread", "macros", "signal"] }
 axum = { workspace = true }
+multer = "3.1.0"
+futures-util = "0.3.32"
+tempfile = { workspace = true }
 actix-web = { workspace = true }
 actix-multipart = { workspace = true }
 sea-orm = { workspace = true, features = ["sqlx-postgres", "runtime-actix-rustls", "debug-print"] }
 bytesize = { workspace = true, features = ["serde"] }
 regex = { workspace = true }
-tempfile = { workspace = true }
 once_cell = { workspace = true }
 o2o = { workspace = true }
 sqlx = { workspace = true, features = ["any", "postgres"] }

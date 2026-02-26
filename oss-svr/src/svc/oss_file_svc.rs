@@ -162,7 +162,7 @@ impl OssFileSvc {
             }
         }
 
-        Ok(obj_ref_ro.msg("上传成功".to_string()))
+        Ok(obj_ref_ro.message("上传成功".to_string()))
     }
 
     /// # 下载文件

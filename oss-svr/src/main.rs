@@ -4,7 +4,7 @@ use idworker::init_id_worker;
 use log::{debug, warn};
 use oss_svr::app::{set_app_config, AppConfig};
 use oss_svr::db::migrate;
-use oss_svr::web_service_config::web_service_config;
+use oss_svr::web;
 use robotech::app::build_app_cfg;
 use robotech::cfg::watch_cfg_file;
 use robotech::db_conn::init_db;
@@ -12,12 +12,11 @@ use robotech::env::init_env;
 use robotech::log::init_log;
 use robotech::macros::log_call;
 use robotech::signal::SignalManager;
-use robotech::web::terminate_old_web_server;
-use robotech_macros::{start_web_server, watch_cfg_file};
+use robotech::web::{start_web_server, terminate_old_web_server};
+use robotech_macros::watch_cfg_file;
 use std::sync::{mpsc, Arc};
 use std::time::Duration;
 use tokio::time::interval;
-use tracing::instrument;
 
 /// oss - 对象存储服务
 ///
@@ -67,7 +66,6 @@ struct Args {
 }
 
 #[tokio::main]
-#[instrument(level = "debug", err)]
 async fn main() -> anyhow::Result<()> {
     // 解析命令行参数
     let Args {
@@ -138,7 +136,6 @@ async fn main() -> anyhow::Result<()> {
 /// init_config(Some(String::from("path/to/app.toml")), Some(8080), Some(1234)).await;
 /// ```
 ///
-#[instrument(level = "debug", err)]
 #[log_call]
 async fn apply_app_config(
     app_config: AppConfig,
@@ -167,13 +164,14 @@ async fn apply_app_config(
     init_db(db_config.clone()).await?;
 
     // 启动Web服务器
-    // start_web_server!(
-    //     web_server_config,
-    //     web_service_config,
-    //     port,
-    //     old_pid,
-    //     app_started_sender
-    // );
+    start_web_server(
+        web_server_config,
+        web::router::register(),
+        port,
+        old_pid,
+        app_started_sender,
+    )
+    .await?;
 
     Ok(())
 }

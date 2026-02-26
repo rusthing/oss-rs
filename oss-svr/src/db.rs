@@ -1,10 +1,10 @@
 use log::debug;
 use robotech::db_conn::DbConfig;
-use sqlx::AnyPool;
+use robotech_macros::log_call;
 use sqlx::any::install_default_drivers;
-use tracing::instrument;
+use sqlx::AnyPool;
 
-#[instrument(level = "debug", err)]
+#[log_call]
 pub async fn migrate(db: DbConfig) -> Result<(), sqlx::Error> {
     debug!("migrating database...");
     install_default_drivers();
