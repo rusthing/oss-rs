@@ -14,6 +14,9 @@ port = 9840
 reuse-port = true
 cors.enabled = true
 
+[web-server.https]
+enabled = false
+
 [id-worker]
 epoch = 1758108749211
 machine-id = 1

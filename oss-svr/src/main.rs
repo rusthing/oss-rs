@@ -12,10 +12,11 @@ use robotech::env::init_env;
 use robotech::log::init_log;
 use robotech::macros::log_call;
 use robotech::signal::SignalManager;
-use robotech::web::start_web_server;
+use robotech::web::{start_web_server, take_web_server_handles};
 use robotech_macros::watch_cfg_file;
 use std::sync::{mpsc, Arc};
 use std::time::Duration;
+use tokio::sync::broadcast;
 use tokio::time::interval;
 
 /// oss - 对象存储服务
@@ -96,11 +97,19 @@ async fn main() -> anyhow::Result<()> {
     });
 
     // 应用配置
-    apply_app_config(app_config, port, old_pid).await?;
+    let web_server_stop_sender = apply_app_config(app_config, port, old_pid).await?;
 
     // 监听系统信号与等待退出
     let signal_receiver = signal_manager.watch_signal()?;
-    Ok(wait_app_exit(signal_receiver).await)
+    Ok(wait_app_exit(signal_receiver, || async {
+        web_server_stop_sender.send(()).expect("无法发送信号");
+        let web_server_handles = take_web_server_handles().expect("无法获取Web服务器句柄");
+        for web_server_handle in web_server_handles {
+            let _ = web_server_handle.await.expect("无法等待Web服务器退出");
+        }
+        Ok(())
+    })
+    .await?)
 }
 
 ///
@@ -135,7 +144,7 @@ async fn apply_app_config(
     app_config: AppConfig,
     port: Option<u16>,
     old_pid: Option<i32>,
-) -> anyhow::Result<()> {
+) -> anyhow::Result<broadcast::Sender<()>> {
     debug!("应用App配置...");
     let AppConfig {
         web_server: web_server_config,
@@ -157,7 +166,5 @@ async fn apply_app_config(
     init_db(db_config.clone()).await?;
 
     // 启动Web服务器
-    start_web_server(web_server_config, web::router::register(), port, old_pid).await?;
-
-    Ok(())
+    Ok(start_web_server(web_server_config, web::router::register(), port, old_pid).await?)
 }
