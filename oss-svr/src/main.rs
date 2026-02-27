@@ -84,28 +84,21 @@ async fn main() -> anyhow::Result<()> {
     let (app_config, files) = build_app_cfg::<AppConfig>(config_file.clone())?;
     let files = Arc::new(files);
 
-    watch_cfg_file!(
-        "app",
-        {
-            let files = files.clone();
-            // let app_config = app_config.clone();
-            // let app_started_sender = app_started_sender.clone();
-            // let port = port.clone();
-            // let old_pid = old_pid.clone();
-        },
-        {
-            let config_file = config_file.clone();
-            let (app_config, _) =
-                build_app_cfg::<AppConfig>(config_file).expect("无法加载配置文件");
-            apply_app_config(app_config, port, old_pid)
-                .await
-                .expect("配置无法应用");
-            debug!("重新加载配置成功");
-        }
-    );
+    // 监听配置文件变化
+    let files = files.clone();
+    watch_cfg_file!("app", {
+        let (app_config, _) =
+            build_app_cfg::<AppConfig>(config_file.clone()).expect("无法加载配置文件");
+        apply_app_config(app_config, port, None)
+            .await
+            .expect("配置无法应用");
+        debug!("重新加载配置成功");
+    });
 
+    // 应用配置
     apply_app_config(app_config, port, old_pid).await?;
 
+    // 监听系统信号与等待退出
     let signal_receiver = signal_manager.watch_signal()?;
     Ok(wait_app_exit(signal_receiver).await)
 }
