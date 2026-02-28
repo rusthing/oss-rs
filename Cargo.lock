@@ -3100,7 +3100,6 @@ dependencies = [
  "tokio-rustls",
  "tower",
  "tower-http",
- "tracing",
  "tracing-appender",
  "tracing-core",
  "tracing-log",

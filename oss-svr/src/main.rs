@@ -12,7 +12,7 @@ use robotech::env::init_env;
 use robotech::log::init_log;
 use robotech::macros::log_call;
 use robotech::signal::SignalManager;
-use robotech::web::{start_web_server, take_web_server_handles};
+use robotech::web::{start_web_server, stop_web_service};
 use robotech_macros::watch_cfg_file;
 use std::sync::{mpsc, Arc};
 use std::time::Duration;
@@ -80,34 +80,51 @@ async fn main() -> anyhow::Result<()> {
     // 初始化日志系统
     init_log()?;
 
+    let (terminate_old_app_sender, terminate_old_app_receiver) = broadcast::channel::<()>(1);
+
     // 初始化信号(_signal_manager变量将在程序优雅退出时释放，释放时删除pid文件)
     let (mut signal_manager, old_pid) = SignalManager::new(signal)?;
     let (app_config, files) = build_app_cfg::<AppConfig>(config_file.clone())?;
     let files = Arc::new(files);
 
     // 监听配置文件变化
+    let terminate_old_app_sender_clone = terminate_old_app_sender.clone();
     let files = files.clone();
     watch_cfg_file!("app", {
         let (app_config, _) =
             build_app_cfg::<AppConfig>(config_file.clone()).expect("无法加载配置文件");
-        apply_app_config(app_config, port, None)
-            .await
-            .expect("配置无法应用");
+        apply_app_config(
+            app_config,
+            port,
+            None,
+            terminate_old_app_sender_clone.clone(),
+            terminate_old_app_sender_clone.subscribe(),
+        )
+        .await
+        .expect("配置无法应用");
         debug!("重新加载配置成功");
     });
 
     // 应用配置
-    let web_server_stop_sender = apply_app_config(app_config, port, old_pid).await?;
+    apply_app_config(
+        app_config,
+        port,
+        old_pid,
+        terminate_old_app_sender.clone(),
+        terminate_old_app_receiver,
+    )
+    .await?;
 
     // 监听系统信号与等待退出
     let signal_receiver = signal_manager.watch_signal()?;
-    Ok(wait_app_exit(signal_receiver, || async {
-        web_server_stop_sender.send(()).expect("无法发送信号");
-        let web_server_handles = take_web_server_handles().expect("无法获取Web服务器句柄");
-        for web_server_handle in web_server_handles {
-            let _ = web_server_handle.await.expect("无法等待Web服务器退出");
+    Ok(wait_app_exit(signal_receiver, || {
+        let terminate_old_app_sender = terminate_old_app_sender.clone();
+        async move {
+            stop_web_service(terminate_old_app_sender)
+                .await
+                .expect("无法停止旧的Web服务");
+            Ok(())
         }
-        Ok(())
     })
     .await?)
 }
@@ -144,7 +161,9 @@ async fn apply_app_config(
     app_config: AppConfig,
     port: Option<u16>,
     old_pid: Option<i32>,
-) -> anyhow::Result<broadcast::Sender<()>> {
+    terminate_old_app_sender: broadcast::Sender<()>,
+    terminate_old_app_receiver: broadcast::Receiver<()>,
+) -> anyhow::Result<()> {
     debug!("应用App配置...");
     let AppConfig {
         web_server: web_server_config,
@@ -166,5 +185,15 @@ async fn apply_app_config(
     init_db(db_config.clone()).await?;
 
     // 启动Web服务器
-    Ok(start_web_server(web_server_config, web::router::register(), port, old_pid).await?)
+    start_web_server(
+        web_server_config,
+        web::router::register(),
+        port,
+        old_pid,
+        terminate_old_app_sender,
+        terminate_old_app_receiver,
+    )
+    .await?;
+
+    Ok(())
 }
