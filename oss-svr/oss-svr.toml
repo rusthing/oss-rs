@@ -15,7 +15,9 @@ reuse-port = true
 cors.enabled = true
 
 [web-server.https]
-enabled = false
+#enabled = false
+cert = "/Users/zbz/workspace/rusthing/oss-rs/oss-svr/certs/cert.pem"
+key = "/Users/zbz/workspace/rusthing/oss-rs/oss-svr/certs/key.pem"
 
 [id-worker]
 epoch = 1758108749211
