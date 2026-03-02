@@ -17,6 +17,10 @@ pub struct OssBucketVo {
     /// 名称
     #[from(~.to_string())]
     pub name: String,
+    /// 备注
+    #[from(~.as_ref().map(|v| v.to_string()))]
+    #[serde_as(as = "Option<String>")]
+    pub remark: Option<String>,
     /// 创建者ID
     #[from(~ as u64)]
     #[serde_as(as = "String")]
