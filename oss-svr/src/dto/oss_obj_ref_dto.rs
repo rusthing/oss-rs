@@ -6,11 +6,11 @@ use serde_with::serde_as;
 #[add_dto]
 pub struct OssObjRefAddDto {
     #[validate(required(message = "对象ID不能为空"))]
-    #[into(match ~ {Some(value)=>ActiveValue::Set(value as i64),None=>ActiveValue::NotSet})]
+    #[into(match ~ {Some(value)=>ActiveValue::Set(value),None=>ActiveValue::NotSet})]
     #[serde_as(as = "Option<String>")]
     pub obj_id: Option<u64>,
     #[validate(required(message = "对象ID不能为空"))]
-    #[into(match ~ {Some(value)=>ActiveValue::Set(value as i64),None=>ActiveValue::NotSet})]
+    #[into(match ~ {Some(value)=>ActiveValue::Set(value),None=>ActiveValue::NotSet})]
     #[serde_as(as = "Option<String>")]
     pub bucket_id: Option<u64>,
     #[validate(
@@ -35,10 +35,10 @@ pub struct OssObjRefAddDto {
 
 #[modify_dto]
 pub struct OssObjRefModifyDto {
-    #[into(match ~ {Some(value)=>ActiveValue::Set(value as i64),None=>ActiveValue::NotSet})]
+    #[into(match ~ {Some(value)=>ActiveValue::Set(value),None=>ActiveValue::NotSet})]
     #[serde_as(as = "Option<String>")]
     pub obj_id: Option<u64>,
-    #[into(match ~ {Some(value)=>ActiveValue::Set(value as i64),None=>ActiveValue::NotSet})]
+    #[into(match ~ {Some(value)=>ActiveValue::Set(value),None=>ActiveValue::NotSet})]
     #[serde_as(as = "Option<String>")]
     pub bucket_id: Option<u64>,
     #[into(ActiveValue::Set(~.clone().unwrap()))]
@@ -51,16 +51,11 @@ pub struct OssObjRefModifyDto {
 
 #[save_dto]
 pub struct OssObjRefSaveDto {
-    // #[into(~ )]
     #[serde_as(as = "Option<String>")]
     pub obj_id: Option<u64>,
-    // #[into(~ )]
     #[serde_as(as = "Option<String>")]
     pub bucket_id: Option<u64>,
-    #[into(~.clone())]
     pub name: Option<String>,
-    #[into(~.clone())]
     pub ext: Option<String>,
-    #[into(~.clone())]
     pub url: Option<String>,
 }

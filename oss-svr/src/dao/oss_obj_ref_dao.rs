@@ -17,7 +17,7 @@ pub static UNIQUE_FIELDS: Lazy<HashMap<&'static str, &'static str>> = Lazy::new(
 pub struct OssObjRefDao;
 
 impl OssObjRefDao {
-    pub async fn delete_by_bucket_id<C>(bucket_id: i64, db: &C) -> Result<DeleteResult, DaoError>
+    pub async fn delete_by_bucket_id<C>(bucket_id: u64, db: &C) -> Result<DeleteResult, DaoError>
     where
         C: ConnectionTrait,
     {
@@ -40,7 +40,7 @@ impl OssObjRefDao {
     /// 返回一个包含主记录、关联存储桶和关联对象的元组的Option，如果查询失败则返回相应的错误信息
     /// 如果未找到匹配记录，则返回None
     pub async fn get_by_id<C>(
-        id: i64,
+        id: u64,
         db: &C,
     ) -> Result<Option<(Model, oss_bucket::Model, oss_obj::Model)>, DaoError>
     where

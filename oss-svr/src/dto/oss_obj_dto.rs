@@ -11,12 +11,10 @@ pub struct OssObjAddDto {
     )]
     #[into(ActiveValue::Set(~.clone().unwrap_or("".to_string())))]
     pub path: Option<String>,
-    #[validate(
-        required(message = "文件大小不能为空"),
-        length(min = 1, message = "文件大小不能为空")
-    )]
-    #[into(ActiveValue::Set(~.clone().unwrap().parse::<i64>().unwrap()))]
-    pub size: Option<String>,
+    #[validate(required(message = "文件大小不能为空"))]
+    #[into(match ~ {Some(value)=>ActiveValue::Set(value),None=>ActiveValue::NotSet})]
+    #[serde_as(as = "Option<String>")]
+    pub size: Option<u64>,
     #[validate(
         required(message = "Hash不能为空"),
         length(min = 1, message = "Hash不能为空")
@@ -31,8 +29,9 @@ pub struct OssObjAddDto {
 pub struct OssObjModifyDto {
     #[into(ActiveValue::Set(~.clone().unwrap()))]
     pub path: Option<String>,
-    #[into(ActiveValue::Set(~.clone().unwrap().parse::<i64>().unwrap()))]
-    pub size: Option<String>,
+    #[into(match ~ {Some(value)=>ActiveValue::Set(value),None=>ActiveValue::NotSet})]
+    #[serde_as(as = "Option<String>")]
+    pub size: Option<u64>,
     #[into(ActiveValue::Set(~.clone().unwrap()))]
     pub hash: Option<String>,
     #[into(match ~ {Some(value)=>ActiveValue::Set(value),None=>ActiveValue::NotSet})]
@@ -41,11 +40,8 @@ pub struct OssObjModifyDto {
 
 #[save_dto]
 pub struct OssObjSaveDto {
-    #[into(~.clone())]
     pub path: Option<String>,
-    #[into(~.clone())]
-    pub size: Option<String>,
-    #[into(~.clone())]
+    pub size: Option<u64>,
     pub hash: Option<String>,
     pub is_completed: Option<bool>,
 }

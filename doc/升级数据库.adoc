@@ -1,12 +1,28 @@
 = 常用命令
+:scripts: cjk
+:toc: left
+:toclevels: 3
+:toc-title: 目录
+:numbered:
+:sectnums:
+:sectnum-depth: 3
+:source-highlighter: coderay
 
-== 生成模型
+== 生成MySQL的建表语句
+
+因为PostgreSQL不支持unsigned类型，所以建议使用MySQL来生成sea-orm的Model
+
+== 生成建表语句后，修改建表语句
+
+将bool替换为bit(1)，否则MySQL默认会转成tinyint(1)
+
+== 生成sea-orm的Model
 
 进入xxx-svr的项目目录，执行下面的命令
 
 [source,bash]
 ----
-sea-orm-cli generate entity --model-extra-derives Default --with-serde both --ignore-tables _sqlx_migrations --database-url postgres://ossrs:ossrs@127.0.0.1/ossrs -o src/model
+sea-orm-cli generate entity --model-extra-derives Default --with-serde both --ignore-tables _sqlx_migrations --database-url mysql://ossrs:ossrs@mysql/ossrs -o src/model
 ----
 
 - model-extra-derives: 模型文件添加的 trait，例如 `Default`
@@ -32,14 +48,14 @@ DATABASE_URL=postgres://ossrs:ossrs@127.0.0.1/ossrs
 +
 [source,bash]
 ----
-sqlx migrate add <版本名称> --source migrations/[pgsql或mysql]]
+sqlx migrate add <版本名称> --source migrations/[mysql或pgsql]]
 ----
 +
 [NOTE]
 ====
 版本名称: 例如 `create-table`、`alert-table`、`init-data`、`update-data`
 ====
-. 上面的命令会在`migrations`目录下生成一个文件，文件名格式为 `<版本号>_<版本名称>.sql`，例如 `20220101000000_create-table.sql`
+. 上面的命令会在`migrations/[mysql或pgsql]`目录下生成一个文件，文件名格式为 `<版本号>_<版本名称>.sql`，例如 `20220101000000_create-table.sql`
 . 在生成的文件中编写SQL语句，并保存
 . 每次运行程序都会自动判断是否需要执行数据库迁移，如果需要则执行迁移
 

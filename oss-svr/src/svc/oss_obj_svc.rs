@@ -69,7 +69,7 @@ impl OssObjSvc {
 
         let result = OssObjDao::find_orphaned(db).await?;
         for item in result.into_iter() {
-            Self::del_with_file(item.id as u64, current_user_id, Some(db)).await?;
+            Self::del_with_file(item.id, current_user_id, Some(db)).await?;
         }
 
         Ok(Ro::success("删除孤立数据成功".to_string()))
@@ -90,7 +90,7 @@ impl OssObjSvc {
     #[db_unwrap]
     pub async fn get_by_hash_and_size<C>(
         hash: &str,
-        size: i64,
+        size: u64,
         db: Option<&C>,
     ) -> Result<Ro<OssObjVo>, SvcError>
     where

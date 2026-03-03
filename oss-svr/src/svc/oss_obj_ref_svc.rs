@@ -66,7 +66,7 @@ impl OssObjRefSvc {
             "ID为<{}>的用户将删除oss_obj_ref中bucket_id={}的记录",
             current_user_id, bucket_id
         );
-        OssObjRefDao::delete_by_bucket_id(bucket_id as i64, db).await?;
+        OssObjRefDao::delete_by_bucket_id(bucket_id, db).await?;
         Ok(Ro::success("删除成功".to_string()))
     }
 }

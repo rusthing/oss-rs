@@ -67,7 +67,7 @@ impl OssObjDao {
     /// 返回查询到的完整 Model 实例（如果存在），如果查询失败则返回相应的错误信息
     pub async fn get_by_hash_and_size<C>(
         hash: &str,
-        size: i64,
+        size: u64,
         db: &C,
     ) -> Result<Option<Model>, DaoError>
     where

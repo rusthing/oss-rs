@@ -11,11 +11,11 @@ use chrono::{Local, TimeZone};
 use idworker::get_id_worker;
 use log::{debug, error, warn};
 use robotech::dao::begin_transaction;
-use robotech::env::{APP_ENV, EnvError};
+use robotech::env::{EnvError, APP_ENV};
 use robotech::ro::Ro;
 use robotech::svc::SvcError;
 use robotech_macros::db_unwrap;
-use sea_orm::{ConnectionTrait, };
+use sea_orm::ConnectionTrait;
 use std::fs;
 use std::fs::File;
 use std::io::{Read, Seek, SeekFrom};
@@ -49,7 +49,7 @@ impl OssFileSvc {
     pub async fn upload<C>(
         bucket: &str,
         file_name: &str,
-        file_size: usize,
+        file_size: u64,
         hash: &str,
         temp_file: NamedTempFile,
         current_user_id: u64,
@@ -66,7 +66,7 @@ impl OssFileSvc {
         };
 
         let now = get_current_timestamp()?;
-        let obj_vo = OssObjSvc::get_by_hash_and_size(hash, file_size as i64, Some(db))
+        let obj_vo = OssObjSvc::get_by_hash_and_size(hash, file_size, Some(db))
             .await?
             .get_extra();
         let ext = get_file_ext(file_name);
@@ -106,7 +106,7 @@ impl OssFileSvc {
             let oss_obj_add_dto = OssObjAddDto {
                 id: Some(obj_id),
                 hash: Some(hash.to_string()),
-                size: Some(file_size.to_string()),
+                size: Some(file_size),
                 path: Some(new_file_path.to_string()),
                 is_completed: Some(is_completed),
                 current_user_id,
@@ -199,7 +199,7 @@ impl OssFileSvc {
     where
         C: ConnectionTrait,
     {
-        let one = OssObjRefDao::get_by_id(obj_ref_id as i64, db).await?;
+        let one = OssObjRefDao::get_by_id(obj_ref_id, db).await?;
         let (obj_ref_model, _, obj_model) =
             one.ok_or(SvcError::NotFound(format!("id: {}", obj_ref_id)))?;
         // 扩展名不对也不行

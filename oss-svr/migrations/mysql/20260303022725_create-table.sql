@@ -28,7 +28,7 @@ alter table oss_bucket comment '桶';
 create table oss_obj
 (
     _id                  bigint unsigned not null  comment 'ID',
-    is_completed         bool not null default true  comment '是否完成',
+    is_completed         bit(1) not null default true  comment '是否完成',
     path                 varchar(100) not null  comment '路径
              存储文件的路径',
     size                 bigint unsigned not null  comment '大小',

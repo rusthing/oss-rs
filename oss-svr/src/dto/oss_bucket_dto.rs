@@ -25,8 +25,6 @@ pub struct OssBucketModifyDto {
 
 #[save_dto]
 pub struct OssBucketSaveDto {
-    #[into(~.clone())]
     pub name: Option<String>,
-    #[into(~.clone())]
     pub remark: Option<String>,
 }
