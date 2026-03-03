@@ -3,17 +3,16 @@ use clap::Parser;
 use idworker::init_id_worker;
 use log::{debug, warn};
 use oss_svr::app::{set_app_config, AppConfig};
-use oss_svr::db::migrate;
 use oss_svr::web;
 use robotech::app::{build_app_cfg, wait_app_exit};
 use robotech::cfg::watch_cfg_file;
-use robotech::db_conn::init_db;
+use robotech::db::init_db;
 use robotech::env::init_env;
 use robotech::log::init_log;
 use robotech::macros::log_call;
 use robotech::signal::SignalManager;
 use robotech::web::{start_web_server, stop_web_service};
-use robotech_macros::watch_cfg_file;
+use robotech_macros::{db_migrate, watch_cfg_file};
 use std::sync::{mpsc, Arc};
 use std::time::Duration;
 use tokio::time::interval;
@@ -150,9 +149,11 @@ async fn apply_app_config(
     set_app_config(app_config)?;
 
     // 升级数据库版本...
-    migrate(db_config.clone())
-        .await
-        .map_err(|e| anyhow!(format!("升级数据库版本时出错: {e}")))?;
+    let db_url = db_config.url.as_str();
+    db_migrate!(db_url);
+    // migrate(db_config.clone())
+    //     .await
+    //     .map_err(|e| anyhow!(format!("升级数据库版本时出错: {e}")))?;
 
     // 初始化ID生成器...
     init_id_worker(id_worker_config.clone())?;

@@ -7,7 +7,7 @@ use utoipa::ToSchema;
 
 #[skip_serializing_none] // 忽略空字段(好像必须放在#[derive(o2o, Serialize)]的上方才能起效)
 #[derive(o2o, ToSchema, Debug, Serialize, Clone)]
-#[from(Model)]
+#[from_owned(Model)]
 #[serde(rename_all = "camelCase")]
 #[serde_as]
 pub struct OssObjVo {
@@ -16,10 +16,8 @@ pub struct OssObjVo {
     #[serde_as(as = "String")]
     pub id: u64,
     /// 文件路径
-    #[from(~.to_string())]
     pub path: String,
     /// 文件Hash
-    #[from(~.to_string())]
     pub hash: String,
     /// 文件大小
     #[from(~.to_string())]

@@ -26,12 +26,12 @@ futures-util = "0.3.32"
 tempfile = { workspace = true }
 actix-web = { workspace = true }
 actix-multipart = { workspace = true }
-sea-orm = { workspace = true, features = ["sqlx-postgres", "runtime-actix-rustls", "debug-print"] }
+sqlx = { workspace = true, features = ["any", "mysql", "postgres"] }
+sea-orm = { workspace = true, features = ["sqlx-mysql", "sqlx-postgres", "runtime-tokio-rustls", "debug-print"] }
 bytesize = { workspace = true, features = ["serde"] }
 regex = { workspace = true }
 once_cell = { workspace = true }
 o2o = { workspace = true }
-sqlx = { workspace = true, features = ["any", "postgres"] }
 validator = { workspace = true, features = ["derive"] }
 strum = { workspace = true, features = ["derive"] }
 utoipa = { workspace = true, features = ["actix_extras"] }

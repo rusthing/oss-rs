@@ -1,7 +1,7 @@
 use crate::app::oss_config::OssConfig;
 use idworker::IdWorkerConfig;
 use robotech::app::AppError;
-use robotech::db_conn::DbConfig;
+use robotech::db::DbConfig;
 use robotech::web::WebServerConfig;
 use serde::{Deserialize, Serialize};
 use std::sync::RwLock;

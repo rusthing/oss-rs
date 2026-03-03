@@ -6,7 +6,7 @@ use utoipa::ToSchema;
 
 #[skip_serializing_none] // 忽略空字段(好像必须放在#[derive(o2o, Serialize)]的上方才能起效)
 #[derive(o2o, ToSchema, Debug, Serialize, Clone)]
-#[from(Model)]
+#[from_owned(Model)]
 #[serde(rename_all = "camelCase")]
 #[serde_as]
 pub struct OssBucketVo {
@@ -15,11 +15,8 @@ pub struct OssBucketVo {
     #[serde_as(as = "String")]
     pub id: u64,
     /// 名称
-    #[from(~.to_string())]
     pub name: String,
     /// 备注
-    #[from(~.as_ref().map(|v| v.to_string()))]
-    #[serde_as(as = "Option<String>")]
     pub remark: Option<String>,
     /// 创建者ID
     #[from(~ as u64)]

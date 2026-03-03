@@ -9,6 +9,12 @@
 sea-orm-cli generate entity --model-extra-derives Default --with-serde both --ignore-tables _sqlx_migrations --database-url postgres://ossrs:ossrs@127.0.0.1/ossrs -o src/model
 ----
 
+- model-extra-derives: 模型文件添加的 trait，例如 `Default`
+- with-serde: 是否生成 serde 的代码，both 表示生成正反序列化的代码，还有 `deserialize` 和 `serialize` 可以选择
+- ignore-tables: 忽略的表，多个表用逗号分隔
+- database-url: 数据库连接字符串
+- o: 输出目录，模型文件将生成到`src/model`目录下
+
 == 新增数据库版本
 
 . 进入xxx-svr的项目目录，执行下面的命令
@@ -22,9 +28,11 @@ DATABASE_URL=postgres://ossrs:ossrs@127.0.0.1/ossrs
 +
 . 执行新增数据库版本
 +
+终端进入xxx-svr/src目录下
++
 [source,bash]
 ----
-sqlx migrate add <版本名称>
+sqlx migrate add <版本名称> --source migrations/[pgsql或mysql]]
 ----
 +
 [NOTE]
