@@ -7,18 +7,18 @@ use serde::{Deserialize, Serialize};
 #[sea_orm(table_name = "oss_bucket")]
 pub struct Model {
     #[sea_orm(column_name = "_id", primary_key, auto_increment = false)]
-    pub id: u64,
+    pub id: i64,
     #[sea_orm(unique)]
     pub name: String,
     pub remark: Option<String>,
     #[sea_orm(column_name = "_creator_id")]
-    pub creator_id: u64,
+    pub creator_id: i64,
     #[sea_orm(column_name = "_create_timestamp")]
-    pub create_timestamp: u64,
+    pub create_timestamp: i64,
     #[sea_orm(column_name = "_updator_id")]
-    pub updator_id: u64,
+    pub updator_id: i64,
     #[sea_orm(column_name = "_update_timestamp")]
-    pub update_timestamp: u64,
+    pub update_timestamp: i64,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
