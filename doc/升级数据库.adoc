@@ -8,13 +8,13 @@
 :sectnum-depth: 3
 :source-highlighter: coderay
 
-== 生成MySQL的建表语句
+== 生成建表语句
 
-因为PostgreSQL不支持unsigned类型，所以建议使用MySQL来生成sea-orm的Model
+略
 
 == 生成建表语句后，修改建表语句
 
-将bool替换为bit(1)，否则MySQL默认会转成tinyint(1)
+如果是MySQL的脚本，将bool替换为bit(1)，否则MySQL默认会转成tinyint(1)
 
 == 生成sea-orm的Model
 

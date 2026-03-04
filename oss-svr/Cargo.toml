@@ -37,7 +37,7 @@ strum = { workspace = true, features = ["derive"] }
 utoipa = { workspace = true, features = ["actix_extras"] }
 utoipa-swagger-ui = { workspace = true, features = ["actix-web"] }
 
-idworker = { workspace = true, features = ["config"] }
+idworker = { workspace = true }
 wheel-rs = { workspace = true }
 robotech = { workspace = true, features = ["web", "db", "macros"] }
 robotech-macros = { path = "../../robotech-rs/robotech-macros" }

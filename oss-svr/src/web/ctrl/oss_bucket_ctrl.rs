@@ -3,14 +3,14 @@ use crate::svc::oss_bucket_svc;
 use crate::svc::oss_bucket_svc::OssBucketSvc;
 use crate::vo::oss_bucket_vo::OssBucketVo;
 use crate::web::ctrl::oss_bucket_ctrl;
-use axum::extract::{Query, State};
+use axum::extract::{Path, Query, State};
 use axum::http::HeaderMap;
 use axum::response::Json;
 use axum::routing::{delete, get};
 use axum::Router;
 use robotech::macros::log_call;
 use robotech::ro::Ro;
-use robotech::web::ctrl_utils::{get_current_user_id, get_id_from_query_params};
+use robotech::web::ctrl_utils::get_current_user_id;
 use robotech::web::CtrlError;
 use robotech_macros::ctrl;
 use sea_orm::{DatabaseConnection, DatabaseTransaction};
@@ -18,7 +18,7 @@ use std::collections::HashMap;
 use validator::Validate;
 
 // #[ctrl(exclude: get_by_id)]
-// struct OssBucketCtrl;
+struct OssBucketCtrl;
 
 /// # 根据ID获取记录的信息
 ///
@@ -37,20 +37,16 @@ use validator::Validate;
 /// * 当根据ID找不到对应记录时，返回相应的错误信息
 #[utoipa::path(
     get,
-    path = "/oss/bucket/get-by-id",
+    path = "/oss/bucket/get-by-id/{id}",
     params(
-        ("id", description = "记录的唯一标识符，类型为u64")
+        ("id" = u64, Path, description = "记录的唯一标识符")
     ),
     responses(
         (status = OK, body = Ro<OssBucketVo>)
     )
 )]
 #[log_call]
-pub async fn get_by_id(
-    query: Query<HashMap<String, String>>,
-) -> Result<Json<Ro<OssBucketVo>>, CtrlError> {
-    let id = get_id_from_query_params(&query)?;
-
+pub async fn get_by_id(Path(id): Path<u64>) -> Result<Json<Ro<OssBucketVo>>, CtrlError> {
     let ro = OssBucketSvc::get_by_id::<DatabaseConnection>(id, None).await?;
     Ok(Json(ro))
 }
@@ -68,19 +64,17 @@ pub async fn get_by_id(
 /// * 当根据ID找不到对应记录时，返回相应的错误信息
 #[utoipa::path(
     delete,
-    path = "/oss/bucket/cascade",
+    path = "/oss/bucket/cascade/{id}",
     params(
-        ("id", description = "记录的唯一标识符，类型为u64")
+        ("id" = u64, Path, description = "记录的唯一标识符")
     ),
     responses((status = OK, body = Ro<String>))
 )]
 #[log_call]
 pub async fn del_cascade(
-    query: Query<HashMap<String, String>>,
+    Path(id): Path<u64>,
     headers: HeaderMap,
 ) -> Result<Json<Ro<OssBucketVo>>, CtrlError> {
-    let id = get_id_from_query_params(&query)?;
-
     // 从header中解析当前用户ID，如果没有或解析失败则抛出ApiError
     let current_user_id = get_current_user_id(&headers)?;
 

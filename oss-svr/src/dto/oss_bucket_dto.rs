@@ -9,17 +9,17 @@ pub struct OssBucketAddDto {
         required(message = "名称不能为空"),
         length(min = 1, message = "名称不能为空")
     )]
-    #[into(ActiveValue::Set(~.clone().unwrap()))]
+    #[into(ActiveValue::Set(~.unwrap()))]
     pub name: Option<String>,
-    #[into(ActiveValue::Set(~.clone()))]
+    #[into(ActiveValue::Set(~))]
     pub remark: Option<String>,
 }
 
 #[modify_dto]
 pub struct OssBucketModifyDto {
-    #[into(ActiveValue::Set(~.clone().unwrap()))]
+    #[into(ActiveValue::Set(~.unwrap()))]
     pub name: Option<String>,
-    #[into(ActiveValue::Set(~.clone()))]
+    #[into(ActiveValue::Set(~))]
     pub remark: Option<String>,
 }
 

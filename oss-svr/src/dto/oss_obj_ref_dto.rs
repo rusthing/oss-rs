@@ -17,19 +17,19 @@ pub struct OssObjRefAddDto {
         required(message = "名称不能为空"),
         length(min = 1, message = "名称不能为空")
     )]
-    #[into(ActiveValue::Set(~.clone().unwrap()))]
+    #[into(ActiveValue::Set(~.unwrap()))]
     pub name: Option<String>,
     #[validate(
         required(message = "文件扩展名不能为空"),
         length(min = 1, message = "文件扩展名不能为空")
     )]
-    #[into(ActiveValue::Set(~.clone().unwrap()))]
+    #[into(ActiveValue::Set(~.unwrap()))]
     pub ext: Option<String>,
     #[validate(
         required(message = "Url不能为空"),
         length(min = 1, message = "Url不能为空")
     )]
-    #[into(ActiveValue::Set(~.clone().unwrap()))]
+    #[into(ActiveValue::Set(~.unwrap()))]
     pub url: Option<String>,
 }
 
@@ -41,11 +41,11 @@ pub struct OssObjRefModifyDto {
     #[into(match ~ {Some(value)=>ActiveValue::Set(value),None=>ActiveValue::NotSet})]
     #[serde_as(as = "Option<String>")]
     pub bucket_id: Option<u64>,
-    #[into(ActiveValue::Set(~.clone().unwrap()))]
+    #[into(ActiveValue::Set(~.unwrap()))]
     pub name: Option<String>,
-    #[into(ActiveValue::Set(~.clone().unwrap()))]
+    #[into(ActiveValue::Set(~.unwrap()))]
     pub ext: Option<String>,
-    #[into(ActiveValue::Set(~.clone().unwrap()))]
+    #[into(ActiveValue::Set(~.unwrap()))]
     pub url: Option<String>,
 }
 
