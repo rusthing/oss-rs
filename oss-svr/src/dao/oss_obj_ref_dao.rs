@@ -46,7 +46,7 @@ impl OssObjRefDao {
     where
         C: ConnectionTrait,
     {
-        Entity::find_by_id(id)
+        Entity::find_by_id(id as i64)
             .find_also_related(oss_bucket::Entity)
             .find_also_related(oss_obj::Entity)
             .one(db)

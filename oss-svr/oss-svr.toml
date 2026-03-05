@@ -4,8 +4,8 @@ upload-buffer-size = "2MiB"
 download-buffer-size = "2MiB"
 
 [db]
-#url = "postgres://ossrs:ossrs@pgsql:5432/ossrs"
-url = "mysql://ossrs:ossrs@mysql:3306/ossrs"
+url = "postgres://ossrs:ossrs@pgsql:5432/ossrs"
+#url = "mysql://ossrs:ossrs@mysql:3306/ossrs"
 
 [web-server]
 log-enabled = true

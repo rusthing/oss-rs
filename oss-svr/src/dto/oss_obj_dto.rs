@@ -12,7 +12,7 @@ pub struct OssObjAddDto {
     #[into(ActiveValue::Set(~.unwrap_or("".to_string())))]
     pub path: Option<String>,
     #[validate(required(message = "文件大小不能为空"))]
-    #[into(match ~ {Some(value)=>ActiveValue::Set(value),None=>ActiveValue::NotSet})]
+    #[into(match ~ {Some(value)=>ActiveValue::Set(value as i64),None=>ActiveValue::NotSet})]
     #[serde_as(as = "Option<String>")]
     pub size: Option<u64>,
     #[validate(
@@ -29,7 +29,7 @@ pub struct OssObjAddDto {
 pub struct OssObjModifyDto {
     #[into(ActiveValue::Set(~.unwrap()))]
     pub path: Option<String>,
-    #[into(match ~ {Some(value)=>ActiveValue::Set(value),None=>ActiveValue::NotSet})]
+    #[into(match ~ {Some(value)=>ActiveValue::Set(value as i64),None=>ActiveValue::NotSet})]
     #[serde_as(as = "Option<String>")]
     pub size: Option<u64>,
     #[into(ActiveValue::Set(~.unwrap()))]
