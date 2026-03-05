@@ -6,7 +6,6 @@ use crate::model;
 use crate::svc::oss_bucket_svc::OssBucketSvc;
 use crate::svc::oss_obj_ref_svc::OssObjRefSvc;
 use crate::svc::oss_obj_svc::OssObjSvc;
-use crate::vo::oss_obj_ref_vo::OssObjRefVo;
 use anyhow::anyhow;
 use chrono::{Local, TimeZone};
 use idworker::get_id_worker;
@@ -61,7 +60,7 @@ impl OssFileSvc {
     {
         // 获取存储桶
         let one_bucket = OssBucketSvc::get_by_name(bucket, Some(db)).await?;
-        let one_bucket = match one_bucket.get_extra() {
+        let one_bucket = match one_bucket.extra {
             Some(bucket) => bucket,
             None => return Ok(Ro::warn(format!("未找到存储桶<{}>", bucket))),
         };
@@ -69,7 +68,7 @@ impl OssFileSvc {
         let now = get_current_timestamp()?;
         let obj_vo = OssObjSvc::get_by_hash_and_size(hash, file_size, Some(db))
             .await?
-            .get_extra();
+            .extra;
         let ext = get_file_ext(file_name);
 
         // 判断对象是否存在
