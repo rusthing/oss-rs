@@ -1,6 +1,7 @@
 use crate::dao::oss_obj_ref_dao::OssObjRefDao;
 use crate::dto::oss_obj_ref_dto::{OssObjRefAddDto, OssObjRefModifyDto, OssObjRefSaveDto};
 use crate::model::oss_obj_ref::ActiveModel;
+use crate::model::oss_obj_ref::Model;
 use crate::svc::oss_obj_svc::OssObjSvc;
 use crate::vo::oss_obj_ref_vo::OssObjRefVo;
 use log::warn;
@@ -29,13 +30,13 @@ impl OssObjRefSvc {
         id: u64,
         current_user_id: u64,
         db: Option<&C>,
-    ) -> Result<Ro<OssObjRefVo>, SvcError>
+    ) -> Result<Ro<Model>, SvcError>
     where
         C: ConnectionTrait,
     {
         let ro = Self::del(id, current_user_id, Some(db)).await?;
         // 删除对象, 如果对象没有其他引用则会顺利删除，否则会失败
-        let obj_id = ro.extra.clone().unwrap().oss_obj.id;
+        let obj_id = ro.extra.clone().unwrap().obj_id as u64;
         OssObjSvc::del_with_file(obj_id, current_user_id, Some(db))
             .await
             .ok();

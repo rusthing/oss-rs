@@ -2,6 +2,7 @@ use crate::app::get_app_config;
 use crate::dao::oss_obj_ref_dao::OssObjRefDao;
 use crate::dto::oss_obj_dto::OssObjAddDto;
 use crate::dto::oss_obj_ref_dto::OssObjRefAddDto;
+use crate::model;
 use crate::svc::oss_bucket_svc::OssBucketSvc;
 use crate::svc::oss_obj_ref_svc::OssObjRefSvc;
 use crate::svc::oss_obj_svc::OssObjSvc;
@@ -11,7 +12,7 @@ use chrono::{Local, TimeZone};
 use idworker::get_id_worker;
 use log::{debug, error, warn};
 use robotech::dao::begin_transaction;
-use robotech::env::{EnvError, APP_ENV};
+use robotech::env::{APP_ENV, EnvError};
 use robotech::ro::Ro;
 use robotech::svc::SvcError;
 use robotech_macros::db_unwrap;
@@ -54,7 +55,7 @@ impl OssFileSvc {
         temp_file: NamedTempFile,
         current_user_id: u64,
         db: Option<&C>,
-    ) -> Result<Ro<OssObjRefVo>, SvcError>
+    ) -> Result<Ro<model::oss_obj_ref::Model>, SvcError>
     where
         C: ConnectionTrait,
     {
@@ -114,7 +115,7 @@ impl OssFileSvc {
             debug!("新增对象: {:?}", oss_obj_add_dto);
             let add_ro = OssObjSvc::add(oss_obj_add_dto, Some(db)).await?;
             if let Some(obj_vo) = add_ro.extra {
-                (obj_vo.id, new_file_path)
+                (obj_vo.id as u64, new_file_path)
             } else {
                 return Err(SvcError::Runtime(anyhow!("新增对象失败".to_string())));
             }
@@ -199,7 +200,7 @@ impl OssFileSvc {
     where
         C: ConnectionTrait,
     {
-        let one = OssObjRefDao::get_by_id(obj_ref_id, db).await?;
+        let one = OssObjRefDao::get_by_id_also_related(obj_ref_id, db).await?;
         let (obj_ref_model, _, obj_model) =
             one.ok_or(SvcError::NotFound(format!("id: {}", obj_ref_id)))?;
         // 扩展名不对也不行

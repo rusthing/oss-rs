@@ -1,23 +1,24 @@
 use crate::dto::oss_bucket_dto::{OssBucketAddDto, OssBucketModifyDto, OssBucketSaveDto};
+use crate::model::oss_bucket::Model;
 use crate::svc::oss_bucket_svc;
 use crate::svc::oss_bucket_svc::OssBucketSvc;
 use crate::vo::oss_bucket_vo::OssBucketVo;
 use crate::web::ctrl::oss_bucket_ctrl;
+use axum::Router;
 use axum::extract::{Path, Query, State};
 use axum::http::HeaderMap;
 use axum::response::Json;
 use axum::routing::{delete, get};
-use axum::Router;
 use robotech::macros::log_call;
 use robotech::ro::Ro;
-use robotech::web::ctrl_utils::get_current_user_id;
 use robotech::web::CtrlError;
+use robotech::web::ctrl_utils::get_current_user_id;
 use robotech_macros::ctrl;
 use sea_orm::{DatabaseConnection, DatabaseTransaction};
 use std::collections::HashMap;
 use validator::Validate;
 
-// #[ctrl(exclude: get_by_id)]
+// #[ctrl(get_by_id)]
 struct OssBucketCtrl;
 
 /// # 根据ID获取记录的信息
@@ -46,7 +47,7 @@ struct OssBucketCtrl;
     )
 )]
 #[log_call]
-pub async fn get_by_id(Path(id): Path<u64>) -> Result<Json<Ro<OssBucketVo>>, CtrlError> {
+pub async fn get_by_id(Path(id): Path<u64>) -> Result<Json<Ro<Model>>, CtrlError> {
     let ro = OssBucketSvc::get_by_id::<DatabaseConnection>(id, None).await?;
     Ok(Json(ro))
 }
@@ -74,7 +75,7 @@ pub async fn get_by_id(Path(id): Path<u64>) -> Result<Json<Ro<OssBucketVo>>, Ctr
 pub async fn del_cascade(
     Path(id): Path<u64>,
     headers: HeaderMap,
-) -> Result<Json<Ro<OssBucketVo>>, CtrlError> {
+) -> Result<Json<Ro<Model>>, CtrlError> {
     // 从header中解析当前用户ID，如果没有或解析失败则抛出ApiError
     let current_user_id = get_current_user_id(&headers)?;
 

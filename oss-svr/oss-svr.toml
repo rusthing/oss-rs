@@ -9,16 +9,16 @@ url = "postgres://ossrs:ossrs@pgsql:5432/ossrs"
 
 [web-server]
 log-enabled = true
-#bind = "127.0.0.1"
-bind = ["127.0.0.1", "192.168.1.232"]
+bind = "127.0.0.1"
+#bind = ["127.0.0.1", "192.168.1.232"]
 port = 9840
 #listen = "[::1]:9840"
-listen = ["[::1]:9840", "0.0.0.0:9841", "[::]:9842", "192.168.1.169:9843"]
+#listen = ["[::1]:9840", "0.0.0.0:9841", "[::]:9842", "192.168.1.169:9843"]
 #reuse-port = true
 cors.enabled = true
 
 [web-server.https]
-#enabled = false
+enabled = false
 cert = "certs/cert.pem"
 key = "certs/key.pem"
 

@@ -1,6 +1,7 @@
 use crate::dao::oss_bucket_dao::OssBucketDao;
 use crate::dto::oss_bucket_dto::{OssBucketAddDto, OssBucketModifyDto, OssBucketSaveDto};
 use crate::model::oss_bucket::ActiveModel;
+use crate::model::oss_bucket::Model;
 use crate::svc::oss_obj_ref_svc::OssObjRefSvc;
 use crate::svc::oss_obj_svc::OssObjSvc;
 use crate::vo::oss_bucket_vo::OssBucketVo;
@@ -32,7 +33,7 @@ impl OssBucketSvc {
         id: u64,
         current_user_id: u64,
         db: Option<&C>,
-    ) -> Result<Ro<OssBucketVo>, SvcError>
+    ) -> Result<Ro<Model>, SvcError>
     where
         C: ConnectionTrait,
     {

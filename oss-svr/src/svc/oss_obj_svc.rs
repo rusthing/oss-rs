@@ -1,6 +1,7 @@
 use crate::dao::oss_obj_dao::OssObjDao;
 use crate::dto::oss_obj_dto::{OssObjAddDto, OssObjModifyDto, OssObjSaveDto};
 use crate::model::oss_obj::ActiveModel;
+use crate::model::oss_obj::Model;
 use crate::vo::oss_obj_vo::OssObjVo;
 use log::warn;
 use robotech::dao::begin_transaction;
@@ -31,7 +32,7 @@ impl OssObjSvc {
         id: u64,
         current_user_id: u64,
         db: Option<&C>,
-    ) -> Result<Ro<OssObjVo>, SvcError>
+    ) -> Result<Ro<Model>, SvcError>
     where
         C: ConnectionTrait,
     {

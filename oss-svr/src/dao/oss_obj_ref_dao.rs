@@ -13,7 +13,7 @@ use std::collections::HashMap;
 /// 在捕获到数据库重复键异常时，提取字段名称时可据此获取到字段的中文意义，方便提示给用户
 pub static UNIQUE_FIELDS: Lazy<HashMap<&'static str, &'static str>> = Lazy::new(|| HashMap::new());
 
-#[dao(exclude: get_by_id)]
+#[dao]
 pub struct OssObjRefDao;
 
 impl OssObjRefDao {
@@ -39,7 +39,7 @@ impl OssObjRefDao {
     /// ## 返回值
     /// 返回一个包含主记录、关联存储桶和关联对象的元组的Option，如果查询失败则返回相应的错误信息
     /// 如果未找到匹配记录，则返回None
-    pub async fn get_by_id<C>(
+    pub async fn get_by_id_also_related<C>(
         id: u64,
         db: &C,
     ) -> Result<Option<(Model, oss_bucket::Model, oss_obj::Model)>, DaoError>
