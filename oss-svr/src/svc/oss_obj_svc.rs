@@ -28,15 +28,11 @@ impl OssObjSvc {
     /// * `Ok(Ro<Vo>)` - 删除成功，返回封装了Vo的Ro对象
     /// * `Err(SvcError)` - 删除失败，可能因为记录不存在或其他数据库错误
     #[db_unwrap(transaction_required)]
-    pub async fn del_with_file<C>(
-        id: u64,
-        current_user_id: u64,
-        db: Option<&C>,
-    ) -> Result<Ro<Model>, SvcError>
+    pub async fn del_with_file<C>(id: u64, db: Option<&C>) -> Result<Ro<OssObjVo>, SvcError>
     where
         C: ConnectionTrait,
     {
-        let ro = Self::del(id, current_user_id, Some(db)).await?;
+        let ro = Self::del(id, Some(db)).await?;
         if let Some(extra) = ro.extra.clone() {
             // 删除文件
             fs::remove_file(extra.path)?;
@@ -57,21 +53,13 @@ impl OssObjSvc {
     /// * `Ok(Ro<String>)` - 删除成功，返回删除记录数
     /// * `Err(SvcError)` - 删除失败，可能因为数据库错误
     #[db_unwrap(transaction_required)]
-    pub async fn delete_orphaned<C>(
-        current_user_id: u64,
-        db: Option<&C>,
-    ) -> Result<Ro<String>, SvcError>
+    pub async fn delete_orphaned<C>(db: Option<&C>) -> Result<Ro<()>, SvcError>
     where
         C: ConnectionTrait,
     {
-        warn!(
-            "ID为<{}>的用户将删除oss_obj中孤立无对象引用的记录",
-            current_user_id
-        );
-
         let result = OssObjDao::find_orphaned(db).await?;
         for item in result.into_iter() {
-            Self::del_with_file(item.id as u64, current_user_id, Some(db)).await?;
+            Self::del_with_file(item.id as u64, Some(db)).await?;
         }
 
         Ok(Ro::success("删除孤立数据成功".to_string()))

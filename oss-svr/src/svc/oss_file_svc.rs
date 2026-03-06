@@ -4,6 +4,7 @@ use crate::model;
 use crate::svc::oss_bucket_svc::OssBucketSvc;
 use crate::svc::oss_obj_ref_svc::OssObjRefSvc;
 use crate::svc::oss_obj_svc::OssObjSvc;
+use crate::vo::oss_obj_ref_vo::OssObjRefVo;
 use anyhow::anyhow;
 use chrono::{Local, TimeZone};
 use idworker::get_id_worker;
@@ -52,7 +53,7 @@ impl OssFileSvc {
         temp_file: NamedTempFile,
         current_user_id: u64,
         db: Option<&C>,
-    ) -> Result<Ro<model::oss_obj_ref::Model>, SvcError>
+    ) -> Result<Ro<OssObjRefVo>, SvcError>
     where
         C: ConnectionTrait,
     {

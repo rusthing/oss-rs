@@ -1,18 +1,16 @@
 use crate::dao::oss_bucket_dao::OssBucketDao;
-use crate::dto::oss_bucket_dto::{OssBucketAddDto, OssBucketModifyDto, OssBucketSaveDto};
 use crate::model::oss_bucket::ActiveModel;
 use crate::model::oss_bucket::Model;
 use crate::svc::oss_obj_ref_svc::OssObjRefSvc;
 use crate::svc::oss_obj_svc::OssObjSvc;
 use crate::vo::oss_bucket_vo::OssBucketVo;
-use log::warn;
 use robotech::dao::begin_transaction;
 use robotech::ro::Ro;
 use robotech::svc::SvcError;
 use robotech_macros::{db_unwrap, svc};
 use sea_orm::ConnectionTrait;
 
-#[svc]
+#[svc(del, get_by_id)]
 pub struct OssBucketSvc;
 
 impl OssBucketSvc {
@@ -29,17 +27,13 @@ impl OssBucketSvc {
     /// * `Ok(Ro<Vo>)` - 删除成功，返回封装了Vo的Ro对象
     /// * `Err(SvcError)` - 删除失败，可能因为记录不存在或其他数据库错误
     #[db_unwrap(transaction_required)]
-    pub async fn del_cascade<C>(
-        id: u64,
-        current_user_id: u64,
-        db: Option<&C>,
-    ) -> Result<Ro<Model>, SvcError>
+    pub async fn del_cascade<C>(id: u64, db: Option<&C>) -> Result<Ro<OssBucketVo>, SvcError>
     where
         C: ConnectionTrait,
     {
-        OssObjRefSvc::del_by_bucket_id(id, current_user_id, Some(db)).await?;
-        OssObjSvc::delete_orphaned(current_user_id, Some(db)).await?;
-        let ro = Self::del(id, current_user_id, Some(db)).await?;
+        OssObjRefSvc::del_by_bucket_id(id, Some(db)).await?;
+        OssObjSvc::delete_orphaned(Some(db)).await?;
+        let ro = Self::del(id, Some(db)).await?;
         Ok(ro)
     }
 
@@ -59,7 +53,9 @@ impl OssBucketSvc {
     where
         C: ConnectionTrait,
     {
-        let one = OssBucketDao::get_by_name(name, db).await?;
-        Ok(Ro::success("查询成功".to_string()).extra(one.map(|value| OssBucketVo::from(value))))
+        let one = OssBucketDao::get_by_name(name, db)
+            .await?
+            .map(|value| OssBucketVo::from(value));
+        Ok(Ro::success("查询成功".to_string()).extra(one))
     }
 }

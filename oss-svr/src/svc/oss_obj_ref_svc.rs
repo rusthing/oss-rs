@@ -1,10 +1,7 @@
 use crate::dao::oss_obj_ref_dao::OssObjRefDao;
-use crate::dto::oss_obj_ref_dto::{OssObjRefAddDto, OssObjRefModifyDto, OssObjRefSaveDto};
 use crate::model::oss_obj_ref::ActiveModel;
-use crate::model::oss_obj_ref::Model;
 use crate::svc::oss_obj_svc::OssObjSvc;
 use crate::vo::oss_obj_ref_vo::OssObjRefVo;
-use log::warn;
 use robotech::dao::begin_transaction;
 use robotech::ro::Ro;
 use robotech::svc::SvcError;
@@ -26,20 +23,15 @@ impl OssObjRefSvc {
     /// ## 返回值
     /// * `Ok(Ro<Vo>)` - 删除成功，返回封装了Vo的Ro对象
     #[db_unwrap(transaction_required)]
-    pub async fn del_with_obj<C>(
-        id: u64,
-        current_user_id: u64,
-        db: Option<&C>,
-    ) -> Result<Ro<Model>, SvcError>
+    pub async fn del_with_obj<C>(id: u64, db: Option<&C>) -> Result<Ro<OssObjRefVo>, SvcError>
     where
         C: ConnectionTrait,
     {
-        let ro = Self::del(id, current_user_id, Some(db)).await?;
-        // 删除对象, 如果对象没有其他引用则会顺利删除，否则会失败
-        let obj_id = ro.extra.clone().unwrap().obj_id as u64;
-        OssObjSvc::del_with_file(obj_id, current_user_id, Some(db))
-            .await
-            .ok();
+        let ro = Self::del(id, Some(db)).await?;
+        if let Some(extra) = ro.extra.clone() {
+            // 删除对象, 如果对象没有其他引用则会顺利删除，否则会失败
+            OssObjSvc::del_with_file(extra.obj_id, Some(db)).await.ok();
+        }
         Ok(ro)
     }
 
@@ -55,18 +47,10 @@ impl OssObjRefSvc {
     /// * `Ok(Ro<Vec<OssObjRefVo>>)` - 删除成功，返回封装了Vo的Ro对象
     /// * `Err(SvcError)` - 删除失败，可能是数据库错误
     #[db_unwrap(transaction_required)]
-    pub async fn del_by_bucket_id<C>(
-        bucket_id: u64,
-        current_user_id: u64,
-        db: Option<&C>,
-    ) -> Result<Ro<()>, SvcError>
+    pub async fn del_by_bucket_id<C>(bucket_id: u64, db: Option<&C>) -> Result<Ro<()>, SvcError>
     where
         C: ConnectionTrait,
     {
-        warn!(
-            "ID为<{}>的用户将删除oss_obj_ref中bucket_id={}的记录",
-            current_user_id, bucket_id
-        );
         OssObjRefDao::delete_by_bucket_id(bucket_id, db).await?;
         Ok(Ro::success("删除成功".to_string()))
     }

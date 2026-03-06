@@ -3,17 +3,7 @@
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(
-    utoipa :: ToSchema,
-    Clone,
-    Debug,
-    PartialEq,
-    DeriveEntityModel,
-    Eq,
-    Serialize,
-    Deserialize,
-    Default,
-)]
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, Default)]
 #[sea_orm(table_name = "oss_bucket")]
 pub struct Model {
     #[sea_orm(column_name = "_id", primary_key, auto_increment = false, unique)]

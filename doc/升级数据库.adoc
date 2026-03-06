@@ -22,7 +22,7 @@
 
 [source,bash]
 ----
-sea-orm-cli generate entity --model-extra-derives utoipa::ToSchema,Default --with-serde both --ignore-tables _sqlx_migrations --database-url postgres://ossrs:ossrs@pgsql/ossrs -o src/model
+sea-orm-cli generate entity --model-extra-derives combine_structs::Fields,Default --with-serde both --ignore-tables _sqlx_migrations --database-url postgres://ossrs:ossrs@pgsql/ossrs -o src/model
 ----
 
 - model-extra-derives: 模型文件添加的 trait，例如 `Default`
