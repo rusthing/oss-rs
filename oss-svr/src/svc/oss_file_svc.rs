@@ -104,14 +104,15 @@ impl OssFileSvc {
                 .to_string();
 
             // 新增对象
-            let oss_obj_add_dto = OssObjAddDto {
-                id: Some(obj_id),
-                hash: Some(hash.to_string()),
-                size: Some(file_size),
-                path: Some(new_file_path.to_string()),
-                is_completed: Some(is_completed),
-                current_user_id,
-            };
+            let oss_obj_add_dto = OssObjAddDto::builder()
+                .id(obj_id)
+                .hash(hash.to_string())
+                .size(file_size)
+                .path(new_file_path.to_string())
+                .is_completed(is_completed)
+                .current_user_id(current_user_id)
+                .build();
+
             debug!("新增对象: {:?}", oss_obj_add_dto);
             let add_ro = OssObjSvc::add(oss_obj_add_dto, Some(db)).await?;
             if let Some(obj_vo) = add_ro.extra {
@@ -125,15 +126,15 @@ impl OssFileSvc {
         let obj_ref_id = get_id_worker()?.next_id()?;
         let obj_ref_name = format!("{}.{}", obj_ref_id, ext);
         let obj_ref_url = format!("/oss/file/preview/{}", obj_ref_name);
-        let oss_obj_ref_add_dto = OssObjRefAddDto {
-            id: Some(obj_ref_id),
-            name: Some(file_name.to_string()),
-            bucket_id: Some(one_bucket.id),
-            obj_id: Some(obj_id),
-            ext: Some(ext.to_string()),
-            url: Some(obj_ref_url),
-            current_user_id,
-        };
+        let oss_obj_ref_add_dto = OssObjRefAddDto::builder()
+            .id(obj_ref_id)
+            .name(file_name.to_string())
+            .bucket_id(one_bucket.id)
+            .obj_id(obj_id)
+            .ext(ext.to_string())
+            .url(obj_ref_url)
+            .current_user_id(current_user_id)
+            .build();
         debug!("新增对象引用: {:?}", oss_obj_ref_add_dto);
         let obj_ref_ro = OssObjRefSvc::add(oss_obj_ref_add_dto, Some(db)).await?;
 
