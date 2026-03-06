@@ -1,6 +1,6 @@
 use crate::dao::oss_bucket_dao::OssBucketDao;
+use crate::dto::oss_bucket_dto::{OssBucketAddDto, OssBucketModifyDto, OssBucketSaveDto};
 use crate::model::oss_bucket::ActiveModel;
-use crate::model::oss_bucket::Model;
 use crate::svc::oss_obj_ref_svc::OssObjRefSvc;
 use crate::svc::oss_obj_svc::OssObjSvc;
 use crate::vo::oss_bucket_vo::OssBucketVo;
@@ -10,7 +10,7 @@ use robotech::svc::SvcError;
 use robotech_macros::{db_unwrap, svc};
 use sea_orm::ConnectionTrait;
 
-#[svc(del, get_by_id)]
+#[svc]
 pub struct OssBucketSvc;
 
 impl OssBucketSvc {
