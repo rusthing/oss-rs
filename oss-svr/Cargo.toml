@@ -17,6 +17,8 @@ log = { workspace = true }
 tracing = { workspace = true }
 clap = { workspace = true, features = ["derive"] }
 chrono = { workspace = true }
+derive_setters = { workspace = true }
+typed-builder = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_with = { workspace = true }
 tokio = { workspace = true, features = ["rt", "rt-multi-thread", "macros", "signal"] }
