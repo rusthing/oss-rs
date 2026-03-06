@@ -1,7 +1,5 @@
 use crate::app::get_app_config;
 use crate::dao::oss_obj_ref_dao::OssObjRefDao;
-use crate::dto::oss_obj_dto::OssObjAddDto;
-use crate::dto::oss_obj_ref_dto::OssObjRefAddDto;
 use crate::model;
 use crate::svc::oss_bucket_svc::OssBucketSvc;
 use crate::svc::oss_obj_ref_svc::OssObjRefSvc;
@@ -11,11 +9,11 @@ use chrono::{Local, TimeZone};
 use idworker::get_id_worker;
 use log::{debug, error, warn};
 use robotech::dao::begin_transaction;
-use robotech::env::{APP_ENV, EnvError};
+use robotech::env::{EnvError, APP_ENV};
 use robotech::ro::Ro;
 use robotech::svc::SvcError;
 use robotech_macros::db_unwrap;
-use sea_orm::ConnectionTrait;
+use sea_orm::{ActiveValue, ConnectionTrait};
 use std::fs;
 use std::fs::File;
 use std::io::{Read, Seek, SeekFrom};
@@ -103,13 +101,14 @@ impl OssFileSvc {
                 .to_string();
 
             // 新增对象
-            let oss_obj_add_dto = OssObjAddDto {
-                id: Some(obj_id),
-                hash: Some(hash.to_string()),
-                size: Some(file_size),
-                path: Some(new_file_path.to_string()),
-                is_completed: Some(is_completed),
-                current_user_id,
+            let oss_obj_add_dto = model::oss_obj::ActiveModel {
+                id: ActiveValue::Set(obj_id as i64),
+                hash: ActiveValue::Set(hash.to_string()),
+                size: ActiveValue::Set(file_size as i64),
+                path: ActiveValue::Set(new_file_path.to_string()),
+                is_completed: ActiveValue::Set(is_completed),
+                creator_id: ActiveValue::Set(current_user_id as i64),
+                ..Default::default()
             };
             debug!("新增对象: {:?}", oss_obj_add_dto);
             let add_ro = OssObjSvc::add(oss_obj_add_dto, Some(db)).await?;
@@ -124,14 +123,15 @@ impl OssFileSvc {
         let obj_ref_id = get_id_worker()?.next_id()?;
         let obj_ref_name = format!("{}.{}", obj_ref_id, ext);
         let obj_ref_url = format!("/oss/file/preview/{}", obj_ref_name);
-        let oss_obj_ref_add_dto = OssObjRefAddDto {
-            id: Some(obj_ref_id),
-            name: Some(file_name.to_string()),
-            bucket_id: Some(one_bucket.id),
-            obj_id: Some(obj_id),
-            ext: Some(ext.to_string()),
-            url: Some(obj_ref_url),
-            current_user_id,
+        let oss_obj_ref_add_dto = model::oss_obj_ref::ActiveModel {
+            id: ActiveValue::Set(obj_ref_id as i64),
+            name: ActiveValue::Set(file_name.to_string()),
+            bucket_id: ActiveValue::Set(one_bucket.id as i64),
+            obj_id: ActiveValue::Set(obj_id as i64),
+            ext: ActiveValue::Set(ext.to_string()),
+            url: ActiveValue::Set(obj_ref_url),
+            creator_id: ActiveValue::Set(current_user_id as i64),
+            ..Default::default()
         };
         debug!("新增对象引用: {:?}", oss_obj_ref_add_dto);
         let obj_ref_ro = OssObjRefSvc::add(oss_obj_ref_add_dto, Some(db)).await?;

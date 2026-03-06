@@ -8,7 +8,7 @@ use robotech::dao::begin_transaction;
 use robotech::ro::Ro;
 use robotech::svc::SvcError;
 use robotech_macros::{db_unwrap, svc};
-use sea_orm::ConnectionTrait;
+use sea_orm::{ActiveValue, ConnectionTrait};
 use std::fs;
 
 #[svc]
@@ -37,9 +37,10 @@ impl OssObjSvc {
         C: ConnectionTrait,
     {
         let ro = Self::del(id, current_user_id, Some(db)).await?;
-        let path = ro.extra.clone().unwrap().path.clone();
-        // 删除文件
-        fs::remove_file(path)?;
+        if let Some(extra) = ro.extra.clone() {
+            // 删除文件
+            fs::remove_file(extra.path)?;
+        }
         Ok(ro)
     }
 

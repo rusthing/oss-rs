@@ -3,10 +3,20 @@
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, Default)]
+#[derive(
+    Clone,
+    Debug,
+    PartialEq,
+    DeriveEntityModel,
+    Eq,
+    Serialize,
+    Deserialize,
+    utoipa :: ToSchema,
+    Default,
+)]
 #[sea_orm(table_name = "oss_obj")]
 pub struct Model {
-    #[sea_orm(column_name = "_id", primary_key, auto_increment = false)]
+    #[sea_orm(column_name = "_id", primary_key, auto_increment = false, unique)]
     pub id: i64,
     pub is_completed: bool,
     #[sea_orm(unique)]

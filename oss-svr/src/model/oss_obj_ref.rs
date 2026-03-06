@@ -3,17 +3,25 @@
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize, Default)]
+#[derive(
+    Clone,
+    Debug,
+    PartialEq,
+    DeriveEntityModel,
+    Eq,
+    Serialize,
+    Deserialize,
+    utoipa :: ToSchema,
+    Default,
+)]
 #[sea_orm(table_name = "oss_obj_ref")]
 pub struct Model {
-    #[sea_orm(column_name = "_id", primary_key, auto_increment = false)]
+    #[sea_orm(column_name = "_id", primary_key, auto_increment = false, unique)]
     pub id: i64,
     pub obj_id: i64,
     pub bucket_id: i64,
     pub name: String,
     pub ext: String,
-    #[sea_orm(unique)]
-    pub url: String,
     #[sea_orm(column_name = "_creator_id")]
     pub creator_id: i64,
     #[sea_orm(column_name = "_create_timestamp")]
@@ -22,6 +30,8 @@ pub struct Model {
     pub updator_id: i64,
     #[sea_orm(column_name = "_update_timestamp")]
     pub update_timestamp: i64,
+    #[sea_orm(unique)]
+    pub url: String,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
