@@ -4,19 +4,20 @@ use robotech_macros::{add_dto, modify_dto, save_dto};
 use sea_orm::ActiveValue;
 use serde_with::serde_as;
 use typed_builder::TypedBuilder;
+use wheel_rs::serde::u64_option_serde;
 
 #[add_dto]
 pub struct OssObjRefAddDto {
     /// 对象ID
     #[validate(required(message = "对象ID不能为空"))]
     #[into(match ~ {Some(v)=>ActiveValue::Set(v as i64),None=>ActiveValue::NotSet})]
-    #[serde_as(as = "Option<String>")]
+    #[serde(with = "u64_option_serde")]
     #[builder(default, setter(strip_option))]
     pub obj_id: Option<u64>,
     /// 存储桶ID
     #[validate(required(message = "对象ID不能为空"))]
     #[into(match ~ {Some(v)=>ActiveValue::Set(v as i64),None=>ActiveValue::NotSet})]
-    #[serde_as(as = "Option<String>")]
+    #[serde(with = "u64_option_serde")]
     #[builder(default, setter(strip_option))]
     pub bucket_id: Option<u64>,
     /// 名称
@@ -49,12 +50,12 @@ pub struct OssObjRefAddDto {
 pub struct OssObjRefModifyDto {
     /// 对象ID
     #[into(match ~ {Some(v)=>ActiveValue::Set(v as i64),None=>ActiveValue::NotSet})]
-    #[serde_as(as = "Option<String>")]
+    #[serde(with = "u64_option_serde")]
     #[builder(default, setter(strip_option))]
     pub obj_id: Option<u64>,
     /// 存储桶ID
     #[into(match ~ {Some(v)=>ActiveValue::Set(v as i64),None=>ActiveValue::NotSet})]
-    #[serde_as(as = "Option<String>")]
+    #[serde(with = "u64_option_serde")]
     #[builder(default, setter(strip_option))]
     pub bucket_id: Option<u64>,
     /// 名称
@@ -74,11 +75,11 @@ pub struct OssObjRefModifyDto {
 #[save_dto]
 pub struct OssObjRefSaveDto {
     /// 对象ID
-    #[serde_as(as = "Option<String>")]
     #[builder(default, setter(strip_option))]
+    #[serde(with = "u64_option_serde")]
     pub obj_id: Option<u64>,
     /// 存储桶ID
-    #[serde_as(as = "Option<String>")]
+    #[serde(with = "u64_option_serde")]
     #[builder(default, setter(strip_option))]
     pub bucket_id: Option<u64>,
     /// 名称

@@ -4,6 +4,7 @@ use robotech_macros::{add_dto, modify_dto, save_dto};
 use sea_orm::ActiveValue;
 use serde_with::serde_as;
 use typed_builder::TypedBuilder;
+use wheel_rs::serde::u64_option_serde;
 
 #[add_dto]
 pub struct OssObjAddDto {
@@ -18,7 +19,7 @@ pub struct OssObjAddDto {
     /// 文件大小
     #[validate(required(message = "文件大小不能为空"))]
     #[into(match ~ {Some(v)=>ActiveValue::Set(v as i64),None=>ActiveValue::NotSet})]
-    #[serde_as(as = "Option<String>")]
+    #[serde(with = "u64_option_serde")]
     #[builder(default, setter(strip_option))]
     pub size: Option<u64>,
     /// Hash
@@ -43,7 +44,7 @@ pub struct OssObjModifyDto {
     pub path: Option<String>,
     /// 文件大小
     #[into(match ~ {Some(v)=>ActiveValue::Set(v as i64),None=>ActiveValue::NotSet})]
-    #[serde_as(as = "Option<String>")]
+    #[serde(with = "u64_option_serde")]
     #[builder(default, setter(strip_option))]
     pub size: Option<u64>,
     /// Hash
@@ -63,6 +64,7 @@ pub struct OssObjSaveDto {
     pub path: Option<String>,
     /// 文件大小
     #[builder(default, setter(strip_option))]
+    #[serde(with = "u64_option_serde")]
     pub size: Option<u64>,
     /// Hash
     #[builder(default, setter(strip_option))]
