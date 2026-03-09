@@ -4,7 +4,7 @@ use robotech_macros::{add_dto, modify_dto, save_dto};
 use sea_orm::ActiveValue;
 use serde_with::serde_as;
 use typed_builder::TypedBuilder;
-use wheel_rs::serde::option_option_serde;
+use wheel_rs::serde::{option_option_serde, u64_option_serde};
 
 #[add_dto]
 pub struct OssBucketAddDto {
