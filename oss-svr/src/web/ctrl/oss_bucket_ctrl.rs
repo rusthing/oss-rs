@@ -1,56 +1,19 @@
 use crate::dto::oss_bucket_dto::{OssBucketAddDto, OssBucketModifyDto, OssBucketSaveDto};
-use crate::model::oss_bucket::{ActiveModel, Model};
-use crate::svc::oss_bucket_svc;
 use crate::svc::oss_bucket_svc::OssBucketSvc;
 use crate::vo::oss_bucket_vo::OssBucketVo;
-use crate::web::ctrl::oss_bucket_ctrl;
-use axum::extract::{Path, Query, State};
+use axum::extract::Path;
 use axum::http::HeaderMap;
 use axum::response::Json;
-use axum::routing::{delete, get};
-use axum::Router;
 use robotech::macros::log_call;
 use robotech::ro::Ro;
 use robotech::web::ctrl_utils::get_current_user_id;
 use robotech::web::CtrlError;
 use robotech_macros::ctrl;
 use sea_orm::{DatabaseConnection, DatabaseTransaction};
-use std::collections::HashMap;
 use validator::Validate;
 
-// #[ctrl(get_by_id)]
+#[ctrl]
 struct OssBucketCtrl;
-
-/// # 根据ID获取记录的信息
-///
-/// 该接口通过查询参数中的ID获取对应记录的详细信息
-///
-/// ## 查询参数
-/// * `id` - 记录的唯一标识符，类型为u64
-///
-/// ## 返回值
-/// * 成功时返回对应的记录信息的JSON格式数据
-/// * 失败时返回相应的错误信息
-///
-/// ## 错误处理
-/// * 当缺少参数`id`时，返回`ValidationError`错误
-/// * 当参数`id`格式不正确时，返回`ValidationError`错误
-/// * 当根据ID找不到对应记录时，返回相应的错误信息
-#[utoipa::path(
-    get,
-    path = "/oss/bucket/{id}",
-    params(
-        ("id" = u64, Path, description = "记录的唯一标识符")
-    ),
-    responses(
-        (status = OK, body = Ro<OssBucketVo>)
-    )
-)]
-#[log_call]
-pub async fn get_by_id(Path(id): Path<u64>) -> Result<Json<Ro<OssBucketVo>>, CtrlError> {
-    let ro = OssBucketSvc::get_by_id::<DatabaseConnection>(id, None).await?;
-    Ok(Json(ro))
-}
 
 /// # 级联删除记录
 ///
