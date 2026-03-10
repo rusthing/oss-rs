@@ -1,15 +1,7 @@
-use crate::dto::oss_obj_dto::{OssObjAddDto, OssObjModifyDto, OssObjSaveDto};
-use crate::svc::oss_obj_svc::OssObjSvc;
-use crate::vo::oss_obj_vo::OssObjVo;
-use actix_web::web::Query;
-use actix_web::{HttpRequest, HttpResponse, Result, delete, get, post, put, web};
-use robotech::macros::log_call;
-use robotech::ro::Ro;
-use robotech::web::CtrlError;
+use crate::dto::{OssObjAddDto, OssObjModifyDto, OssObjSaveDto};
+use crate::svc::OssObjSvc;
+use crate::vo::OssObjVo;
 use robotech_macros::ctrl;
-use sea_orm::{DatabaseConnection, DatabaseTransaction};
-use std::collections::HashMap;
-use validator::Validate;
 
-// #[ctrl]
+#[ctrl]
 struct OssObjCtrl;

@@ -1,14 +1,8 @@
-use crate::dao::oss_obj_dao::OssObjDao;
-use crate::dto::oss_obj_dto::{OssObjAddDto, OssObjModifyDto, OssObjSaveDto};
+use crate::dao::OssObjDao;
+use crate::dto::{OssObjAddDto, OssObjModifyDto, OssObjSaveDto};
 use crate::model::oss_obj::ActiveModel;
-use crate::model::oss_obj::Model;
-use crate::vo::oss_obj_vo::OssObjVo;
-use log::warn;
-use robotech::dao::begin_transaction;
-use robotech::ro::Ro;
-use robotech::svc::SvcError;
-use robotech_macros::{db_unwrap, svc};
-use sea_orm::{ActiveValue, ConnectionTrait};
+use crate::vo::OssObjVo;
+use robotech_macros::svc;
 use std::fs;
 
 #[svc]

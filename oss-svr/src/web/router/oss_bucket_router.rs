@@ -1,4 +1,4 @@
-use crate::web::ctrl::oss_bucket_ctrl;
+use crate::web::ctrl::oss_bucket_ctrl::*;
 use axum::{
     routing::{delete, get, post, put},
     Router,
@@ -6,13 +6,10 @@ use axum::{
 
 pub(super) fn routes(router: Router) -> Router {
     router
-        .route("/oss/bucket", post(oss_bucket_ctrl::add))
-        .route("/oss/bucket", put(oss_bucket_ctrl::modify))
-        .route("/oss/bucket/save", post(oss_bucket_ctrl::save))
-        .route("/oss/bucket/{id}", delete(oss_bucket_ctrl::del))
-        .route("/oss/bucket/{id}", get(oss_bucket_ctrl::get_by_id))
-        .route(
-            "/oss/bucket/cascade/{id}",
-            delete(oss_bucket_ctrl::del_cascade),
-        )
+        .route("/oss/bucket", post(add)) // 添加
+        .route("/oss/bucket", put(modify)) // 修改
+        .route("/oss/bucket/save", post(save)) // 保存
+        .route("/oss/bucket/{id}", delete(del)) // 删除
+        .route("/oss/bucket/{id}", get(get_by_id)) // 根据id获取
+        .route("/oss/bucket/cascade/{id}", delete(del_cascade)) // 级联删除
 }
