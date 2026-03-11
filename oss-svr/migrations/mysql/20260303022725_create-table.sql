@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2026/3/11 12:38:03                           */
+/* Created on:     2026/3/11 13:13:53                           */
 /*==============================================================*/
 
 
@@ -28,7 +28,7 @@ alter table oss_bucket comment '桶';
 create table oss_obj
 (
     _id                  bigint not null  comment 'ID',
-    is_completed         bit(1) not null default true  comment '是否完成',
+    is_completed         bit(1) not null  comment '是否完成',
     path                 varchar(100) not null  comment '路径
              存储文件的路径',
     size                 bigint not null  comment '大小',
