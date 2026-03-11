@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2026/3/11 13:13:53                           */
+/* Created on:     2026/3/11 15:07:48                           */
 /*==============================================================*/
 
 
@@ -39,7 +39,7 @@ create table oss_obj
    _update_timestamp    bigint not null  comment '修改时间戳',
    primary key (_id),
    unique key AK_PATH (path),
-   unique key AK_SIZE_ANE_HASH (size, hash)
+   unique key AK_SIZE_AND_HASH (size, hash)
 );
 
 alter table oss_obj comment '对象';

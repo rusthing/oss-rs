@@ -1,14 +1,14 @@
 // use crate::base::api::upload_form::UploadForm;
-// use crate::svc::oss_file_svc::OssFileSvc;
-// use crate::vo::oss_obj_ref_vo::OssObjRefVo;
-// use actix_multipart::form::MultipartForm;
-// use actix_web::{HttpRequest, HttpResponse, Result, get, post, web};
+// use crate::svc::OssFileSvc;
+// use crate::vo::OssObjRefVo;
+// use axum::http::HeaderMap;
+// use axum::Json;
 // use once_cell::sync::Lazy;
 // use regex::Regex;
 // use robotech::macros::log_call;
 // use robotech::ro::Ro;
-// use robotech::web::CtrlError;
 // use robotech::web::ctrl_utils::get_current_user_id;
+// use robotech::web::CtrlError;
 // use sea_orm::DatabaseTransaction;
 // use wheel_rs::file_utils::calc_hash;
 //
@@ -38,11 +38,11 @@
 // #[log_call]
 // pub async fn upload(
 //     bucket: web::Path<String>,
+//     headers: HeaderMap,
 //     MultipartForm(form): MultipartForm<UploadForm>,
-//     req: HttpRequest,
-// ) -> Result<HttpResponse, CtrlError> {
+// ) -> Result<Json<Ro<OssObjRefVo>>, CtrlError> {
 //     // 从header中解析当前用户ID，如果没有或解析失败则抛出ApiError
-//     let current_user_id = get_current_user_id(req)?;
+//     let current_user_id = get_current_user_id(&headers)?;
 //
 //     let bucket = bucket.into_inner();
 //     if bucket.is_empty() {
@@ -68,7 +68,7 @@
 //     let ro = OssFileSvc::upload::<DatabaseTransaction>(
 //         &bucket,
 //         &file_name,
-//         file_size,
+//         file_size as u64,
 //         &hash,
 //         temp_file,
 //         current_user_id,
@@ -76,7 +76,7 @@
 //     )
 //     .await?;
 //
-//     Ok(HttpResponse::Ok().json(ro))
+//     Ok(Json(ro))
 // }
 //
 // /// # 下载文件

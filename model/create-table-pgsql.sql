@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      PostgreSQL 9.x                               */
-/* Created on:     2026/3/11 13:06:01                           */
+/* Created on:     2026/3/11 15:09:22                           */
 /*==============================================================*/
 
 
@@ -65,7 +65,7 @@ create table oss_obj (
    _update_timestamp    INT8                 not null,
    constraint PK_OSS_OBJ primary key (_id),
    constraint AK_PATH_OSS_OBJ unique (path),
-   constraint AK_SIZE_ANE_HASH_OSS_OBJ unique (size, hash)
+   constraint AK_SIZE_AND_HASH_OSS_OBJ unique (size, hash)
 );
 
 comment on table oss_obj is

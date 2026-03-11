@@ -2,7 +2,6 @@ use crate::app::get_app_config;
 use crate::dao::OssObjRefDao;
 use crate::dto::OssObjAddDto;
 use crate::dto::OssObjRefAddDto;
-use crate::model;
 use crate::svc::OssBucketSvc;
 use crate::svc::OssObjRefSvc;
 use crate::svc::OssObjSvc;
@@ -16,7 +15,7 @@ use robotech::env::{EnvError, APP_ENV};
 use robotech::ro::Ro;
 use robotech::svc::SvcError;
 use robotech_macros::db_unwrap;
-use sea_orm::{ActiveValue, ConnectionTrait};
+use sea_orm::ConnectionTrait;
 use std::fs;
 use std::fs::File;
 use std::io::{Read, Seek, SeekFrom};
@@ -116,7 +115,7 @@ impl OssFileSvc {
             debug!("新增对象: {:?}", oss_obj_add_dto);
             let add_ro = OssObjSvc::add(oss_obj_add_dto, Some(db)).await?;
             if let Some(obj_vo) = add_ro.extra {
-                (obj_vo.id as u64, new_file_path)
+                (obj_vo.id, new_file_path)
             } else {
                 return Err(SvcError::Runtime(anyhow!("新增对象失败".to_string())));
             }
