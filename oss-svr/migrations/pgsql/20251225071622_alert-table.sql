@@ -1,6 +1,4 @@
 -- 迁移脚本：将 url 字段从 oss_obj 表迁移到 oss_obj_ref 表
-BEGIN;
-
 -- 1. 从 oss_obj 表中删除 url 字段（先保存数据）
 -- 创建临时表保存数据
 CREATE TEMP TABLE temp_url_data AS
@@ -30,5 +28,3 @@ ALTER TABLE oss_obj_ref ADD CONSTRAINT AK_URL_OSS_OBJ_ UNIQUE (url);
 
 -- 7. 更新表注释
 COMMENT ON COLUMN oss_obj_ref.url IS 'URL';
-
-COMMIT;
