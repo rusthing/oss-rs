@@ -2,6 +2,7 @@ use crate::model::oss_obj::{ActiveModel, Column, Entity, Model};
 use crate::model::oss_obj_ref::{Column as OssObjRefColumn, Entity as OssObjRefEntity};
 use once_cell::sync::Lazy;
 use robotech::dao::{push_unique_field, DaoError};
+use robotech::define_unique_fields;
 use robotech::macros::dao;
 use sea_orm::{
     ActiveModelTrait, ActiveValue, ColumnTrait, ConnectionTrait, EntityTrait, QueryFilter,
@@ -9,16 +10,13 @@ use sea_orm::{
 };
 use std::collections::HashMap;
 
-/// # 存储unique字段的HashMap
-///
-/// 在捕获到数据库重复键异常时，提取字段名称时可据此获取到字段的中文意义，方便提示给用户
-static UNIQUE_FIELDS: Lazy<HashMap<&'static str, &'static str>> = Lazy::new(|| {
-    let mut unique_fields = HashMap::new();
-    push_unique_field(&mut unique_fields, "oss_obj", "path", "对象路径");
-    push_unique_field(&mut unique_fields, "oss_obj", "size,hash", "对象大小与Hash");
-    push_unique_field(&mut unique_fields, "oss_obj", "url", "对象URL");
-    unique_fields
-});
+// 定义唯一字段列表
+define_unique_fields! {
+    "oss_obj",
+    ("path", "对象路径"),
+    ("size,hash", "对象大小与 Hash"),
+    ("url", "对象 URL"),
+}
 
 #[dao]
 pub struct OssObjDao;
