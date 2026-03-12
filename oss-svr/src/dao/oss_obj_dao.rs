@@ -1,13 +1,10 @@
 use crate::model::oss_obj::{ActiveModel, Column, Entity, Model};
 use crate::model::oss_obj_ref::{Column as OssObjRefColumn, Entity as OssObjRefEntity};
 use once_cell::sync::Lazy;
-use robotech::dao::{push_unique_field, DaoError};
-use robotech::define_unique_fields;
+use robotech::dao::{push_unique_field, ForeignKey};
 use robotech::macros::dao;
-use sea_orm::{
-    ActiveModelTrait, ActiveValue, ColumnTrait, ConnectionTrait, EntityTrait, QueryFilter,
-    QuerySelect, QueryTrait,
-};
+use robotech::{define_foreign_keys, define_unique_fields};
+use sea_orm::{ColumnTrait, QueryFilter, QuerySelect, QueryTrait};
 use std::collections::HashMap;
 
 // 定义唯一字段列表
@@ -17,6 +14,9 @@ define_unique_fields! {
     ("size,hash", "对象大小与 Hash"),
     ("url", "对象 URL"),
 }
+
+// 定义外键列表
+define_foreign_keys! {}
 
 #[dao]
 pub struct OssObjDao;
@@ -48,7 +48,7 @@ impl OssObjDao {
             )
             .all(db)
             .await
-            .map_err(|e| DaoError::parse_db_err(e, &UNIQUE_FIELDS))
+            .map_err(|e| DaoError::parse_db_err(e, &UNIQUE_FIELDS, &FOREIGN_KEYS))
     }
 
     /// # 根据哈希值和大小查询记录
@@ -76,6 +76,6 @@ impl OssObjDao {
             .filter(Column::Size.eq(size))
             .one(db)
             .await
-            .map_err(|e| DaoError::parse_db_err(e, &UNIQUE_FIELDS))
+            .map_err(|e| DaoError::parse_db_err(e, &UNIQUE_FIELDS, &FOREIGN_KEYS))
     }
 }

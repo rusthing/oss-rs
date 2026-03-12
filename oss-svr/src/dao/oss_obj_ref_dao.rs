@@ -1,19 +1,23 @@
 use crate::model::oss_obj_ref::{ActiveModel, Column, Entity, Model};
 use crate::model::{oss_bucket, oss_obj};
 use once_cell::sync::Lazy;
-use robotech::dao::{push_unique_field, DaoError};
-use robotech::define_unique_fields;
+use robotech::dao::{push_feign_key, push_unique_field, ForeignKey};
 use robotech::macros::dao;
-use sea_orm::{
-    ActiveModelTrait, ActiveValue, ColumnTrait, ConnectionTrait, DeleteResult, EntityTrait,
-    QueryFilter,
-};
+use robotech::{define_foreign_keys, define_unique_fields};
+use sea_orm::{ColumnTrait, DeleteResult, QueryFilter};
 use std::collections::HashMap;
 
 // 定义唯一字段列表
 define_unique_fields! {
     "oss_obj_ref",
     ("url", "对象引用的URL"),
+}
+
+// 定义外键列表
+define_foreign_keys! {
+    "oss_obj_ref", "对象引用",
+    ("bucket_id", "oss_bucket", "桶"),
+    ("obj_id", "oss_obj", "对象"),
 }
 
 #[dao]
@@ -28,7 +32,7 @@ impl OssObjRefDao {
             .filter(Column::BucketId.eq(bucket_id))
             .exec(db)
             .await
-            .map_err(|e| DaoError::parse_db_err(e, &UNIQUE_FIELDS))
+            .map_err(|e| DaoError::parse_db_err(e, &UNIQUE_FIELDS, &FOREIGN_KEYS))
     }
 
     /// # 根据ID查询记录
@@ -59,6 +63,6 @@ impl OssObjRefDao {
                     (model, bucket_option.unwrap(), obj_option.unwrap())
                 })
             })
-            .map_err(|e| DaoError::parse_db_err(e, &UNIQUE_FIELDS))
+            .map_err(|e| DaoError::parse_db_err(e, &UNIQUE_FIELDS, &FOREIGN_KEYS))
     }
 }

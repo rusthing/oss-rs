@@ -1,11 +1,9 @@
 use crate::model::oss_bucket::{ActiveModel, Column, Entity, Model};
 use once_cell::sync::Lazy;
-use robotech::dao::{push_unique_field, DaoError};
-use robotech::define_unique_fields;
+use robotech::dao::{push_unique_field, ForeignKey};
 use robotech::macros::dao;
-use sea_orm::{
-    ActiveModelTrait, ActiveValue, ColumnTrait, ConnectionTrait, EntityTrait, QueryFilter,
-};
+use robotech::{define_foreign_keys, define_unique_fields};
+use sea_orm::{ColumnTrait, QueryFilter};
 use std::collections::HashMap;
 
 // 定义唯一字段列表
@@ -13,6 +11,9 @@ define_unique_fields! {
     "oss_bucket",
     ("name", "桶名称"),
 }
+
+// 定义外键列表
+define_foreign_keys! {}
 
 #[dao]
 pub struct OssBucketDao;
