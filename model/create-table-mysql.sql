@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2026/3/11 15:07:48                           */
+/* Created on:     2026/3/12 11:23:16                           */
 /*==============================================================*/
 
 
@@ -65,9 +65,9 @@ create table oss_obj_ref
 
 alter table oss_obj_ref comment '对象引用';
 
-alter table oss_obj_ref add constraint FK_OSS_OBJ__RELATIONS_OSS_OBJ foreign key (obj_id)
+alter table oss_obj_ref add constraint fk_obj_id__from__oss_obj foreign key (obj_id)
       references oss_obj (_id) on delete restrict on update restrict;
 
-alter table oss_obj_ref add constraint FK_OSS_OBJ__RELATIONS_OSS_BUCK foreign key (bucket_id)
+alter table oss_obj_ref add constraint fk_bucket_id__from__oss_bucket foreign key (bucket_id)
       references oss_bucket (_id) on delete restrict on update restrict;
 
