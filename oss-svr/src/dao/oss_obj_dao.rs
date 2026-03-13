@@ -1,10 +1,9 @@
 use crate::model::oss_obj::{ActiveModel, Column, Entity, Model};
 use crate::model::oss_obj_ref::{Column as OssObjRefColumn, Entity as OssObjRefEntity};
+use linkme::distributed_slice;
 use robotech::macros::dao;
-use robotech_macros::{define_foreign_keys, define_unique_fields};
+use robotech_macros::define_unique_fields;
 use sea_orm::{ColumnTrait, QueryFilter, QuerySelect, QueryTrait};
-use std::collections::HashMap;
-use std::sync::LazyLock;
 
 // 定义唯一字段列表
 define_unique_fields! {
@@ -13,17 +12,6 @@ define_unique_fields! {
     ("size,hash", "对象大小与Hash"),
     ("url", "对象 URL"),
 }
-use linkme::distributed_slice;
-use robotech::dao::UNIQUE_FIELDS_SLICE;
-#[distributed_slice(UNIQUE_FIELDS_SLICE)]
-static UNIQUE_FIELD_1: (&str, &str, &str) = ("oss_obj", "path", "对象路径");
-#[distributed_slice(UNIQUE_FIELDS_SLICE)]
-static UNIQUE_FIELD_2: (&str, &str, &str) = ("oss_obj", "size,hash", "对象大小与Hash");
-#[distributed_slice(UNIQUE_FIELDS_SLICE)]
-static UNIQUE_FIELD_3: (&str, &str, &str) = ("oss_obj", "url", "对象URL");
-
-// 定义外键列表
-define_foreign_keys! {}
 
 #[dao]
 pub struct OssObjDao;
@@ -55,7 +43,7 @@ impl OssObjDao {
             )
             .all(db)
             .await
-            .map_err(|e| DaoError::parse_db_err(e, &FOREIGN_KEYS))
+            .map_err(|e| DaoError::parse_db_err(e))
     }
 
     /// # 根据哈希值和大小查询记录
@@ -83,6 +71,6 @@ impl OssObjDao {
             .filter(Column::Size.eq(size))
             .one(db)
             .await
-            .map_err(|e| DaoError::parse_db_err(e, &FOREIGN_KEYS))
+            .map_err(|e| DaoError::parse_db_err(e))
     }
 }

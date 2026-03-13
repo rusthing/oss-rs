@@ -1,20 +1,15 @@
 use crate::model::oss_obj_ref::{ActiveModel, Column, Entity, Model};
 use crate::model::{oss_bucket, oss_obj};
+use linkme::distributed_slice;
 use robotech::macros::dao;
 use robotech_macros::{define_foreign_keys, define_unique_fields};
 use sea_orm::{ColumnTrait, DeleteResult, QueryFilter};
-use std::collections::HashMap;
-use std::sync::LazyLock;
 
 // 定义唯一字段列表
 define_unique_fields! {
     "oss_obj_ref",
     ("url", "对象引用的URL"),
 }
-use linkme::distributed_slice;
-use robotech::dao::UNIQUE_FIELDS_SLICE;
-#[distributed_slice(UNIQUE_FIELDS_SLICE)]
-static UNIQUE_FIELD_1: (&str, &str, &str) = ("oss_obj_ref", "url", "对象引用的URL");
 
 // 定义外键列表
 define_foreign_keys! {
@@ -22,14 +17,6 @@ define_foreign_keys! {
     ("bucket_id", "oss_bucket", "桶"),
     ("obj_id", "oss_obj", "对象"),
 }
-// use linkme::distributed_slice;
-use robotech::dao::FOREIGN_KEYS_SLICE;
-#[distributed_slice(FOREIGN_KEYS_SLICE)]
-static FOREIGN_KEYS_1: (&str, &str, &str, &str, &str) =
-    ("oss_obj_ref", "对象引用", "bucket_id", "oss_bucket", "桶");
-#[distributed_slice(FOREIGN_KEYS_SLICE)]
-static FOREIGN_KEYS_2: (&str, &str, &str, &str, &str) =
-    ("oss_obj_ref", "对象引用", "obj_id", "oss_obj", "对象");
 
 #[dao]
 pub struct OssObjRefDao;
@@ -43,7 +30,7 @@ impl OssObjRefDao {
             .filter(Column::BucketId.eq(bucket_id))
             .exec(db)
             .await
-            .map_err(|e| DaoError::parse_db_err(e, &FOREIGN_KEYS))
+            .map_err(|e| DaoError::parse_db_err(e))
     }
 
     /// # 根据ID查询记录
@@ -74,6 +61,6 @@ impl OssObjRefDao {
                     (model, bucket_option.unwrap(), obj_option.unwrap())
                 })
             })
-            .map_err(|e| DaoError::parse_db_err(e, &FOREIGN_KEYS))
+            .map_err(|e| DaoError::parse_db_err(e))
     }
 }
