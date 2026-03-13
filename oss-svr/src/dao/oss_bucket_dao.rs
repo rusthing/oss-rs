@@ -1,5 +1,4 @@
 use crate::model::oss_bucket::{ActiveModel, Column, Entity, Model};
-use once_cell::sync::Lazy;
 use robotech::macros::dao;
 use robotech_macros::{define_foreign_keys, define_unique_fields};
 use sea_orm::{ColumnTrait, QueryFilter};

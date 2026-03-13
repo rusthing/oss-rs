@@ -3,7 +3,7 @@
 // use crate::vo::OssObjRefVo;
 // use axum::http::HeaderMap;
 // use axum::Json;
-// use once_cell::sync::Lazy;
+// use std::sync::LazyLock;
 // use regex::Regex;
 // use robotech::macros::log_call;
 // use robotech::ro::Ro;
@@ -292,7 +292,7 @@
 // }
 //
 // /// # 正则表达式，用于匹配对象ID的格式(19位数字+可选的扩展名)
-// static OBJ_ID_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"^(\d+)\.?([a-zA-Z0-9]*)$").unwrap());
+// static OBJ_ID_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^(\d+)\.?([a-zA-Z0-9]*)$").unwrap());
 //
 // /// # 解析对象ID
 // ///
