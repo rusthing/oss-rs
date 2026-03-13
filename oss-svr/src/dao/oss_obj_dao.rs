@@ -4,6 +4,7 @@ use robotech::macros::dao;
 use robotech_macros::{define_foreign_keys, define_unique_fields};
 use sea_orm::{ColumnTrait, QueryFilter, QuerySelect, QueryTrait};
 use std::collections::HashMap;
+use std::sync::LazyLock;
 
 // 定义唯一字段列表
 define_unique_fields! {
