@@ -10,7 +10,7 @@ use std::collections::HashMap;
 define_unique_fields! {
     "oss_obj",
     ("path", "对象路径"),
-    ("size,hash", "对象大小与 Hash"),
+    ("size,hash", "对象大小与Hash"),
     ("url", "对象 URL"),
 }
 
