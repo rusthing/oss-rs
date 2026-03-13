@@ -3,7 +3,7 @@ use crate::model::{oss_bucket, oss_obj};
 use once_cell::sync::Lazy;
 use robotech::dao::{push_feign_key, push_unique_field, ForeignKey};
 use robotech::macros::dao;
-use robotech::{define_foreign_keys, define_unique_fields};
+use robotech_macros::{define_foreign_keys, define_unique_fields};
 use sea_orm::{ColumnTrait, DeleteResult, QueryFilter};
 use std::collections::HashMap;
 

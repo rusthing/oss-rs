@@ -3,7 +3,7 @@ use crate::model::oss_obj_ref::{Column as OssObjRefColumn, Entity as OssObjRefEn
 use once_cell::sync::Lazy;
 use robotech::dao::{push_unique_field, ForeignKey};
 use robotech::macros::dao;
-use robotech::{define_foreign_keys, define_unique_fields};
+use robotech_macros::{define_foreign_keys, define_unique_fields};
 use sea_orm::{ColumnTrait, QueryFilter, QuerySelect, QueryTrait};
 use std::collections::HashMap;
 
