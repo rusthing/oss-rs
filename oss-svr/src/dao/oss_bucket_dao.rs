@@ -3,6 +3,7 @@ use robotech::macros::dao;
 use robotech_macros::{define_foreign_keys, define_unique_fields};
 use sea_orm::{ColumnTrait, QueryFilter};
 use std::collections::HashMap;
+use std::string::ToString;
 use std::sync::LazyLock;
 
 // 定义唯一字段列表
@@ -10,6 +11,10 @@ define_unique_fields! {
     "oss_bucket",
     ("name", "桶名称"),
 }
+use linkme::distributed_slice;
+use robotech::dao::UNIQUE_FIELDS_SLICE;
+#[distributed_slice(UNIQUE_FIELDS_SLICE)]
+static UNIQUE_FIELD_1: (&str, &str, &str) = ("oss_bucket", "name", "桶名称");
 
 // 定义外键列表
 define_foreign_keys! {}

@@ -13,6 +13,14 @@ define_unique_fields! {
     ("size,hash", "对象大小与Hash"),
     ("url", "对象 URL"),
 }
+use linkme::distributed_slice;
+use robotech::dao::UNIQUE_FIELDS_SLICE;
+#[distributed_slice(UNIQUE_FIELDS_SLICE)]
+static UNIQUE_FIELD_1: (&str, &str, &str) = ("oss_obj", "path", "对象路径");
+#[distributed_slice(UNIQUE_FIELDS_SLICE)]
+static UNIQUE_FIELD_2: (&str, &str, &str) = ("oss_obj", "size,hash", "对象大小与Hash");
+#[distributed_slice(UNIQUE_FIELDS_SLICE)]
+static UNIQUE_FIELD_3: (&str, &str, &str) = ("oss_obj", "url", "对象URL");
 
 // 定义外键列表
 define_foreign_keys! {}
@@ -47,7 +55,7 @@ impl OssObjDao {
             )
             .all(db)
             .await
-            .map_err(|e| DaoError::parse_db_err(e, &UNIQUE_FIELDS, &FOREIGN_KEYS))
+            .map_err(|e| DaoError::parse_db_err(e, &FOREIGN_KEYS))
     }
 
     /// # 根据哈希值和大小查询记录
@@ -75,6 +83,6 @@ impl OssObjDao {
             .filter(Column::Size.eq(size))
             .one(db)
             .await
-            .map_err(|e| DaoError::parse_db_err(e, &UNIQUE_FIELDS, &FOREIGN_KEYS))
+            .map_err(|e| DaoError::parse_db_err(e, &FOREIGN_KEYS))
     }
 }

@@ -12,7 +12,7 @@ use robotech::log::init_log;
 use robotech::macros::log_call;
 use robotech::signal::SignalManager;
 use robotech::web::{start_web_server, stop_web_service};
-use robotech_macros::{db_migrate, watch_cfg_file};
+use robotech_macros::{db_migrate, init_dao, watch_cfg_file};
 use std::sync::{mpsc, Arc};
 use std::time::Duration;
 use tokio::time::interval;
@@ -77,6 +77,21 @@ async fn main() -> anyhow::Result<()> {
     init_env()?;
     // 初始化日志系统
     init_log()?;
+    // 初始化数据访问层
+    // init_dao!()?;
+
+    use robotech::dao::{
+        eo::{ForeignKey, UniqueField},
+        init_foreign_keys, init_unique_fields,
+    };
+
+    init_unique_fields()?;
+    init_foreign_keys()?;
+
+    // init_unique_fields(
+    //
+    // )
+    // .await?;
 
     // 初始化信号(_signal_manager变量将在程序优雅退出时释放，释放时删除pid文件)
     let (mut signal_manager, old_pid) = SignalManager::new(signal)?;
