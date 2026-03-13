@@ -1,7 +1,6 @@
 use crate::model::oss_obj_ref::{ActiveModel, Column, Entity, Model};
 use crate::model::{oss_bucket, oss_obj};
 use once_cell::sync::Lazy;
-use robotech::dao::{push_feign_key, push_unique_field, ForeignKey};
 use robotech::macros::dao;
 use robotech_macros::{define_foreign_keys, define_unique_fields};
 use sea_orm::{ColumnTrait, DeleteResult, QueryFilter};
