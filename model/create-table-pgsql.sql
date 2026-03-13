@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      PostgreSQL 9.x                               */
-/* Created on:     2026/3/12 11:23:38                           */
+/* Created on:     2026/3/13 18:43:49                           */
 /*==============================================================*/
 
 
@@ -16,7 +16,7 @@ create table oss_bucket (
    _updator_id          INT8                 not null,
    _update_timestamp    INT8                 not null,
    constraint PK_OSS_BUCKET primary key (_id),
-   constraint AK_NAME_OSS_BUCK unique (name)
+   constraint AK_NAME_OSS_BUCKET unique (name)
 );
 
 comment on table oss_bucket is
@@ -121,7 +121,7 @@ create table oss_obj_ref (
    _updator_id          INT8                 not null,
    _update_timestamp    INT8                 not null,
    constraint PK_OSS_OBJ_REF primary key (_id),
-   constraint AK_URL_OSS_OBJ_ unique (url)
+   constraint AK_URL_OSS_OBJ_REF unique (url)
 );
 
 comment on table oss_obj_ref is
