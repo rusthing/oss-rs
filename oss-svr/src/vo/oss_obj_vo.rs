@@ -7,10 +7,10 @@ pub struct OssObjVo {
     pub id: u64,
     /// 文件路径
     pub path: String,
-    /// 文件Hash
-    pub hash: String,
     /// 文件大小
-    pub size: u64,
+    pub size: Option<u64>,
+    /// 文件Hash
+    pub hash: Option<String>,
     /// 是否完成
     pub is_completed: bool,
     /// 创建者ID
