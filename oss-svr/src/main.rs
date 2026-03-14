@@ -7,7 +7,7 @@ use oss_svr::web;
 use robotech::app::{build_app_cfg, wait_app_exit};
 use robotech::cfg::watch_cfg_file;
 use robotech::dao::init_dao;
-use robotech::db::init_db;
+use robotech::db::init_db_conn;
 use robotech::env::init_env;
 use robotech::log::init_log;
 use robotech::macros::log_call;
@@ -145,14 +145,14 @@ async fn apply_app_config(
     debug!("应用App配置...");
     let AppConfig {
         web_server: web_server_config,
-        db: db_config,
+        db: db_conn_config,
         id_worker: id_worker_config,
         ..
     } = app_config.clone();
     set_app_config(app_config)?;
 
     // 升级数据库版本...
-    let db_url = db_config.url.as_str();
+    let db_url = db_conn_config.url.as_str();
     db_migrate!(db_url);
     // migrate(db_config.clone())
     //     .await
@@ -162,7 +162,7 @@ async fn apply_app_config(
     init_id_worker(id_worker_config.clone())?;
 
     // 初始化数据库连接
-    init_db(db_config.clone()).await?;
+    init_db_conn(db_conn_config.clone()).await?;
 
     // 启动Web服务器
     start_web_server(web_server_config, web::router::register(), port, old_pid).await?;

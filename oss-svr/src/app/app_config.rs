@@ -1,7 +1,7 @@
 use crate::app::oss_config::OssConfig;
 use idworker::IdWorkerConfig;
 use robotech::app::AppError;
-use robotech::db::DbConfig;
+use robotech::db::DbConnConfig;
 use robotech::web::WebServerConfig;
 use serde::{Deserialize, Serialize};
 use std::sync::RwLock;
@@ -29,8 +29,8 @@ pub struct AppConfig {
     #[serde(default = "OssConfig::default")]
     pub oss: OssConfig,
     /// db
-    #[serde(default = "DbConfig::default")]
-    pub db: DbConfig,
+    #[serde(default = "DbConnConfig::default")]
+    pub db: DbConnConfig,
     /// Web服务器
     #[serde(default = "WebServerConfig::default")]
     pub web_server: WebServerConfig,
