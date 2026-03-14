@@ -5,7 +5,7 @@ use robotech::macros::dao;
 use robotech_macros::{define_foreign_keys, define_unique_fields};
 use sea_orm::{ColumnTrait, DeleteResult, QueryFilter};
 
-// 定义唯一字段列表
+// 定义唯一键字段列表
 define_unique_fields! {
     "oss_obj_ref",
     ("url", "对象引用的URL"),

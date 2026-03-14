@@ -4,7 +4,7 @@ use robotech::macros::dao;
 use robotech_macros::define_unique_fields;
 use sea_orm::{ColumnTrait, QueryFilter};
 
-// 定义唯一字段列表
+// 定义唯一键字段列表
 define_unique_fields! {
     "oss_bucket",
     ("name", "桶名称"),

@@ -5,7 +5,7 @@ use robotech::macros::dao;
 use robotech_macros::define_unique_fields;
 use sea_orm::{ColumnTrait, QueryFilter, QuerySelect, QueryTrait};
 
-// 定义唯一字段列表
+// 定义唯一键字段列表
 define_unique_fields! {
     "oss_obj",
     ("path", "对象路径"),
