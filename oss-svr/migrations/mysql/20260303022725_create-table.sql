@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2026/3/12 11:23:16                           */
+/* Created on:     2026/3/14 15:52:56                           */
 /*==============================================================*/
 
 
@@ -31,8 +31,8 @@ create table oss_obj
     is_completed         bit(1) not null  comment '是否完成',
     path                 varchar(100) not null  comment '路径
              存储文件的路径',
-    size                 bigint not null  comment '大小',
-    hash                 varchar(64) not null  comment 'Hash',
+    size                 bigint  comment '大小',
+    hash                 varchar(64)  comment 'Hash',
     _creator_id          bigint not null  comment '创建人的用户ID',
     _create_timestamp    bigint not null  comment '建立时间戳',
     _updator_id          bigint not null  comment '修改人的用户ID',

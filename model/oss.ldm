@@ -1725,7 +1725,7 @@ LABL 0 新宋体,8,N</a:FontList>
 <a:Code>path</a:Code>
 <a:CreationDate>1713618567</a:CreationDate>
 <a:Creator>zbz</a:Creator>
-<a:ModificationDate>1760010439</a:ModificationDate>
+<a:ModificationDate>1773474738</a:ModificationDate>
 <a:Modifier>zbz</a:Modifier>
 <a:Comment>路径
 存储文件的路径</a:Comment>
@@ -1740,10 +1740,9 @@ LABL 0 新宋体,8,N</a:FontList>
 <a:Code>size</a:Code>
 <a:CreationDate>1713618674</a:CreationDate>
 <a:Creator>zbz</a:Creator>
-<a:ModificationDate>1760010474</a:ModificationDate>
+<a:ModificationDate>1773474738</a:ModificationDate>
 <a:Modifier>zbz</a:Modifier>
 <a:DataType>LI</a:DataType>
-<a:LogicalAttribute.Mandatory>1</a:LogicalAttribute.Mandatory>
 <a:GlobalObjectID/>
 </o:EntityAttribute>
 <o:EntityAttribute Id="o22">
@@ -1752,11 +1751,10 @@ LABL 0 新宋体,8,N</a:FontList>
 <a:Code>hash</a:Code>
 <a:CreationDate>1758089746</a:CreationDate>
 <a:Creator>zlby</a:Creator>
-<a:ModificationDate>1760010474</a:ModificationDate>
+<a:ModificationDate>1773474738</a:ModificationDate>
 <a:Modifier>zbz</a:Modifier>
 <a:DataType>VA64</a:DataType>
 <a:Length>64</a:Length>
-<a:LogicalAttribute.Mandatory>1</a:LogicalAttribute.Mandatory>
 <a:GlobalObjectID/>
 </o:EntityAttribute>
 <o:EntityAttribute Id="o24">
@@ -2190,13 +2188,13 @@ LABL 0 新宋体,8,N</a:FontList>
 <a:Code>oss-pgsql</a:Code>
 <a:CreationDate>1713619231</a:CreationDate>
 <a:Creator>zbz</a:Creator>
-<a:ModificationDate>1773212952</a:ModificationDate>
+<a:ModificationDate>1773474801</a:ModificationDate>
 <a:Modifier>zbz</a:Modifier>
 <a:GlobalObjectID/>
 <a:TargetModelURL>file:///%[PRJ_ROOT_DIR]%/oss-pgsql.pdm</a:TargetModelURL>
 <a:TargetModelID>52F8B753-342B-48E0-8844-D698FCD5C16B</a:TargetModelID>
 <a:TargetModelClassID>CDE44E21-9669-11D1-9914-006097355D9B</a:TargetModelClassID>
-<a:TargetModelLastModificationDate>1773212952</a:TargetModelLastModificationDate>
+<a:TargetModelLastModificationDate>1773474801</a:TargetModelLastModificationDate>
 <c:SessionShortcuts>
 <o:Shortcut Ref="o3"/>
 </c:SessionShortcuts>
@@ -2207,13 +2205,13 @@ LABL 0 新宋体,8,N</a:FontList>
 <a:Code>oss-mysql</a:Code>
 <a:CreationDate>1772502426</a:CreationDate>
 <a:Creator>zbz</a:Creator>
-<a:ModificationDate>1773212803</a:ModificationDate>
+<a:ModificationDate>1773474758</a:ModificationDate>
 <a:Modifier>zbz</a:Modifier>
 <a:GlobalObjectID/>
 <a:TargetModelURL>file:///%[PRJ_ROOT_DIR]%/oss-mysql.pdm</a:TargetModelURL>
 <a:TargetModelID>A307D8D6-907A-4E06-B335-F521DB289549</a:TargetModelID>
 <a:TargetModelClassID>CDE44E21-9669-11D1-9914-006097355D9B</a:TargetModelClassID>
-<a:TargetModelLastModificationDate>1773212803</a:TargetModelLastModificationDate>
+<a:TargetModelLastModificationDate>1773474758</a:TargetModelLastModificationDate>
 <c:SessionShortcuts>
 <o:Shortcut Ref="o4"/>
 </c:SessionShortcuts>

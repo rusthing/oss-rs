@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      PostgreSQL 9.x                               */
-/* Created on:     2026/3/13 18:43:49                           */
+/* Created on:     2026/3/14 15:53:31                           */
 /*==============================================================*/
 
 
@@ -57,8 +57,8 @@ create table oss_obj (
    _id                  INT8                 not null,
    is_completed         BOOL                 not null,
    path                 VARCHAR(100)         not null,
-   size                 INT8                 not null,
-   hash                 VARCHAR(64)          not null,
+   size                 INT8                 null,
+   hash                 VARCHAR(64)          null,
    _creator_id          INT8                 not null,
    _create_timestamp    INT8                 not null,
    _updator_id          INT8                 not null,
