@@ -9,22 +9,21 @@ use utoipa::ToSchema;
 #[serde(rename_all = "camelCase")]
 pub struct OssObjRefVo {
     /// ID
-    pub id: String,
-    /// 名称
-    pub name: String,
-    /// 扩展名
-    pub ext: String,
+    pub id: u64,
+    /// 文件路径
+    pub path: String,
+    /// 文件Hash
+    pub hash: String,
+    /// 文件大小
+    pub size: u64,
+    /// 是否完成
+    pub is_completed: bool,
     /// 创建者ID
-    pub creator_id: String,
+    pub creator_id: u64,
     /// 创建时间戳
-    pub create_timestamp: String,
+    pub create_timestamp: u64,
     /// 更新者ID
-    pub updator_id: String,
+    pub updator_id: u64,
     /// 更新时间戳
-    pub update_timestamp: String,
-
-    /// 对象存储桶
-    pub oss_bucket: OssBucketVo,
-    /// 对象
-    pub oss_obj: OssObjVo,
+    pub update_timestamp: u64,
 }
