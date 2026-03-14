@@ -11,8 +11,8 @@ pub struct Model {
     pub is_completed: bool,
     #[sea_orm(unique)]
     pub path: String,
-    pub size: i64,
-    pub hash: String,
+    pub size: Option<i64>,
+    pub hash: Option<String>,
     #[sea_orm(column_name = "_creator_id")]
     pub creator_id: i64,
     #[sea_orm(column_name = "_create_timestamp")]
