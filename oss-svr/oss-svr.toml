@@ -1,5 +1,6 @@
 [oss]
 file-dir-format = "%Y/%m/%d"
+upload-file-limit-size = "100MiB"
 upload-buffer-size = "2MiB"
 download-buffer-size = "2MiB"
 

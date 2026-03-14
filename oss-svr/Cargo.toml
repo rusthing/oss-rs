@@ -22,7 +22,7 @@ typed-builder = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_with = { workspace = true }
 tokio = { workspace = true, features = ["rt", "rt-multi-thread", "macros", "signal"] }
-axum = { workspace = true }
+axum = { workspace = true, features = ["multipart"] }
 multer = "3.1.0"
 futures-util = "0.3.32"
 tempfile = { workspace = true }
@@ -38,6 +38,8 @@ validator = { workspace = true, features = ["derive"] }
 strum = { workspace = true, features = ["derive"] }
 utoipa = { workspace = true, features = ["actix_extras"] }
 utoipa-swagger-ui = { workspace = true, features = ["actix-web"] }
+sha2 = { workspace = true }
+
 
 idworker = { workspace = true }
 wheel-rs = { workspace = true }

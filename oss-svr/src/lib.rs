@@ -1,5 +1,4 @@
 pub mod app;
-pub mod base;
 pub mod dao;
 pub mod dto;
 pub mod model;

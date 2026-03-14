@@ -1,84 +1,52 @@
-// use crate::base::api::upload_form::UploadForm;
-// use crate::svc::OssFileSvc;
-// use crate::vo::OssObjRefVo;
-// use axum::http::HeaderMap;
-// use axum::Json;
-// use std::sync::LazyLock;
-// use regex::Regex;
-// use robotech::macros::log_call;
-// use robotech::ro::Ro;
-// use robotech::web::ctrl_utils::get_current_user_id;
-// use robotech::web::CtrlError;
-// use sea_orm::DatabaseTransaction;
-// use wheel_rs::file_utils::calc_hash;
-//
-// /// # 上传文件到指定的存储桶
-// ///
-// /// 该接口接收一个文件和可选的哈希值，将其上传到指定的存储桶中。
-// /// 如果提供了哈希值，会与计算出的文件哈希值进行比对，确保文件完整性。
-// ///
-// /// ## 参数
-// /// - `bucket`: 路径参数，指定文件上传的目标存储桶名称
-// /// - `form`: Multipart表单数据，包含上传的文件和其他元数据
-// ///
-// /// ## 返回值
-// /// 成功时返回包含文件引用信息的`Ro<OssObjRefVo>`对象
-// ///
-// /// ## 错误处理
-// /// - 如果存储桶名称为空，返回验证错误
-// /// - 如果提供的哈希值与计算出的哈希值不匹配，返回验证错误
-// #[utoipa::path(
-//     path = "/oss/file/upload/{bucket}",
-//     params(
-//         ("bucket" = String, Path, description = "存储桶名称")
-//     ),
-//     responses((status = OK, body = Ro<OssObjRefVo>))
-// )]
-// #[post("/upload/{bucket}")]
-// #[log_call]
-// pub async fn upload(
-//     bucket: web::Path<String>,
-//     headers: HeaderMap,
-//     MultipartForm(form): MultipartForm<UploadForm>,
-// ) -> Result<Json<Ro<OssObjRefVo>>, CtrlError> {
-//     // 从header中解析当前用户ID，如果没有或解析失败则抛出ApiError
-//     let current_user_id = get_current_user_id(&headers)?;
-//
-//     let bucket = bucket.into_inner();
-//     if bucket.is_empty() {
-//         return Err(CtrlError::from(validator::ValidationError::new(
-//             "缺少必要路径<桶名称>",
-//         )));
-//     }
-//
-//     let file_name = form.file.file_name.unwrap();
-//     let file_size = form.file.size;
-//     let temp_file = form.file.file;
-//     let provided_hash = form.hash.map(|t| t.into_inner());
-//     let computed_hash = calc_hash(&temp_file.path())?;
-//     if let Some(provided_hash) = provided_hash
-//         && provided_hash != computed_hash
-//     {
-//         return Err(CtrlError::from(validator::ValidationError::new(
-//             "文件Hash值不匹配",
-//         )));
-//     }
-//     let hash = computed_hash;
-//
-//     let ro = OssFileSvc::upload::<DatabaseTransaction>(
-//         &bucket,
-//         &file_name,
-//         file_size as u64,
-//         &hash,
-//         temp_file,
-//         current_user_id,
-//         None,
-//     )
-//     .await?;
-//
-//     Ok(Json(ro))
-// }
-//
+use crate::svc::OssFileSvc;
+use crate::vo::OssObjRefVo;
+use axum::extract::{Multipart, Path};
+use axum::http::HeaderMap;
+use axum::Json;
+use robotech::macros::log_call;
+use robotech::ro::Ro;
+use robotech::web::ctrl_utils::get_current_user_id;
+use robotech::web::CtrlError;
+use sea_orm::DatabaseTransaction;
+
+/// # 上传文件到指定的存储桶
+///
+/// 该接口接收一个文件和可选的哈希值，将其上传到指定的存储桶中。
+/// 如果提供了哈希值，会与计算出的文件哈希值进行比对，确保文件完整性。
+///
+/// ## 参数
+/// - `bucket`: 路径参数，指定文件上传的目标存储桶名称
+/// - `form`: Multipart表单数据，包含上传的文件和其他元数据
+///
+/// ## 返回值
+/// 成功时返回包含文件引用信息的`Ro<OssObjRefVo>`对象
+///
+/// ## 错误处理
+/// - 如果存储桶名称为空，返回验证错误
+/// - 如果提供的哈希值与计算出的哈希值不匹配，返回验证错误
+#[utoipa::path(
+    post,
+    path = "/oss/file/upload/{bucket}",
+    params(
+        ("bucket" = String, Path, description = "存储桶名称")
+    ),
+    responses((status = OK, body = Ro<OssObjRefVo>))
+)]
+#[log_call]
+pub async fn upload(
+    Path(bucket): Path<String>,
+    headers: HeaderMap,
+    multipart: Multipart,
+) -> Result<Json<Ro<OssObjRefVo>>, CtrlError> {
+    // 从header中解析当前用户ID，如果没有或解析失败则抛出ApiError
+    let current_user_id = get_current_user_id(&headers)?;
+
+    Ok(Json(
+        OssFileSvc::upload::<DatabaseTransaction>(&bucket, multipart, current_user_id, None)
+            .await?,
+    ))
+}
+
 // /// # 下载文件
 // ///
 // /// 该接口根据对象ID下载对应的文件内容。
@@ -292,7 +260,8 @@
 // }
 //
 // /// # 正则表达式，用于匹配对象ID的格式(19位数字+可选的扩展名)
-// static OBJ_ID_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^(\d+)\.?([a-zA-Z0-9]*)$").unwrap());
+// static OBJ_ID_REGEX: LazyLock<Regex> =
+//     LazyLock::new(|| Regex::new(r"^(\d+)\.?([a-zA-Z0-9]*)$").unwrap());
 //
 // /// # 解析对象ID
 // ///
