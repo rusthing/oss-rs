@@ -11,10 +11,12 @@ pub struct OssObjRefVo {
     pub bucket_id: u64,
     /// 名称
     pub name: String,
-    /// 扩展名
-    pub ext: String,
-    /// 访问URL地址
-    pub url: String,
+    /// 文件扩展名
+    pub ext: Option<String>,
+    /// 下载URL
+    pub download_url: String,
+    /// 预览URL
+    pub preview_url: Option<String>,
     /// 创建者ID
     pub creator_id: u64,
     /// 创建时间戳

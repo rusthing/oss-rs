@@ -11,7 +11,7 @@ pub struct Model {
     pub obj_id: i64,
     pub bucket_id: i64,
     pub name: String,
-    pub ext: String,
+    pub ext: Option<String>,
     #[sea_orm(column_name = "_creator_id")]
     pub creator_id: i64,
     #[sea_orm(column_name = "_create_timestamp")]
@@ -21,7 +21,8 @@ pub struct Model {
     #[sea_orm(column_name = "_update_timestamp")]
     pub update_timestamp: i64,
     #[sea_orm(unique)]
-    pub url: String,
+    pub download_url: String,
+    pub preview_url: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

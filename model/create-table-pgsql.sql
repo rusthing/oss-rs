@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      PostgreSQL 9.x                               */
-/* Created on:     2026/3/14 15:53:31                           */
+/* Created on:     2026/3/16 17:26:36                           */
 /*==============================================================*/
 
 
@@ -114,14 +114,15 @@ create table oss_obj_ref (
    obj_id               INT8                 not null,
    bucket_id            INT8                 not null,
    name                 VARCHAR(100)         not null,
-   ext                  VARCHAR(10)          not null,
-   url                  VARCHAR(200)         not null,
+   ext                  VARCHAR(10)          null,
+   download_url         VARCHAR(200)         not null,
+   preview_url          VARCHAR(200)         null,
    _creator_id          INT8                 not null,
    _create_timestamp    INT8                 not null,
    _updator_id          INT8                 not null,
    _update_timestamp    INT8                 not null,
    constraint PK_OSS_OBJ_REF primary key (_id),
-   constraint AK_URL_OSS_OBJ_REF unique (url)
+   constraint AK_URL_OSS_OBJ_REF unique (download_url)
 );
 
 comment on table oss_obj_ref is
@@ -140,10 +141,13 @@ comment on column oss_obj_ref.name is
 '名称(上传时的文件原名，带后缀名)';
 
 comment on column oss_obj_ref.ext is
-'扩展名';
+'文件扩展名';
 
-comment on column oss_obj_ref.url is
-'URL';
+comment on column oss_obj_ref.download_url is
+'下载URL';
+
+comment on column oss_obj_ref.preview_url is
+'预览URL';
 
 comment on column oss_obj_ref._creator_id is
 '创建人的用户ID';

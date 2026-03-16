@@ -10,7 +10,9 @@ pub struct OssObjRefDto {
     /// 名称
     pub name: String,
     /// 文件扩展名
-    pub ext: String,
-    /// Url
-    pub url: String,
+    pub ext: Option<String>,
+    /// 下载URL
+    pub download_url: String,
+    /// 预览URL
+    pub preview_url: Option<String>,
 }
