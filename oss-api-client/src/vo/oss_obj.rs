@@ -8,16 +8,14 @@ use utoipa::ToSchema;
 pub struct OssObjVo {
     /// ID
     pub id: u64,
-    /// 对象ID
-    pub obj_id: u64,
-    /// 存储桶ID
-    pub bucket_id: u64,
-    /// 名称
-    pub name: String,
-    /// 扩展名
-    pub ext: String,
-    /// 访问URL地址
-    pub url: String,
+    /// 文件路径
+    pub path: String,
+    /// 文件大小
+    pub size: Option<u64>,
+    /// 文件Hash
+    pub hash: Option<String>,
+    /// 是否完成
+    pub is_completed: bool,
     /// 创建者ID
     pub creator_id: u64,
     /// 创建时间戳

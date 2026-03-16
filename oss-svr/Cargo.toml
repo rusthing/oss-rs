@@ -45,6 +45,7 @@ idworker = { workspace = true }
 wheel-rs = { workspace = true }
 robotech = { workspace = true, features = ["web", "db", "macros"] }
 robotech-macros = { path = "../../robotech-rs/robotech-macros" }
+tokio-util = "0.7.18"
 
 [build-dependencies]
 # cross打包时用，需要开启vendored feature

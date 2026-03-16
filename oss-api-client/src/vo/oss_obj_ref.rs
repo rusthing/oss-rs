@@ -1,5 +1,3 @@
-use crate::vo::oss_bucket::OssBucketVo;
-use crate::vo::oss_obj::OssObjVo;
 use serde::Serialize;
 use serde_with::skip_serializing_none;
 use utoipa::ToSchema;
@@ -10,14 +8,18 @@ use utoipa::ToSchema;
 pub struct OssObjRefVo {
     /// ID
     pub id: u64,
-    /// 文件路径
-    pub path: String,
-    /// 文件Hash
-    pub hash: String,
-    /// 文件大小
-    pub size: u64,
-    /// 是否完成
-    pub is_completed: bool,
+    /// 对象ID
+    pub obj_id: u64,
+    /// 存储桶ID
+    pub bucket_id: u64,
+    /// 名称
+    pub name: String,
+    /// 文件扩展名
+    pub ext: Option<String>,
+    /// 下载URL
+    pub download_url: String,
+    /// 预览URL
+    pub preview_url: Option<String>,
     /// 创建者ID
     pub creator_id: u64,
     /// 创建时间戳
