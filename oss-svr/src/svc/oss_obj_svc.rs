@@ -2,8 +2,10 @@ use crate::dao::OssObjDao;
 use crate::dto::{OssObjAddDto, OssObjModifyDto, OssObjSaveDto};
 use crate::model::oss_obj::ActiveModel;
 use crate::vo::OssObjVo;
+use anyhow::{anyhow, Context};
+use log::warn;
 use robotech_macros::svc;
-use std::fs;
+use std::{fs, io};
 
 #[svc]
 pub struct OssObjSvc;
@@ -28,8 +30,17 @@ impl OssObjSvc {
     {
         let ro = Self::del(id, Some(db)).await?;
         if let Some(extra) = ro.extra.clone() {
+            let path = extra.path;
             // 删除文件
-            fs::remove_file(extra.path)?;
+            if let Err(e) = fs::remove_file(&path) {
+                match e.kind() {
+                    io::ErrorKind::NotFound => {
+                        // 忽略文件不存在的错误
+                        warn!("删除文件时发现路径不正确或文件不存在：{path}");
+                    }
+                    _ => Err(SvcError::Runtime(anyhow!("删除文件失败"))).with_context(|| e)?,
+                }
+            }
         }
         Ok(ro)
     }
@@ -74,7 +85,7 @@ impl OssObjSvc {
     #[db_unwrap]
     pub async fn get_by_hash_and_size<C>(
         hash: &str,
-        size: u64,
+        size: &u64,
         db: Option<&C>,
     ) -> Result<Ro<OssObjVo>, SvcError>
     where

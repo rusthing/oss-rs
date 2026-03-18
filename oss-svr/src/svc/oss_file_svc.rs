@@ -1,7 +1,7 @@
 use crate::app::{get_app_config, AppConfig, OssConfig};
 use crate::dao::OssObjRefDao;
-use crate::dto::OssObjRefAddDto;
 use crate::dto::{OssObjAddDto, OssObjModifyDto};
+use crate::dto::{OssObjRefAddDto, OssObjRefModifyDto};
 use crate::svc::OssBucketSvc;
 use crate::svc::OssObjRefSvc;
 use crate::svc::OssObjSvc;
@@ -13,7 +13,7 @@ use axum::extract::Multipart;
 use axum::http::{header, HeaderMap, HeaderValue};
 use chrono::{Local, TimeZone};
 use idworker::get_id_worker;
-use log::{debug, info, trace};
+use log::{debug, info, trace, warn};
 use robotech::dao::begin_transaction;
 use robotech::env::{EnvError, APP_ENV};
 use robotech::ro::Ro;
@@ -21,8 +21,8 @@ use robotech::svc::SvcError;
 use robotech_macros::db_unwrap;
 use sea_orm::ConnectionTrait;
 use sha2::Digest;
-use std::fs;
 use std::io::SeekFrom;
+use tokio::fs;
 use tokio::fs::File;
 use tokio::io::{AsyncReadExt, AsyncSeekExt, AsyncWriteExt};
 use tokio_util::io::ReaderStream;
@@ -91,12 +91,12 @@ impl OssFileSvc {
                         .ok_or_else(|| validator::ValidationError::new("上传文件没有文件名"))?;
 
                     // 根据hash和size判断，如果对象已存在，则直接返回对象信息
-                    let obj_vo = if let Some(hash_provided) = hash_provided.clone()
-                        && let Some(file_size_provided) = file_size_provided.clone()
+                    let obj_vo = if let (Some(hash_provided), Some(file_size_provided)) =
+                        (&hash_provided, &file_size_provided)
                     {
                         OssObjSvc::get_by_hash_and_size(
                             &hash_provided,
-                            file_size_provided,
+                            &file_size_provided,
                             Some(db),
                         )
                         .await?
@@ -129,12 +129,14 @@ impl OssFileSvc {
                             .join(&oss_config.file_root_dir)
                             .join(bucket.to_string())
                             .join(&date_path);
-                        fs::create_dir_all(&storage_dir)?;
+                        fs::create_dir_all(&storage_dir).await?;
                         let new_file_path = storage_dir
                             .join(obj_id.to_string())
                             .as_path()
                             .to_str()
-                            .unwrap()
+                            .ok_or_else(|| {
+                                std::io::Error::new(std::io::ErrorKind::Other, "Invalid file path")
+                            })?
                             .to_string();
 
                         // 新增对象
@@ -151,7 +153,7 @@ impl OssFileSvc {
                         if let Some(obj_vo) = add_ro.extra {
                             (false, obj_vo.id, new_file_path)
                         } else {
-                            return Err(SvcError::Runtime(anyhow!("新增对象失败".to_string())));
+                            return Err(SvcError::Runtime(anyhow!("新增对象失败")));
                         }
                     };
 
@@ -183,24 +185,50 @@ impl OssFileSvc {
 
                     if !obj_exists {
                         let (file_size_computed, hash_computed) = Self::receive_and_write(
-                            hash_provided,
-                            file_size_provided,
+                            &hash_provided,
+                            &file_size_provided,
                             field,
-                            new_file_path,
+                            &new_file_path,
                         )
                         .await?;
-                        let is_completed = true;
-                        OssObjSvc::modify(
-                            OssObjModifyDto::builder()
-                                .id(obj_id)
-                                .hash(Some(hash_computed))
-                                .size(Some(file_size_computed))
-                                .is_completed(is_completed)
-                                .current_user_id(current_user_id)
-                                .build(),
+
+                        // 写完文件时最后再检查一次文件大小和hash是否已经存在
+                        let oss_obj_vo = OssObjSvc::get_by_hash_and_size(
+                            &hash_computed,
+                            &file_size_computed,
                             Some(db),
                         )
-                        .await?;
+                        .await?
+                        .extra;
+                        if let Some(oss_obj_vo) = oss_obj_vo {
+                            warn!(
+                                "在上传完成后发现文件已存在，删除上传文件，引用的对象指向已存在的对象"
+                            );
+                            fs::remove_file(new_file_path).await?;
+                            OssObjRefSvc::modify(
+                                OssObjRefModifyDto::builder()
+                                    .id(obj_ref_id)
+                                    .obj_id(oss_obj_vo.id)
+                                    .current_user_id(current_user_id)
+                                    .build(),
+                                Some(db),
+                            )
+                            .await?;
+                        } else {
+                            // 文件已上传完成，修改对象信息的hash、文件大小、是否完成
+                            let is_completed = true;
+                            OssObjSvc::modify(
+                                OssObjModifyDto::builder()
+                                    .id(obj_id)
+                                    .hash(Some(hash_computed))
+                                    .size(Some(file_size_computed))
+                                    .is_completed(is_completed)
+                                    .current_user_id(current_user_id)
+                                    .build(),
+                                Some(db),
+                            )
+                            .await?;
+                        }
                     }
                     return Ok(obj_ref_ro.message("上传成功".to_string()));
                 }
@@ -315,10 +343,10 @@ impl OssFileSvc {
     }
 
     async fn receive_and_write(
-        hash_provided: Option<String>,
-        file_size_provided: Option<u64>,
+        hash_provided: &Option<String>,
+        file_size_provided: &Option<u64>,
         mut field: Field<'_>,
-        new_file_path: String,
+        new_file_path: &str,
     ) -> Result<(u64, String), SvcError> {
         // 如果对象不存在，则开始接收 chunk
         let AppConfig { oss, .. } = get_app_config().expect("app config not found");
@@ -330,7 +358,7 @@ impl OssFileSvc {
 
         let buffer_size = upload_buffer_size.as_u64();
         let mut file_size_computed: u64 = 0;
-        let mut file = File::create(new_file_path.clone()).await?;
+        let mut file = File::create(new_file_path).await?;
         let mut hasher = sha2::Sha256::new();
         let mut buffer = Vec::with_capacity(buffer_size as usize);
         // 分块写入，而非 .bytes() 一次性读取
@@ -338,18 +366,18 @@ impl OssFileSvc {
             let chunk_size = chunk.len() as u64;
             file_size_computed += chunk_size;
             if file_size_computed > upload_file_limit_size.as_u64() {
-                fs::remove_file(new_file_path)?;
+                fs::remove_file(new_file_path).await?;
                 return Err(SvcError::Runtime(anyhow!(
                     "上传文件大小超出限制: {upload_file_limit_size}"
                 )));
             }
             hasher.update(&chunk);
             if chunk_size == buffer_size {
-                trace!("切片大小 == 缓存大小时，直接写入盘(没有用到缓存)");
+                trace!("切片大小 == 缓存大小，直接写入盘(没有用到缓存)");
                 file.write_all(&chunk).await?;
             } else if chunk_size > buffer_size {
                 trace!(
-                    "切片大小 > 缓存大小时，chunk按缓存大小分片处理，避免单次写入过大(这里也没有用到缓存)"
+                    "切片大小 > 缓存大小，chunk按缓存大小分片处理，避免单次写入过大(这里也没有用到缓存)"
                 );
                 let mut chunk_start: usize = 0;
                 while chunk_start < chunk_size as usize {
@@ -359,7 +387,7 @@ impl OssFileSvc {
                     chunk_start = chunk_end;
                 }
             } else {
-                trace!("切片大小 < 缓存大小时，攒够buffer满才写一次盘");
+                trace!("切片大小 < 缓存大小，攒够缓存满才写一次盘");
                 let buffer_length = buffer.len() as u64; // 缓存实际大小
                 let total_size = buffer_length + chunk_size; // 总大小 = 缓存大小 + 切片大小
                 let chunk_remain = total_size - buffer_length; // 切片剩余大小
@@ -369,7 +397,7 @@ impl OssFileSvc {
                 } else {
                     file.write_all(&buffer).await?;
                     buffer.clear();
-                    buffer.extend_from_slice(&chunk[buffer_length as usize..]);
+                    buffer.extend_from_slice(&chunk);
                 }
             }
         }
@@ -379,9 +407,9 @@ impl OssFileSvc {
         }
 
         if let Some(file_size_provided) = file_size_provided
-            && file_size_provided != file_size_computed
+            && file_size_provided != &file_size_computed
         {
-            fs::remove_file(new_file_path)?;
+            fs::remove_file(new_file_path).await?;
             return Err(SvcError::Runtime(anyhow!(
                 "上传文件大小错误，请重新上传: {file_size_provided}->{file_size_computed}"
             )));
@@ -390,13 +418,14 @@ impl OssFileSvc {
         if let Some(hash_provided) = hash_provided.clone()
             && hash_provided != hash_computed
         {
-            fs::remove_file(new_file_path)?;
+            fs::remove_file(new_file_path).await?;
             return Err(SvcError::Runtime(anyhow!(
                 "上传文件内容校验错误，请重新上传: {hash_provided}->{hash_computed}"
             )));
         }
         Ok((file_size_computed, hash_computed))
     }
+
     fn parse_range(range: &HeaderValue) -> Result<(Option<u64>, Option<u64>), SvcError> {
         // "bytes=500-999"  → (500, 999)
         // "bytes=500-"     → (500, total-1)

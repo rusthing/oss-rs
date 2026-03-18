@@ -60,7 +60,7 @@ impl OssObjDao {
     /// 返回查询到的完整 Model 实例（如果存在），如果查询失败则返回相应的错误信息
     pub async fn get_by_hash_and_size<C>(
         hash: &str,
-        size: u64,
+        size: &u64,
         db: &C,
     ) -> Result<Option<Model>, DaoError>
     where
@@ -68,7 +68,7 @@ impl OssObjDao {
     {
         Entity::find()
             .filter(Column::Hash.eq(hash))
-            .filter(Column::Size.eq(size))
+            .filter(Column::Size.eq(*size))
             .one(db)
             .await
             .map_err(|e| DaoError::parse_db_err(e))

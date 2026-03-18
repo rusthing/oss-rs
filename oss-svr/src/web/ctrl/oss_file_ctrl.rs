@@ -85,7 +85,7 @@ pub async fn download(
     Path(obj_id): Path<String>,
     headers: HeaderMap,
 ) -> Result<Response, CtrlError> {
-    download_or_preview(DownloadMode::Download, Path(obj_id), headers).await
+    download_or_preview(DownloadMode::Download, obj_id, headers).await
 }
 
 /// # 预览文件
@@ -120,12 +120,12 @@ pub async fn preview(
     Path(obj_id): Path<String>,
     headers: HeaderMap,
 ) -> Result<Response, CtrlError> {
-    download_or_preview(DownloadMode::Preview, Path(obj_id), headers).await
+    download_or_preview(DownloadMode::Preview, obj_id, headers).await
 }
 
 async fn download_or_preview(
     mode: DownloadMode,
-    Path(obj_id): Path<String>,
+    obj_id: String,
     headers: HeaderMap,
 ) -> Result<Response, CtrlError> {
     let (obj_id, ext) = parse_obj_id(&obj_id)?;
@@ -209,7 +209,7 @@ async fn download_or_preview(
 //             format!("bytes {}-{}/{}", start, end, file_size),
 //         ))
 //         .body(content)
-// }
+// }ƒ
 //
 // /// # 创建内联内容响应
 // ///
