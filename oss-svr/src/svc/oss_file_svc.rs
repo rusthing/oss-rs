@@ -479,7 +479,7 @@ impl OssFileSvc {
                 "webp" => Some("image/webp"),
                 "svg" => Some("image/svg+xml"),
                 "pdf" => Some("application/pdf"),
-                "txt" | "md" => Some("text/plain"),
+                "txt" | "md" => Some("text/plain; charset=utf-8"),
                 "mp3" | "wav" | "ogg" | "aac" | "flac" => Some("audio/mpeg"),
                 "mp4" => Some("video/mp4"),
                 _ => None,
