@@ -4,9 +4,9 @@ use axum::{
     Router,
 };
 use linkme::distributed_slice;
-use robotech::web::INIT_ROUTERS;
+use robotech::web::INIT_ROUTERS_SLICE;
 
-#[distributed_slice(INIT_ROUTERS)]
+#[distributed_slice(INIT_ROUTERS_SLICE)]
 static INIT_ROUTERS_FN: fn() -> Router = init_routes;
 
 fn init_routes() -> Router {
