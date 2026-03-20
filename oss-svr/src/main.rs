@@ -3,7 +3,6 @@ use clap::Parser;
 use idworker::init_id_worker;
 use log::{debug, warn};
 use oss_svr::app::{set_app_config, AppConfig};
-use oss_svr::web;
 use robotech::app::{build_app_cfg, wait_app_exit};
 use robotech::cfg::watch_cfg_file;
 use robotech::dao::init_dao;
@@ -154,9 +153,6 @@ async fn apply_app_config(
     // 升级数据库版本...
     let db_url = db_conn_config.url.as_str();
     db_migrate!(db_url);
-    // migrate(db_config.clone())
-    //     .await
-    //     .map_err(|e| anyhow!(format!("升级数据库版本时出错: {e}")))?;
 
     // 初始化ID生成器...
     init_id_worker(id_worker_config.clone())?;
@@ -165,7 +161,7 @@ async fn apply_app_config(
     init_db_conn(db_conn_config.clone()).await?;
 
     // 启动Web服务器
-    start_web_server(web_server_config, web::router::register(), port, old_pid).await?;
+    start_web_server(web_server_config, port, old_pid).await?;
 
     Ok(())
 }

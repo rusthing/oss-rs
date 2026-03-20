@@ -3,9 +3,14 @@ use axum::{
     routing::{delete, get, post, put},
     Router,
 };
+use linkme::distributed_slice;
+use robotech::web::INIT_ROUTERS;
 
-pub(super) fn routes(router: Router) -> Router {
-    router
+#[distributed_slice(INIT_ROUTERS)]
+static INIT_ROUTERS_FN: fn() -> Router = init_routes;
+
+fn init_routes() -> Router {
+    Router::new()
         .route("/oss/obj", post(add)) // 添加
         .route("/oss/obj", put(modify)) // 修改
         .route("/oss/obj/save", post(save)) // 保存
