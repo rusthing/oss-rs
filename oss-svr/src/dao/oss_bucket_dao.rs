@@ -1,6 +1,5 @@
 use crate::model::oss_bucket::{ActiveModel, Column, Entity, Model};
 use linkme::distributed_slice;
-use robotech::dao::like_any;
 use robotech::macros::dao;
 use robotech_macros::{define_like_columns, define_unique_fields};
 use sea_orm::{ColumnTrait, QueryFilter};
@@ -37,7 +36,6 @@ impl OssBucketDao {
         C: ConnectionTrait,
     {
         Entity::find()
-            .filter(like_any(name, &LIKE_COLUMNS))
             .filter(Column::Name.eq(name))
             .one(db)
             .await
