@@ -1,29 +1,23 @@
 use crate::model::oss_obj_ref::{ActiveModel, Column, Entity, Model};
 use crate::model::{oss_bucket, oss_obj};
-use linkme::distributed_slice;
 use robotech::macros::dao;
-use robotech_macros::{define_foreign_keys, define_unique_fields};
 use sea_orm::{ColumnTrait, DeleteResult, QueryFilter};
 
-// 定义唯一键字段列表
-define_unique_fields! {
-    "oss_obj_ref",
-    ("url", "对象引用的URL"),
-}
-
-// 定义外键列表
-define_foreign_keys! {
-    "oss_obj_ref", "对象引用",
-    ("bucket_id", "oss_bucket", "桶"),
-    ("obj_id", "oss_obj", "对象"),
-}
-
 /// 对象引用
-#[dao(like_columns: [
-    Column::Name,
-    Column::DownloadUrl,
-    Column::PreviewUrl
-])]
+#[dao(
+    unique_keys: [
+        ("url", "对象引用的URL")
+    ],
+    foreign_keys: [
+        ("bucket_id", "oss_bucket", "桶"),
+        ("obj_id", "oss_obj", "对象")
+    ],
+    like_columns: [
+        Column::Name,
+        Column::DownloadUrl,
+        Column::PreviewUrl
+    ]
+)]
 pub struct OssObjRefDao;
 
 impl OssObjRefDao {

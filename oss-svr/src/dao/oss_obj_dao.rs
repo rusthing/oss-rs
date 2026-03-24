@@ -1,19 +1,14 @@
 use crate::model::oss_obj::{ActiveModel, Column, Entity, Model};
 use crate::model::oss_obj_ref::{Column as OssObjRefColumn, Entity as OssObjRefEntity};
-use linkme::distributed_slice;
 use robotech::macros::dao;
-use robotech_macros::define_unique_fields;
 use sea_orm::{ColumnTrait, QueryFilter, QuerySelect, QueryTrait};
 
-// 定义唯一键字段列表
-define_unique_fields! {
-    "oss_obj",
-    ("path", "对象路径"),
-    ("size,hash", "对象大小与Hash"),
-    ("url", "对象 URL"),
-}
-
 #[dao(
+    unique_keys: [
+        ("path", "对象路径"),
+        ("size,hash", "对象大小与Hash"),
+        ("url", "对象 URL"),
+    ],
     like_columns: [
         Column::Path,
         Column::Hash,

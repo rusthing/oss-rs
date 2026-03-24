@@ -1,17 +1,12 @@
 use crate::model::oss_bucket::{ActiveModel, Column, Entity, Model};
-use linkme::distributed_slice;
 use robotech::dao::like_any;
 use robotech::macros::dao;
-use robotech_macros::define_unique_fields;
 use sea_orm::{ColumnTrait, QueryFilter};
 
-// 定义唯一键字段列表
-define_unique_fields! {
-    "oss_bucket",
-    ("name", "桶名称"),
-}
-
 #[dao(
+    unique_keys: [
+        ("name", "桶名称"),
+    ],
     like_columns: [
         Column::Name,
         Column::Remark
