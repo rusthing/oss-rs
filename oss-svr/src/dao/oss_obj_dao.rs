@@ -2,9 +2,8 @@ use crate::model::oss_obj::{ActiveModel, Column, Entity, Model};
 use crate::model::oss_obj_ref::{Column as OssObjRefColumn, Entity as OssObjRefEntity};
 use linkme::distributed_slice;
 use robotech::macros::dao;
-use robotech_macros::{define_like_columns, define_unique_fields};
+use robotech_macros::define_unique_fields;
 use sea_orm::{ColumnTrait, QueryFilter, QuerySelect, QueryTrait};
-use std::sync::LazyLock;
 
 // 定义唯一键字段列表
 define_unique_fields! {
@@ -14,13 +13,12 @@ define_unique_fields! {
     ("url", "对象 URL"),
 }
 
-// 定义模糊查询关键字字段列表
-define_like_columns! {
-    Column::Path,
-    Column::Hash,
-}
-
-#[dao]
+#[dao(
+    like_columns: [
+        Column::Path,
+        Column::Hash,
+    ],
+)]
 pub struct OssObjDao;
 
 impl OssObjDao {

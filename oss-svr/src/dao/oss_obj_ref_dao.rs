@@ -2,9 +2,8 @@ use crate::model::oss_obj_ref::{ActiveModel, Column, Entity, Model};
 use crate::model::{oss_bucket, oss_obj};
 use linkme::distributed_slice;
 use robotech::macros::dao;
-use robotech_macros::{define_foreign_keys, define_like_columns, define_unique_fields};
+use robotech_macros::{define_foreign_keys, define_unique_fields};
 use sea_orm::{ColumnTrait, DeleteResult, QueryFilter};
-use std::sync::LazyLock;
 
 // 定义唯一键字段列表
 define_unique_fields! {
@@ -19,14 +18,12 @@ define_foreign_keys! {
     ("obj_id", "oss_obj", "对象"),
 }
 
-// 定义模糊查询关键字字段列表
-define_like_columns! {
+/// 对象引用
+#[dao(like_columns: [
     Column::Name,
     Column::DownloadUrl,
     Column::PreviewUrl
-}
-
-#[dao]
+])]
 pub struct OssObjRefDao;
 
 impl OssObjRefDao {

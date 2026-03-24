@@ -1,9 +1,9 @@
 use crate::model::oss_bucket::{ActiveModel, Column, Entity, Model};
 use linkme::distributed_slice;
+use robotech::dao::like_any;
 use robotech::macros::dao;
-use robotech_macros::{define_like_columns, define_unique_fields};
+use robotech_macros::define_unique_fields;
 use sea_orm::{ColumnTrait, QueryFilter};
-use std::sync::LazyLock;
 
 // 定义唯一键字段列表
 define_unique_fields! {
@@ -11,13 +11,12 @@ define_unique_fields! {
     ("name", "桶名称"),
 }
 
-// 定义模糊查询关键字字段列表
-define_like_columns! {
-    Column::Name,
-    Column::Remark,
-}
-
-#[dao]
+#[dao(
+    like_columns: [
+        Column::Name,
+        Column::Remark
+    ],
+)]
 pub struct OssBucketDao;
 
 impl OssBucketDao {
@@ -36,6 +35,7 @@ impl OssBucketDao {
         C: ConnectionTrait,
     {
         Entity::find()
+            .filter(like_any(name, Self::LIKE_COLUMNS))
             .filter(Column::Name.eq(name))
             .one(db)
             .await
