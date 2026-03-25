@@ -145,7 +145,7 @@ impl OssFileSvc {
                             .id(obj_id)
                             .path(new_file_path.to_string())
                             .is_completed(is_completed)
-                            .current_user_id(current_user_id)
+                            ._current_user_id(current_user_id)
                             .build();
 
                         debug!("新增对象: {:?}", oss_obj_add_dto);
@@ -178,7 +178,7 @@ impl OssFileSvc {
                         .ext(ext)
                         .download_url(download_url)
                         .preview_url(preview_url)
-                        .current_user_id(current_user_id)
+                        ._current_user_id(current_user_id)
                         .build();
                     debug!("新增对象引用: {:?}", oss_obj_ref_add_dto);
                     let obj_ref_ro = OssObjRefSvc::add(oss_obj_ref_add_dto, Some(db)).await?;
@@ -209,7 +209,7 @@ impl OssFileSvc {
                                 OssObjRefModifyDto::builder()
                                     .id(obj_ref_id)
                                     .obj_id(oss_obj_vo.id)
-                                    .current_user_id(current_user_id)
+                                    ._current_user_id(current_user_id)
                                     .build(),
                                 Some(db),
                             )
@@ -223,7 +223,7 @@ impl OssFileSvc {
                                     .hash(Some(hash_computed))
                                     .size(Some(file_size_computed))
                                     .is_completed(is_completed)
-                                    .current_user_id(current_user_id)
+                                    ._current_user_id(current_user_id)
                                     .build(),
                                 Some(db),
                             )
