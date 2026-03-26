@@ -1,8 +1,8 @@
-use crate::dao::OssObjRefDao;
-use crate::dto::{OssObjRefAddDto, OssObjRefModifyDto, OssObjRefSaveDto};
-use crate::model::oss_obj_ref::ActiveModel;
+// use crate::dao::OssObjRefDao;
+// use crate::dto::{OssObjRefAddDto, OssObjRefModifyDto, OssObjRefSaveDto};
+// use crate::model::oss_obj_ref::ActiveModel;
 use crate::svc::OssObjSvc;
-use crate::vo::OssObjRefVo;
+// use crate::vo::OssObjRefVo;
 use robotech_macros::svc;
 
 #[svc]
@@ -24,7 +24,7 @@ impl OssObjRefSvc {
     where
         C: ConnectionTrait,
     {
-        let ro = Self::del(id, Some(db)).await?;
+        let ro = Self::del_by_id(id, Some(db)).await?;
         if let Some(extra) = ro.extra.clone() {
             // 删除对象, 如果对象没有其他引用则会顺利删除，否则会失败
             OssObjSvc::del_with_file(extra.obj_id, Some(db)).await.ok();

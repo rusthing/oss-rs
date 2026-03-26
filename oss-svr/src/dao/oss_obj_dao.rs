@@ -1,7 +1,6 @@
-use crate::model::oss_obj::{ActiveModel, Column, Entity, Model};
 use crate::model::oss_obj_ref::{Column as OssObjRefColumn, Entity as OssObjRefEntity};
 use robotech::macros::dao;
-use sea_orm::{ColumnTrait, QueryFilter, QuerySelect, QueryTrait};
+use sea_orm::{ColumnTrait, QuerySelect, QueryTrait};
 
 #[dao(
     unique_keys: [

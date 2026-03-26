@@ -1,7 +1,3 @@
-use crate::dao::OssObjDao;
-use crate::dto::{OssObjAddDto, OssObjModifyDto, OssObjSaveDto};
-use crate::model::oss_obj::ActiveModel;
-use crate::vo::OssObjVo;
 use anyhow::{anyhow, Context};
 use log::warn;
 use robotech_macros::svc;
@@ -28,7 +24,7 @@ impl OssObjSvc {
     where
         C: ConnectionTrait,
     {
-        let ro = Self::del(id, Some(db)).await?;
+        let ro = Self::del_by_id(id, Some(db)).await?;
         if let Some(extra) = ro.extra.clone() {
             let path = extra.path;
             // 删除文件

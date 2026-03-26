@@ -14,6 +14,7 @@ fn init_routes() -> Router {
         .route("/oss/obj-ref", post(add)) // 添加
         .route("/oss/obj-ref", put(modify)) // 修改
         .route("/oss/obj-ref/save", post(save)) // 保存
-        .route("/oss/obj-ref/{id}", delete(del)) // 删除
+        .route("/oss/obj-ref/{id}", delete(del_by_id)) // 删除
         .route("/oss/obj-ref/{id}", get(get_by_id)) // 根据id获取
+        .route("/oss/obj-ref", get(get_by_query_dto)) // 根据查询条件获取
 }

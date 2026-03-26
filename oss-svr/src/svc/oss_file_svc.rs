@@ -1,7 +1,8 @@
 use crate::app::{get_app_config, AppConfig, OssConfig};
 use crate::dao::OssObjRefDao;
-use crate::dto::{OssObjAddDto, OssObjModifyDto};
-use crate::dto::{OssObjRefAddDto, OssObjRefModifyDto};
+use crate::dto::oss_bucket_dto::OssBucketQueryDto;
+use crate::dto::oss_obj_dto::{OssObjAddDto, OssObjModifyDto};
+use crate::dto::oss_obj_ref_dto::{OssObjRefAddDto, OssObjRefModifyDto};
 use crate::svc::OssBucketSvc;
 use crate::svc::OssObjRefSvc;
 use crate::svc::OssObjSvc;
@@ -62,7 +63,13 @@ impl OssFileSvc {
         C: ConnectionTrait,
     {
         // 获取存储桶
-        let one_bucket = OssBucketSvc::get_by_name(bucket, Some(db)).await?;
+        let one_bucket = OssBucketSvc::get_by_query_dto(
+            OssBucketQueryDto::builder()
+                .name(bucket.to_string())
+                .build(),
+            Some(db),
+        )
+        .await?;
         let one_bucket = match one_bucket.extra {
             Some(bucket) => bucket,
             None => return Ok(Ro::warn(format!("未找到存储桶<{}>", bucket))),

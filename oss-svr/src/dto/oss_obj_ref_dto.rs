@@ -1,4 +1,3 @@
-use crate::model::oss_obj_ref::ActiveModel;
 use robotech_macros::crud_dto;
 
 #[crud_dto]

@@ -1,7 +1,6 @@
-use crate::model::oss_obj_ref::{ActiveModel, Column, Entity, Model};
 use crate::model::{oss_bucket, oss_obj};
 use robotech::macros::dao;
-use sea_orm::{ColumnTrait, DeleteResult, QueryFilter};
+use sea_orm::{ColumnTrait, DeleteResult};
 
 /// 对象引用
 #[dao(
@@ -29,7 +28,6 @@ impl OssObjRefDao {
     where
         C: ConnectionTrait,
     {
-        
         Entity::delete_many()
             .filter(Column::BucketId.eq(bucket_id))
             .exec(db)

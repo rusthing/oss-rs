@@ -1,9 +1,5 @@
-use crate::dao::OssBucketDao;
-use crate::dto::{OssBucketAddDto, OssBucketModifyDto, OssBucketSaveDto};
-use crate::model::oss_bucket::ActiveModel;
 use crate::svc::OssObjRefSvc;
 use crate::svc::OssObjSvc;
-use crate::vo::OssBucketVo;
 use robotech_macros::svc;
 
 #[svc]
@@ -29,29 +25,7 @@ impl OssBucketSvc {
     {
         OssObjRefSvc::del_by_bucket_id(id, Some(db)).await?;
         OssObjSvc::delete_orphaned(Some(db)).await?;
-        let ro = Self::del(id, Some(db)).await?;
+        let ro = Self::del_by_id(id, Some(db)).await?;
         Ok(ro)
-    }
-
-    /// # 根据名称获取记录信息
-    ///
-    /// 通过提供的名称从数据库中查询相应的记录，如果找到则返回封装了Vo的Ro对象，否则返回对象的extra为None
-    ///
-    /// ## 参数
-    /// * `name` - 要查询的桶的名称
-    /// * `db` - 数据库连接，如果未提供则使用全局数据库连接
-    ///
-    /// ## 返回值
-    /// * `Ok(Ro<Vo>)` - 查询成功，如果记录存在，返回封装了Vo的Ro对象，如果不存在则返回对象的extra为None
-    /// * `Err(SvcError)` - 查询失败，可能是数据库错误
-    #[db_unwrap]
-    pub async fn get_by_name<C>(name: &str, db: Option<&C>) -> Result<Ro<OssBucketVo>, SvcError>
-    where
-        C: ConnectionTrait,
-    {
-        let one = OssBucketDao::get_by_name(name, db)
-            .await?
-            .map(|value| OssBucketVo::from(value));
-        Ok(Ro::success("查询成功".to_string()).extra(one))
     }
 }
