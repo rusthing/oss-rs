@@ -1,8 +1,4 @@
-// use crate::dao::OssObjRefDao;
-// use crate::dto::{OssObjRefAddDto, OssObjRefModifyDto, OssObjRefSaveDto};
-// use crate::model::oss_obj_ref::ActiveModel;
 use crate::svc::OssObjSvc;
-// use crate::vo::OssObjRefVo;
 use robotech_macros::svc;
 
 #[svc]
@@ -30,6 +26,33 @@ impl OssObjRefSvc {
             OssObjSvc::del_with_file(extra.obj_id, Some(db)).await.ok();
         }
         Ok(ro)
+    }
+
+    /// # 删除记录
+    ///
+    /// 根据提供的查询参数获取数据库中的记录
+    ///
+    /// ## 参数
+    /// * `dto` - 查询参数
+    /// * `db` - 数据库连接，如果未提供则使用全局数据库连接
+    ///
+    /// ## 返回值
+    /// * `Result<Ro<Vo>, SvcError>` - 查询结果封装为Ro对象，如果查询成功则返回封装了Vo的Ro对象，否则返回错误信息
+    #[db_unwrap(transaction_required)]
+    pub async fn del_by_query_dto<C>(
+        dto: OssObjRefQueryDto,
+        db: Option<&C>,
+    ) -> Result<Ro<()>, SvcError>
+    where
+        C: ConnectionTrait,
+    {
+        let mut condition = dto.to_condition();
+        if let Some(keyword) = &dto._keyword {
+            condition = condition.add(build_like_condition(keyword, OssObjRefDao::LIKE_COLUMNS));
+        }
+
+        OssObjRefDao::delete_by_condition(condition, db).await?;
+        Ok(Ro::success("删除成功".to_string()))
     }
 
     /// # 根据bucket_id删除对象引用记录
