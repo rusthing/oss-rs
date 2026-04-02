@@ -44,32 +44,4 @@ impl OssObjDao {
             .await
             .map_err(|e| DaoError::parse_db_err(e))
     }
-
-    /// # 根据哈希值和大小查询记录
-    ///
-    /// 此函数负责根据提供的哈希值和文件大小从数据库中查询对应的记录。
-    /// 这通常用于检测是否已存在具有相同内容的文件，以避免重复存储。
-    ///
-    /// ## 参数
-    /// * `hash` - 文件的哈希值（通常是MD5或SHA256等摘要算法的结果）
-    /// * `size` - 文件的大小（以字节为单位）
-    /// * `db` - 数据库连接 trait 对象
-    ///
-    /// ## 返回值
-    /// 返回查询到的完整 Model 实例（如果存在），如果查询失败则返回相应的错误信息
-    pub async fn get_by_hash_and_size<C>(
-        hash: &str,
-        size: &u64,
-        db: &C,
-    ) -> Result<Option<Model>, DaoError>
-    where
-        C: ConnectionTrait,
-    {
-        Entity::find()
-            .filter(Column::Hash.eq(hash))
-            .filter(Column::Size.eq(*size))
-            .one(db)
-            .await
-            .map_err(|e| DaoError::parse_db_err(e))
-    }
 }

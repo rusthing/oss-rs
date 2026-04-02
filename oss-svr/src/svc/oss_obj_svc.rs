@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Context};
+use anyhow::{Context, anyhow};
 use log::warn;
 use robotech_macros::svc;
 use std::{fs, io};
@@ -20,7 +20,11 @@ impl OssObjSvc {
     /// * `Ok(Ro<Vo>)` - 删除成功，返回封装了Vo的Ro对象
     /// * `Err(SvcError)` - 删除失败，可能因为记录不存在或其他数据库错误
     #[db_unwrap(transaction_required)]
-    pub async fn del_with_file<C>(id: u64, db: Option<&C>) -> Result<Ro<OssObjVo>, SvcError>
+    #[log_call]
+    pub async fn del_with_file<C>(
+        id: u64,
+        #[skip_log] db: Option<&C>,
+    ) -> Result<Ro<OssObjVo>, SvcError>
     where
         C: ConnectionTrait,
     {
@@ -54,7 +58,8 @@ impl OssObjSvc {
     /// * `Ok(Ro<String>)` - 删除成功，返回删除记录数
     /// * `Err(SvcError)` - 删除失败，可能因为数据库错误
     #[db_unwrap(transaction_required)]
-    pub async fn delete_orphaned<C>(db: Option<&C>) -> Result<Ro<()>, SvcError>
+    #[log_call]
+    pub async fn delete_orphaned<C>(#[skip_log] db: Option<&C>) -> Result<Ro<()>, SvcError>
     where
         C: ConnectionTrait,
     {
@@ -79,15 +84,19 @@ impl OssObjSvc {
     /// * `Ok(Ro<Vo>)` - 查询成功，如果记录存在，返回封装了Vo的Ro对象，如果不存在则返回对象的extra为None
     /// * `Err(SvcError)` - 查询失败，可能是数据库错误
     #[db_unwrap]
+    #[log_call]
     pub async fn get_by_hash_and_size<C>(
         hash: &str,
         size: &u64,
-        db: Option<&C>,
+        #[skip_log] db: Option<&C>,
     ) -> Result<Ro<OssObjVo>, SvcError>
     where
         C: ConnectionTrait,
     {
-        let one = OssObjDao::get_by_hash_and_size(hash, size, db).await?;
-        Ok(Ro::success("查询成功".to_string()).extra(one.map(|value| OssObjVo::from(value))))
+        let query_dto = OssObjQueryDto::builder()
+            .hash(Some(hash.to_string()))
+            .size(Some(size.clone()))
+            .build();
+        Self::get_by_query_dto(query_dto, Some(db)).await
     }
 }

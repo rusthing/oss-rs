@@ -19,7 +19,11 @@ impl OssBucketSvc {
     /// * `Ok(Ro<Vo>)` - 删除成功，返回封装了Vo的Ro对象
     /// * `Err(SvcError)` - 删除失败，可能因为记录不存在或其他数据库错误
     #[db_unwrap(transaction_required)]
-    pub async fn del_cascade<C>(id: u64, db: Option<&C>) -> Result<Ro<OssBucketVo>, SvcError>
+    #[log_call]
+    pub async fn del_cascade<C>(
+        id: u64,
+        #[skip_log] db: Option<&C>,
+    ) -> Result<Ro<OssBucketVo>, SvcError>
     where
         C: ConnectionTrait,
     {
