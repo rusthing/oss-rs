@@ -1,4 +1,4 @@
 use robotech_macros::router;
 
-#[router(all)]
+#[router]
 struct OssObjRefRouter;
