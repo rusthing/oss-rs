@@ -5,7 +5,7 @@ edition = "2024"
 authors = ["zbz"]
 license = "MIT"
 keywords = ["oss", "server", "upload", "download", "preview"]
-description = "A Rust-based object storage service system that provides functionalities similar to Alibaba Cloud OSS. Supports file upload, download, preview, bucket management and more, using Actix-web as the web framework and SeaORM as the database ORM."
+description = "A Rust-based object storage service system that provides functionalities similar to Alibaba Cloud OSS. Supports file upload, download, preview, bucket management and more, using Axum as the web framework and SeaORM as the database ORM."
 categories = ["web-programming::http-server"]
 homepage = "https://github.com/rusthing/oss-rs"
 repository = "https://github.com/rusthing/oss-rs"
@@ -17,5 +17,5 @@ reqwest = { workspace = true, features = ["multipart", "json", "stream"] }
 serde = { workspace = true, features = ["derive"] }
 serde_with = { workspace = true }
 serde_json = { workspace = true }
-utoipa = { workspace = true, features = ["actix_extras"] }
+utoipa = { workspace = true, features = ["axum_extras"] }
 robotech = { workspace = true, features = ["api-client"] }

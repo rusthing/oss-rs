@@ -1,6 +1,14 @@
-use crate::web::ctrl::oss_obj_ctrl::*;
-use utoipa::OpenApi;
+use robotech_macros::api_doc;
 
-#[derive(OpenApi)]
-#[openapi(paths(add, modify, save, del_by_id, get_by_id, get_by_query_dto))]
+#[api_doc(
+    add,
+    modify,
+    save,
+    del_by_id,
+    del_by_query_dto,
+    get_by_id,
+    get_by_query_dto,
+    list_by_query_dto,
+    page_by_query_dto
+)]
 pub struct OssObjApiDoc;

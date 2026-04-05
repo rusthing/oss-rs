@@ -1,4 +1,4 @@
-use crate::app::{get_app_config, AppConfig, OssConfig};
+use crate::app::{AppConfig, OssConfig, get_app_config};
 use crate::dao::OssObjRefDao;
 use crate::dto::oss_bucket_dto::OssBucketQueryDto;
 use crate::dto::oss_obj_dto::{OssObjAddDto, OssObjModifyDto};
@@ -9,14 +9,14 @@ use crate::svc::OssObjSvc;
 use crate::vo::OssObjRefVo;
 use anyhow::anyhow;
 use axum::body::Body;
-use axum::extract::multipart::Field;
 use axum::extract::Multipart;
-use axum::http::{header, HeaderMap, HeaderValue};
+use axum::extract::multipart::Field;
+use axum::http::{HeaderMap, HeaderValue, header};
 use chrono::{Local, TimeZone};
 use idworker::get_id_worker;
 use log::{debug, info, trace, warn};
 use robotech::dao::begin_transaction;
-use robotech::env::{EnvError, APP_ENV};
+use robotech::env::{APP_ENV, EnvError};
 use robotech::ro::Ro;
 use robotech::svc::SvcError;
 use robotech_macros::db_unwrap;
@@ -421,7 +421,7 @@ impl OssFileSvc {
                 "上传文件大小错误，请重新上传: {file_size_provided}->{file_size_computed}"
             )));
         }
-        let hash_computed = format!("{:x}", hasher.finalize());
+        let hash_computed = hex::encode(hasher.finalize());
         if let Some(hash_provided) = hash_provided.clone()
             && hash_provided != hash_computed
         {

@@ -1,6 +1,4 @@
-use crate::web::ctrl::oss_file_ctrl::*;
-use utoipa::OpenApi;
+use robotech_macros::api_doc;
 
-#[derive(OpenApi)]
-#[openapi(paths(upload, download, preview))]
+#[api_doc(upload, download, preview)]
 pub struct OssFileApiDoc;

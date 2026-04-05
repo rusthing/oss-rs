@@ -1,14 +1,14 @@
 use crate::svc::OssFileSvc;
 use crate::vo::OssObjRefVo;
 use axum::extract::{Multipart, Path};
-use axum::http::{header, HeaderMap, HeaderValue, StatusCode};
+use axum::http::{HeaderMap, HeaderValue, StatusCode, header};
 use axum::response::{IntoResponse, Response};
-use axum::Json;
+use axum::{Json, debug_handler};
 use regex::Regex;
 use robotech::macros::log_call;
 use robotech::ro::Ro;
-use robotech::web::ctrl_utils::get_current_user_id;
 use robotech::web::CtrlError;
+use robotech::web::ctrl_utils::get_current_user_id;
 use sea_orm::DatabaseTransaction;
 use std::sync::LazyLock;
 
@@ -35,6 +35,7 @@ use std::sync::LazyLock;
     ),
     responses((status = OK, body = Ro<OssObjRefVo>))
 )]
+#[debug_handler]
 #[log_call]
 pub async fn upload(
     Path(bucket): Path<String>,
@@ -80,6 +81,7 @@ enum DownloadMode {
     ),
     responses((status = OK, body = Ro<OssObjRefVo>))
 )]
+#[debug_handler]
 #[log_call]
 pub async fn download(
     Path(obj_id): Path<String>,
@@ -115,6 +117,7 @@ pub async fn download(
     ),
     responses((status = OK, body = Ro<OssObjRefVo>))
 )]
+#[debug_handler]
 #[log_call]
 pub async fn preview(
     Path(obj_id): Path<String>,

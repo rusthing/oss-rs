@@ -5,7 +5,7 @@ edition = "2024"
 authors = ["zbz"]
 license = "MIT"
 keywords = ["oss", "server", "upload", "download", "preview"]
-description = "A Rust-based object storage service system that provides functionalities similar to Alibaba Cloud OSS. Supports file upload, download, preview, bucket management and more, using Actix-web as the web framework and SeaORM as the database ORM."
+description = "A Rust-based object storage service system that provides functionalities similar to Alibaba Cloud OSS. Supports file upload, download, preview, bucket management and more, using Axum as the web framework and SeaORM as the database ORM."
 categories = ["web-programming::http-server"]
 homepage = "https://github.com/rusthing/oss-rs"
 repository = "https://github.com/rusthing/oss-rs"
@@ -22,12 +22,9 @@ typed-builder = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_with = { workspace = true }
 tokio = { workspace = true, features = ["rt", "rt-multi-thread", "macros", "signal"] }
-axum = { workspace = true, features = ["multipart"] }
+axum = { workspace = true, features = ["macros", "multipart"] }
 multer = "3.1.0"
 futures-util = "0.3.32"
-tempfile = { workspace = true }
-actix-web = { workspace = true }
-actix-multipart = { workspace = true }
 sqlx = { workspace = true, features = ["runtime-tokio", "any", "mysql", "postgres"] }
 sea-orm = { workspace = true, features = ["sqlx-mysql", "sqlx-postgres", "runtime-tokio-rustls", "debug-print"] }
 linkme = { workspace = true }
@@ -36,9 +33,11 @@ regex = { workspace = true }
 o2o = { workspace = true }
 validator = { workspace = true, features = ["derive"] }
 strum = { workspace = true, features = ["derive"] }
-utoipa = { workspace = true, features = ["actix_extras"] }
-utoipa-swagger-ui = { workspace = true, features = ["actix-web"] }
+utoipa = { workspace = true, features = ["axum_extras"] }
+utoipa-swagger-ui = { workspace = true, features = ["axum"] }
+utoipauto = { workspace = true }
 sha2 = { workspace = true }
+hex = { workspace = true }
 
 
 idworker = { workspace = true }

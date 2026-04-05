@@ -22,6 +22,7 @@ struct OssBucketCtrl;
     ),
     responses((status = OK, body = Ro<OssBucketVo>))
 )]
+#[debug_handler]
 #[log_call]
 pub async fn del_cascade(
     Path(id): Path<u64>,
