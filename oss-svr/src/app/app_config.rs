@@ -3,7 +3,7 @@ use idworker::IdWorkerConfig;
 use robotech::app::AppError;
 use robotech::db::DbConnConfig;
 use robotech::web::WebServerConfig;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use std::sync::RwLock;
 
 static APP_CONFIG: RwLock<Option<AppConfig>> = RwLock::new(None);
@@ -22,7 +22,7 @@ pub fn set_app_config(value: AppConfig) -> Result<(), AppError> {
 }
 
 /// 配置文件结构
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Deserialize, Clone)]
 #[serde(rename_all = "kebab-case")]
 pub struct AppConfig {
     /// oss

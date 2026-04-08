@@ -18,6 +18,11 @@ port = 9840
 #reuse-port = true
 cors.enabled = true
 #health-check.exposed = true
+forbidden-urns = [
+    "GET:/oss/bucket/list",
+    "GET:/oss/obj/list",
+    "GET:/oss/obj-ref/list"
+]
 
 [web-server.https]
 enabled = false
