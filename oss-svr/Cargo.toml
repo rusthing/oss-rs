@@ -1,6 +1,6 @@
 [package]
 name = "oss-svr"
-version = "1.1.6"
+version = "1.1.7"
 edition = "2024"
 authors = ["zbz"]
 license = "MIT"
@@ -22,6 +22,7 @@ typed-builder = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_with = { workspace = true }
 tokio = { workspace = true, features = ["rt", "rt-multi-thread", "macros", "signal"] }
+tokio-util = { workspace = true }
 axum = { workspace = true, features = ["macros", "multipart"] }
 multer = "3.1.0"
 futures-util = "0.3.32"
@@ -43,8 +44,7 @@ hex = { workspace = true }
 idworker = { workspace = true }
 wheel-rs = { workspace = true }
 robotech = { workspace = true, features = ["web", "db", "macros"] }
-robotech-macros = { path = "../../robotech-rs/robotech-macros" }
-tokio-util = "0.7.18"
+robotech-macros = { workspace = true }
 
 [build-dependencies]
 # cross打包时用，需要开启vendored feature
