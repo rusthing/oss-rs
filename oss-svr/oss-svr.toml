@@ -29,6 +29,13 @@ local-only-urns = [
     "GET:/oss/obj/list",
     "GET:/oss/obj-ref/list"
 ]
+ip-white-list = [
+    "127.0.0.1/32",
+    "192.168.31.0/24",
+]
+ip-black-list = [
+    "192.168.31.102/32"
+]
 
 [web-server.https]
 enabled = false
