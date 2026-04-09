@@ -19,6 +19,12 @@ port = 9840
 cors.enabled = true
 #health-check.exposed = true
 forbidden-urns = [
+    #    "GET:/oss/bucket/list",
+    #    "GET:/oss/obj/list",
+    #    "GET:/oss/obj-ref/list",
+    "GET:/swagger-ui/"
+]
+local-only-urns = [
     "GET:/oss/bucket/list",
     "GET:/oss/obj/list",
     "GET:/oss/obj-ref/list"
