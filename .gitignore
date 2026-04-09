@@ -6,3 +6,5 @@ storage
 *.ldb
 *.pjb
 *.pdb
+
+Cargo.lock
