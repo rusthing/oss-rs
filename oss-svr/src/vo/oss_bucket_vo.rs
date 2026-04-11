@@ -1,5 +1,5 @@
 use crate::model::oss_bucket::Model;
-use robotech_macros::vo;
+use robotech::macros::vo;
 
 #[vo]
 pub struct OssBucketVo {

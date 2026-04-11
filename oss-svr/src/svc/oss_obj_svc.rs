@@ -1,6 +1,6 @@
 use anyhow::{Context, anyhow};
 use log::warn;
-use robotech_macros::svc;
+use robotech::macros::svc;
 use std::{fs, io};
 
 #[svc]

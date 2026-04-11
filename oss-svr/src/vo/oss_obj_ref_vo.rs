@@ -1,5 +1,5 @@
 use crate::model::oss_obj_ref::Model;
-use robotech_macros::vo;
+use robotech::macros::vo;
 
 #[vo]
 pub struct OssObjRefVo {

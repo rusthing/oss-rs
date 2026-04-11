@@ -1,6 +1,6 @@
 use crate::svc::OssObjRefSvc;
 use crate::svc::OssObjSvc;
-use robotech_macros::svc;
+use robotech::macros::svc;
 
 #[svc]
 pub struct OssBucketSvc;

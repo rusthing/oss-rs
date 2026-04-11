@@ -1,4 +1,4 @@
-use robotech_macros::ctrl;
+use robotech::macros::ctrl;
 
 #[ctrl]
 struct OssObjRefCtrl;

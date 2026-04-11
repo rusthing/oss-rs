@@ -1,4 +1,4 @@
-use robotech_macros::crud_dto;
+use robotech::macros::crud_dto;
 
 #[crud_dto]
 pub struct OssObjDto {

@@ -40,11 +40,9 @@ utoipauto = { workspace = true }
 sha2 = { workspace = true }
 hex = { workspace = true }
 
-
 idworker = { workspace = true }
 wheel-rs = { workspace = true }
 robotech = { workspace = true, features = ["web", "db", "macros"] }
-robotech-macros = { workspace = true }
 
 [build-dependencies]
 # cross打包时用，需要开启vendored feature

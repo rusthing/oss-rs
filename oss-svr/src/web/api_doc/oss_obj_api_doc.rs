@@ -1,4 +1,4 @@
-use robotech_macros::api_doc;
+use robotech::macros::api_doc;
 
 #[api_doc(
     add,

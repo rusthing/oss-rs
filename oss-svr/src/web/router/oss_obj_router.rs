@@ -1,4 +1,4 @@
-use robotech_macros::router;
+use robotech::macros::router;
 
 #[router(crud)]
 struct OssObjRouter;

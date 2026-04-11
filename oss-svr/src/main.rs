@@ -1,21 +1,19 @@
 use anyhow::anyhow;
 use clap::Parser;
+use log::debug;
 use idworker::init_id_worker;
-use log::{debug, warn};
 use oss_svr::app::{set_app_config, AppConfig};
+use robotech;
 use robotech::app::{build_app_cfg, wait_app_exit};
 use robotech::cfg::watch_cfg_file;
 use robotech::dao::init_dao;
 use robotech::db::init_db_conn;
 use robotech::env::init_env;
 use robotech::log::init_log;
-use robotech::macros::log_call;
+use robotech::macros::{db_migrate, log_call, watch_cfg_file};
 use robotech::signal::SignalManager;
 use robotech::web::{start_web_server, stop_web_service};
-use robotech_macros::{db_migrate, watch_cfg_file};
-use std::sync::{mpsc, Arc};
-use std::time::Duration;
-use tokio::time::interval;
+use std::sync::Arc;
 
 /// oss - 对象存储服务
 ///
