@@ -137,7 +137,7 @@ async fn main() -> anyhow::Result<()> {
 async fn apply_app_config(
     app_config: AppConfig,
     port: Option<u16>,
-    old_pid: Option<i32>,
+    old_pid: Option<u32>,
 ) -> anyhow::Result<()> {
     debug!("应用App配置...");
     let AppConfig {
