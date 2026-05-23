@@ -14,8 +14,7 @@ fn main() {
     // 获取输出目录路径
     let out_dir = std::env::var("OUT_DIR").unwrap();
 
-    // 复制配置文件到输出目录
-    // 获取源配置文件路径
+    // 复制应用的配置文件到输出目录
     let config_file_name = env!("CARGO_PKG_NAME");
     copy_config_file(&out_dir, config_file_name, "toml");
     copy_config_file(&out_dir, config_file_name, "yml");
@@ -23,8 +22,7 @@ fn main() {
     copy_config_file(&out_dir, config_file_name, "ini");
     copy_config_file(&out_dir, config_file_name, "ron");
 
-    // 复制配置文件到输出目录
-    // 获取源配置文件路径
+    // 复制日志的配置文件到输出目录
     let config_file_name = "log";
     copy_config_file(&out_dir, config_file_name, "toml");
     copy_config_file(&out_dir, config_file_name, "yml");
