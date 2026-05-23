@@ -1,7 +1,7 @@
 use anyhow::anyhow;
 use clap::Parser;
-use log::debug;
 use idworker::init_id_worker;
+use log::debug;
 use oss_svr::app::{set_app_config, AppConfig};
 use robotech;
 use robotech::app::{build_app_cfg, wait_app_exit};
@@ -85,7 +85,7 @@ async fn main() -> anyhow::Result<()> {
 
     // 监听配置文件变化
     let files = files.clone();
-    watch_cfg_file!("app", {
+    watch_cfg_file!("app", files, {
         let (app_config, _) =
             build_app_cfg::<AppConfig>(config_file.clone()).expect("无法加载配置文件");
         apply_app_config(app_config, port, None)
