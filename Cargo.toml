@@ -37,8 +37,8 @@ hex = "0.4.3"
 
 idworker = "1.1.0"
 wheel-rs = "1.6.0"
-robotech = "1.6.0"
-robotech-macros = "1.6.0"
+robotech = "1.6.3"
+robotech-macros = "1.6.3"
 
 [patch.crates-io]
 idworker = { path = "../idworker" }
