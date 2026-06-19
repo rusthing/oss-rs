@@ -1,6 +1,6 @@
 use crate::api_client::oss_file_api_client::OssFileApiClient;
 use log::info;
-use robotech::api_client::{ApiClientConfig, ApiClientError, CrudApiClient};
+use robotech::api_client::{ApiClientConfig, ApiClientError, ApiClient};
 use std::collections::HashMap;
 use std::sync::OnceLock;
 
@@ -17,7 +17,7 @@ pub fn init_oss_api_client(
     let api_client_config = api_config.get("oss").unwrap_or(&default_config).clone();
     OSS_FILE_API_CLIENT
         .set(OssFileApiClient {
-            api_client: CrudApiClient { api_client_config },
+            api_client: ApiClient { api_client_config },
         })
         .map_err(|_| ApiClientError::SetApiClient("OSS_FILE_API_CLIENT".to_string()))?;
     Ok(())

@@ -1,4 +1,4 @@
-use robotech::api_client::{ApiClientError, CrudApiClient};
+use robotech::api_client::{ApiClientError, ApiClient};
 use robotech::ro::Ro;
 use std::fmt::Display;
 use std::ops::{Deref, DerefMut};
@@ -7,11 +7,11 @@ use std::string::ToString;
 /// OSS FILE API
 #[derive(Debug)]
 pub struct OssFileApiClient {
-    pub api_client: CrudApiClient,
+    pub api_client: ApiClient,
 }
 
 impl Deref for OssFileApiClient {
-    type Target = CrudApiClient;
+    type Target = ApiClient;
 
     fn deref(&self) -> &Self::Target {
         &self.api_client
