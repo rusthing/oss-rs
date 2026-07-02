@@ -237,7 +237,7 @@ impl OssFileSvc {
                             .await?;
                         }
                     }
-                    return Ok(obj_ref_ro.message("上传成功".to_string()));
+                    return Ok(obj_ref_ro.msg("上传成功".to_string()));
                 }
                 _ => {}
             }
