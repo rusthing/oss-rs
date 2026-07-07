@@ -28,7 +28,7 @@ use tokio::fs::File;
 use tokio::io::{AsyncReadExt, AsyncSeekExt, AsyncWriteExt};
 use tokio_util::io::ReaderStream;
 use wheel_rs::file_utils::get_file_ext;
-use wheel_rs::time_utils::get_current_timestamp;
+use wheel_rs::time_utils::now_ts;
 
 pub struct OssFileSvc;
 
@@ -112,7 +112,7 @@ impl OssFileSvc {
                         None
                     };
 
-                    let now = get_current_timestamp()?;
+                    let now = now_ts()?;
                     let ext = get_file_ext(file_name);
 
                     // 判断对象是否存在
