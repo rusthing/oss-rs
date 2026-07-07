@@ -1,5 +1,5 @@
 use anyhow::{Context, anyhow};
-use log::warn;
+use tracing::warn;
 use robotech::macros::svc;
 use std::{fs, io};
 

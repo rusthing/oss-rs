@@ -1,5 +1,5 @@
 use crate::api_client::oss_file_api_client::OssFileApiClient;
-use log::info;
+use tracing::info;
 use robotech::api_client::{ApiClientConfig, ApiClientError, ApiClient};
 use std::collections::HashMap;
 use std::sync::OnceLock;

@@ -14,7 +14,7 @@ use axum::extract::multipart::Field;
 use axum::http::{HeaderMap, HeaderValue, header};
 use chrono::{Local, TimeZone};
 use idworker::get_id_worker;
-use log::{debug, info, trace, warn};
+use tracing::{debug, info, trace, warn};
 use robotech::dao::begin_transaction;
 use robotech::env::{APP_ENV, EnvError};
 use robotech::ro::Ro;

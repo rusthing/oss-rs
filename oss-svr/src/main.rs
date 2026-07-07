@@ -1,7 +1,7 @@
 use anyhow::anyhow;
 use clap::Parser;
 use idworker::init_id_worker;
-use log::debug;
+use tracing::debug;
 use oss_svr::app::{set_app_config, AppConfig};
 use robotech;
 use robotech::app::{build_app_cfg, wait_app_exit};
