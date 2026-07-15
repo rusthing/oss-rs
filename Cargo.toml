@@ -36,7 +36,7 @@ sha2 = "0.11.0"
 hex = "0.4.3"
 
 idworker = "1.1.1"
-wheel-rs = "1.8.1"
+wheel-rs = "1.8.2"
 robotech = "1.8.0"
 robotech-macros = "1.8.0"
 
