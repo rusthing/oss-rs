@@ -39,6 +39,13 @@ fn main() {
     copy_file(project_root, file_name, "json", dest_dir_path);
     copy_file(project_root, file_name, "ini", dest_dir_path);
     copy_file(project_root, file_name, "ron", dest_dir_path);
+
+    // 复制数据库升级目录到输出目录
+    copy_dir(project_root, "migrations", dest_dir_path);
+
+    // 复制证书目录到输出目录
+    copy_dir(project_root, "cert", dest_dir_path);
+
 }
 
 fn copy_dir(project_root: &str, src_dir: &str, dest_dir_path: &Path) {

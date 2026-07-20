@@ -1,19 +1,18 @@
 use anyhow::anyhow;
 use clap::Parser;
 use idworker::init_id_worker;
-use tracing::debug;
 use oss_svr::app::{set_app_config, AppConfig};
 use robotech;
-use robotech::app::{build_app_cfg, wait_app_exit};
-use robotech::cfg::watch_cfg_file;
+use robotech::app::{add_app_file_to_watch, build_app_cfg, wait_app_exit, watch_file};
 use robotech::dao::init_dao;
 use robotech::db::init_db_conn;
 use robotech::env::init_env;
 use robotech::log::init_log;
-use robotech::macros::{db_migrate, log_call, watch_cfg_file};
+use robotech::macros::{db_migrate, log_call, watch_file};
 use robotech::signal::SignalManager;
 use robotech::web::{start_web_server, stop_web_service};
 use std::sync::Arc;
+use tracing::debug;
 
 /// oss - 对象存储服务
 ///
@@ -80,12 +79,13 @@ async fn main() -> anyhow::Result<()> {
 
     // 初始化信号(_signal_manager变量将在程序优雅退出时释放，释放时删除pid文件)
     let (mut signal_manager, old_pid) = SignalManager::new(signal)?;
-    let (app_config, files) = build_app_cfg::<AppConfig>(config_file.clone())?;
+    let (app_config, mut files) = build_app_cfg::<AppConfig>(config_file.clone())?;
+    add_app_file_to_watch(&mut files)?;
     let files = Arc::new(files);
 
-    // 监听配置文件变化
+    // 监听文件变化
     let files = files.clone();
-    watch_cfg_file!("app", files, {
+    watch_file!("app,cfg", files, {
         let (app_config, _) =
             build_app_cfg::<AppConfig>(config_file.clone()).expect("无法加载配置文件");
         apply_app_config(app_config, port, None)
