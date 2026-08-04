@@ -85,7 +85,7 @@ async fn main() -> anyhow::Result<()> {
 
     // 监听文件变化
     let files = files.clone();
-    watch_file!("app,cfg", files, {
+    watch_file!("app,cfg", files.clone(), {
         let (app_config, _) =
             build_app_cfg::<AppConfig>(config_file.clone()).expect("无法加载配置文件");
         apply_app_config(app_config, port, None)

@@ -32,6 +32,7 @@ strum = "0.28.0"
 utoipa = "5.5.0"
 utoipa-swagger-ui = "9.0.2"
 utoipauto = "0.3.0-alpha.2"
+notify-debouncer-mini = "0.7.0"
 sha2 = "0.11.0"
 hex = "0.4.3"
 
