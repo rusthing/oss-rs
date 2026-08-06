@@ -43,7 +43,7 @@ hex = { workspace = true }
 
 idworker = { workspace = true }
 wheel-rs = { workspace = true }
-robotech = { workspace = true, features = ["web", "db", "macros"] }
+robotech = { workspace = true, features = ["web", "db", "config-center", "registry-center", "macros"] }
 
 [build-dependencies]
 # cross打包时用，需要开启vendored feature
