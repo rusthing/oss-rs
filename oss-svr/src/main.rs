@@ -73,21 +73,22 @@ async fn main() -> anyhow::Result<()> {
     // 初始化环境变量;
     init_env()?;
     // 初始化日志系统
-    init_log()?;
+    init_log().await?;
     // 初始化数据访问层
     init_dao()?;
 
     // 初始化信号(_signal_manager变量将在程序优雅退出时释放，释放时删除pid文件)
     let (mut signal_manager, old_pid) = SignalManager::new(signal)?;
-    let (app_config, mut files) = build_app_cfg::<AppConfig>(config_file.clone())?;
+    let (app_config, mut files) = build_app_cfg::<AppConfig>(config_file.clone()).await?;
     add_app_file_to_watch(&mut files)?;
     let files = Arc::new(files);
 
     // 监听文件变化
     let files = files.clone();
     watch_file!("app,cfg", files.clone(), {
-        let (app_config, _) =
-            build_app_cfg::<AppConfig>(config_file.clone()).expect("无法加载配置文件");
+        let (app_config, _) = build_app_cfg::<AppConfig>(config_file.clone())
+            .await
+            .expect("无法加载配置文件");
         apply_app_config(app_config, port, None)
             .await
             .expect("配置无法应用");
