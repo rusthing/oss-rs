@@ -1,14 +1,16 @@
 use anyhow::anyhow;
+use arc_swap::access::Access;
+use arc_swap::{ArcSwap, ArcSwapAny};
 use clap::Parser;
 use idworker::init_id_worker;
-use oss_svr::app::{set_app_config, AppConfig};
+use oss_svr::app::AppConfig;
 use robotech;
-use robotech::app::{add_app_file_to_watch, build_app_cfg, wait_app_exit, watch_file};
+use robotech::app::{wait_app_exit, AppWatcher};
 use robotech::dao::init_dao;
 use robotech::db::init_db_conn;
 use robotech::env::init_env;
-use robotech::log::init_log;
-use robotech::macros::{db_migrate, log_call, watch_file};
+use robotech::log::LogWatcher;
+use robotech::macros::{db_migrate, log_call};
 use robotech::signal::SignalManager;
 use robotech::web::{start_web_server, stop_web_service};
 use std::sync::Arc;
@@ -73,30 +75,29 @@ async fn main() -> anyhow::Result<()> {
     // 初始化环境变量;
     init_env()?;
     // 初始化日志系统
-    init_log().await?;
+    let log_watcher = LogWatcher::new().await?;
     // 初始化数据访问层
     init_dao()?;
 
     // 初始化信号(_signal_manager变量将在程序优雅退出时释放，释放时删除pid文件)
     let (mut signal_manager, old_pid) = SignalManager::new(signal)?;
-    let (app_config, mut files) = build_app_cfg::<AppConfig>(config_file.clone()).await?;
-    add_app_file_to_watch(&mut files)?;
-    let files = Arc::new(files);
 
-    // 监听文件变化
-    let files = files.clone();
-    watch_file!("app,cfg", files.clone(), {
-        let (app_config, _) = build_app_cfg::<AppConfig>(config_file.clone())
-            .await
-            .expect("无法加载配置文件");
-        apply_app_config(app_config, port, None)
-            .await
-            .expect("配置无法应用");
-        debug!("重新加载配置成功");
-    });
+    let app_watcher: AppWatcher<AppConfig> = AppWatcher::new(
+        config_file,
+        log_watcher.config_changed_tx.clone(),
+        move |app_config| async move {
+            apply_app_config(app_config, port, None)
+                .await
+                .expect("配置无法应用");
+            debug!("重新加载配置成功");
+            Ok(())
+        },
+    )
+    .await?;
 
     // 应用配置
-    apply_app_config(app_config, port, old_pid).await?;
+    // let app_config = app_watcher.app_config.load().clone();
+    apply_app_config(app_watcher.app_config, port, old_pid).await?;
 
     // 监听系统信号与等待退出
     let signal_receiver = signal_manager.watch_signal()?;
@@ -135,8 +136,8 @@ async fn main() -> anyhow::Result<()> {
 /// ```
 ///
 #[log_call]
-async fn apply_app_config(
-    app_config: AppConfig,
+pub async fn apply_app_config(
+    app_config: Arc<ArcSwap<AppConfig>>,
     port: Option<u16>,
     old_pid: Option<u32>,
 ) -> anyhow::Result<()> {
@@ -146,8 +147,8 @@ async fn apply_app_config(
         db: db_conn_config,
         id_worker: id_worker_config,
         ..
-    } = app_config.clone();
-    set_app_config(app_config)?;
+    } = AppConfig::clone(app_config.load());
+    // set_app_config(app_config)?;
 
     // 升级数据库版本...
     let db_url = db_conn_config.url.as_str();
@@ -160,7 +161,7 @@ async fn apply_app_config(
     init_db_conn(db_conn_config.clone()).await?;
 
     // 启动Web服务器
-    start_web_server(web_server_config, port, old_pid).await?;
+    start_web_server(app_config, web_server_config, port, old_pid).await?;
 
     Ok(())
 }

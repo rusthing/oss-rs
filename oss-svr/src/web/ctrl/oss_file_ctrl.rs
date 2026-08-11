@@ -1,14 +1,15 @@
+use crate::app::OssConfig;
 use crate::svc::OssFileSvc;
 use crate::vo::OssObjRefVo;
-use axum::extract::{Multipart, Path};
-use axum::http::{HeaderMap, HeaderValue, StatusCode, header};
+use axum::extract::{Multipart, Path, State};
+use axum::http::{header, HeaderMap, HeaderValue, StatusCode};
 use axum::response::{IntoResponse, Response};
-use axum::{Json, debug_handler};
+use axum::{debug_handler, Json};
 use regex::Regex;
 use robotech::macros::log_call;
 use robotech::ro::Ro;
-use robotech::web::CtrlError;
 use robotech::web::ctrl_utils::get_current_user_id;
+use robotech::web::CtrlError;
 use sea_orm::DatabaseTransaction;
 use std::sync::LazyLock;
 
@@ -35,19 +36,25 @@ use std::sync::LazyLock;
     ),
     responses((status = OK, body = Ro<OssObjRefVo>))
 )]
-#[debug_handler]
 #[log_call]
+#[debug_handler]
 pub async fn upload(
+    State(oss_config): State<OssConfig>,
     Path(bucket): Path<String>,
     headers: HeaderMap,
-    multipart: Multipart,
+    #[skip_log] multipart: Multipart,
 ) -> Result<Json<Ro<OssObjRefVo>>, CtrlError> {
     // 从header中解析当前用户ID，如果没有或解析失败则抛出ApiError
     let current_user_id = get_current_user_id(&headers)?;
-
     Ok(Json(
-        OssFileSvc::upload::<DatabaseTransaction>(&bucket, multipart, current_user_id, None)
-            .await?,
+        OssFileSvc::upload::<DatabaseTransaction>(
+            &bucket,
+            multipart,
+            current_user_id,
+            &oss_config,
+            None,
+        )
+        .await?,
     ))
 }
 
@@ -81,13 +88,14 @@ enum DownloadMode {
     ),
     responses((status = OK, body = Ro<OssObjRefVo>))
 )]
-#[debug_handler]
 #[log_call]
+#[debug_handler]
 pub async fn download(
+    State(oss_config): State<OssConfig>,
     Path(obj_id): Path<String>,
     headers: HeaderMap,
 ) -> Result<Response, CtrlError> {
-    download_or_preview(DownloadMode::Download, obj_id, headers).await
+    download_or_preview(DownloadMode::Download, obj_id, headers, oss_config).await
 }
 
 /// # 预览文件
@@ -117,23 +125,26 @@ pub async fn download(
     ),
     responses((status = OK, body = Ro<OssObjRefVo>))
 )]
-#[debug_handler]
 #[log_call]
+#[debug_handler]
 pub async fn preview(
+    State(oss_config): State<OssConfig>,
     Path(obj_id): Path<String>,
     headers: HeaderMap,
 ) -> Result<Response, CtrlError> {
-    download_or_preview(DownloadMode::Preview, obj_id, headers).await
+    download_or_preview(DownloadMode::Preview, obj_id, headers, oss_config).await
 }
 
 async fn download_or_preview(
     mode: DownloadMode,
     obj_id: String,
     headers: HeaderMap,
+    oss_config: OssConfig,
 ) -> Result<Response, CtrlError> {
     let (obj_id, ext) = parse_obj_id(&obj_id)?;
     let (file_name, ext, file_size, chunk_size, body, start, end) =
-        OssFileSvc::download::<DatabaseTransaction>(headers, obj_id, ext, None).await?;
+        OssFileSvc::download::<DatabaseTransaction>(headers, obj_id, ext, &oss_config, None)
+            .await?;
 
     let content_type = if mode == DownloadMode::Download {
         "application/octet-stream"

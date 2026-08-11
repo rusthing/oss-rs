@@ -1,4 +1,4 @@
-use crate::app::{AppConfig, OssConfig, get_app_config};
+use crate::app::OssConfig;
 use crate::dao::OssObjRefDao;
 use crate::dto::oss_bucket_dto::OssBucketQueryDto;
 use crate::dto::oss_obj_dto::{OssObjAddDto, OssObjModifyDto};
@@ -9,17 +9,16 @@ use crate::svc::OssObjSvc;
 use crate::vo::OssObjRefVo;
 use anyhow::anyhow;
 use axum::body::Body;
-use axum::extract::Multipart;
 use axum::extract::multipart::Field;
-use axum::http::{HeaderMap, HeaderValue, header};
+use axum::extract::Multipart;
+use axum::http::{header, HeaderMap, HeaderValue};
 use chrono::{Local, TimeZone};
 use idworker::get_id_worker;
-use tracing::{debug, info, trace, warn};
 use robotech::dao::begin_transaction;
-use robotech::env::{APP_ENV, EnvError};
+use robotech::env::{EnvError, APP_ENV};
+use robotech::macros::db_unwrap;
 use robotech::ro::Ro;
 use robotech::svc::SvcError;
-use robotech::macros::db_unwrap;
 use sea_orm::ConnectionTrait;
 use sha2::Digest;
 use std::io::SeekFrom;
@@ -27,6 +26,7 @@ use tokio::fs;
 use tokio::fs::File;
 use tokio::io::{AsyncReadExt, AsyncSeekExt, AsyncWriteExt};
 use tokio_util::io::ReaderStream;
+use tracing::{debug, info, trace, warn};
 use wheel_rs::file_utils::get_file_ext;
 use wheel_rs::time_utils::now_ts;
 
@@ -57,6 +57,7 @@ impl OssFileSvc {
         bucket: &str,
         mut multipart: Multipart,
         current_user_id: u64,
+        oss_config: &OssConfig,
         db: Option<&C>,
     ) -> Result<Ro<OssObjRefVo>, SvcError>
     where
@@ -125,7 +126,6 @@ impl OssFileSvc {
                         let obj_id = get_id_worker()?.next_id()?;
                         // 根据当前时间，创建yyyy/MM/dd/HH的目录，并将文件存入此目录中
                         let datetime = Local.timestamp_opt((now / 1000) as i64, 0).unwrap();
-                        let oss_config = get_app_config()?.oss;
 
                         let date_path = datetime.format(&oss_config.file_dir_format).to_string();
 
@@ -196,6 +196,7 @@ impl OssFileSvc {
                             &file_size_provided,
                             field,
                             &new_file_path,
+                            oss_config,
                         )
                         .await?;
 
@@ -273,6 +274,7 @@ impl OssFileSvc {
         headers: HeaderMap,
         obj_ref_id: u64,
         mut ext: Option<String>,
+        oss_config: &OssConfig,
         db: Option<&C>,
     ) -> Result<
         (
@@ -327,7 +329,7 @@ impl OssFileSvc {
 
             // 用 Take 限制只读 chunk_size 字节，再包成流
             let limited = file.take(chunk_size);
-            let buffer_size = get_app_config()?.oss.download_buffer_size.as_u64() as usize;
+            let buffer_size = oss_config.download_buffer_size.as_u64() as usize;
             let stream = ReaderStream::with_capacity(limited, buffer_size);
             let body = Body::from_stream(stream);
             (chunk_size, body)
@@ -354,14 +356,14 @@ impl OssFileSvc {
         file_size_provided: &Option<u64>,
         mut field: Field<'_>,
         new_file_path: &str,
+        oss_config: &OssConfig,
     ) -> Result<(u64, String), SvcError> {
         // 如果对象不存在，则开始接收 chunk
-        let AppConfig { oss, .. } = get_app_config().expect("app config not found");
         let OssConfig {
             upload_file_limit_size,
             upload_buffer_size,
             ..
-        } = oss;
+        } = oss_config;
 
         let buffer_size = upload_buffer_size.as_u64();
         let mut file_size_computed: u64 = 0;
