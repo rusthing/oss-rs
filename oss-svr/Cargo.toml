@@ -13,12 +13,12 @@ readme = "README.md"
 
 [dependencies]
 anyhow = { workspace = true }
-#log = { workspace = true }
 tracing = { workspace = true }
 clap = { workspace = true, features = ["derive"] }
 chrono = { workspace = true }
 derive_setters = { workspace = true }
 typed-builder = { workspace = true }
+arc-swap = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_with = { workspace = true }
 tokio = { workspace = true, features = ["rt", "rt-multi-thread", "macros", "signal"] }
@@ -37,7 +37,7 @@ strum = { workspace = true, features = ["derive"] }
 utoipa = { workspace = true, features = ["axum_extras"] }
 utoipa-swagger-ui = { workspace = true, features = ["axum"] }
 #utoipauto = { workspace = true }
-notify-debouncer-mini = { workspace = true }
+#notify-debouncer-mini = { workspace = true }
 sha2 = { workspace = true }
 hex = { workspace = true }
 
