@@ -1,5 +1,31 @@
+use arc_swap::ArcSwap;
 use bytesize::ByteSize;
+use robotech::cfg::CfgError;
 use serde::{Deserialize, Serialize};
+use std::sync::{Arc, OnceLock};
+
+static OSS_CONFIG: OnceLock<ArcSwap<OssConfig>> = OnceLock::new();
+
+pub fn init_oss_config(oss_config: OssConfig) {
+    OSS_CONFIG.set(ArcSwap::new(Arc::new(oss_config))).unwrap();
+}
+
+pub fn get_oss_config() -> Result<Arc<OssConfig>, CfgError> {
+    Ok(OSS_CONFIG
+        .get()
+        .ok_or(CfgError::NotInit("OSS config not initialized".to_string()))?
+        .load_full()
+        .clone())
+}
+
+pub fn update_oss_config(oss_config: OssConfig) -> Result<(), CfgError> {
+    if let Some(swap) = OSS_CONFIG.get() {
+        swap.store(Arc::new(oss_config));
+        Ok(())
+    } else {
+        Err(CfgError::NotInit("OSS config not initialized".to_string()))
+    }
+}
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "kebab-case")]

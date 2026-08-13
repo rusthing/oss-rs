@@ -3,7 +3,7 @@ use arc_swap::access::Access;
 use arc_swap::{ArcSwap, ArcSwapAny};
 use clap::Parser;
 use idworker::init_id_worker;
-use oss_svr::app::AppConfig;
+use oss_svr::app::{init_oss_config, update_oss_config, AppConfig};
 use robotech;
 use robotech::app::{wait_app_exit, AppWatcher};
 use robotech::dao::init_dao;
@@ -86,6 +86,7 @@ async fn main() -> anyhow::Result<()> {
         config_file,
         log_watcher.config_changed_tx.clone(),
         move |app_config| async move {
+            update_oss_config(app_config.oss)?;
             apply_app_config(app_config, port, None)
                 .await
                 .expect("配置无法应用");
@@ -94,6 +95,8 @@ async fn main() -> anyhow::Result<()> {
         },
     )
     .await?;
+
+    init_oss_config(app_watcher.app_config.oss)?;
 
     // 应用配置
     // let app_config = app_watcher.app_config.load().clone();
@@ -137,7 +140,7 @@ async fn main() -> anyhow::Result<()> {
 ///
 #[log_call]
 pub async fn apply_app_config(
-    app_config: Arc<ArcSwap<AppConfig>>,
+    app_config: Arc<AppConfig>,
     port: Option<u16>,
     old_pid: Option<u32>,
 ) -> anyhow::Result<()> {
