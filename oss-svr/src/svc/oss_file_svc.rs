@@ -365,7 +365,7 @@ impl OssFileSvc {
             ..
         } = oss_config;
 
-        let buffer_size = upload_buffer_size.as_u64();
+        let buffer_size = upload_buffer_size.as_u64(); // 缓存总大小
         let mut file_size_computed: u64 = 0;
         let mut file = File::create(new_file_path).await?;
         let mut hasher = sha2::Sha256::new();
@@ -398,12 +398,14 @@ impl OssFileSvc {
             } else {
                 trace!("切片大小 < 缓存大小，攒够缓存满才写一次盘");
                 let buffer_length = buffer.len() as u64; // 缓存实际大小
-                let total_size = buffer_length + chunk_size; // 总大小 = 缓存大小 + 切片大小
-                let chunk_remain = total_size - buffer_length; // 切片剩余大小
-                // 如果切片剩余大小 <= 0，则将切片添加入缓存中，否则将缓存中的数据写入盘，并清空缓存，再将剩余切片写入缓存中
-                if chunk_remain <= 0 {
+                let total_size = buffer_length + chunk_size; // 实际总大小 = 缓存实际大小 + 切片大小
+                let chunk_remain = buffer_size - total_size; // 缓存剩余大小 = 缓存总大小 - 实际总大小
+                // 如果缓存剩余大小 == 0，则将切片添加入缓存中
+                if chunk_remain == 0 {
                     buffer.extend_from_slice(&chunk);
-                } else {
+                }
+                // 否则将缓存中的数据写入盘，并清空缓存，再将切片中的数据写入缓存中(切片中的数据前面比较过肯定小于缓存总大小)
+                else {
                     file.write_all(&buffer).await?;
                     buffer.clear();
                     buffer.extend_from_slice(&chunk);
