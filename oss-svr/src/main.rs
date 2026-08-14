@@ -1,7 +1,7 @@
 use anyhow::anyhow;
 use clap::Parser;
 use idworker::init_id_worker;
-use oss_svr::app::{init_oss_config, update_oss_config, AppConfig};
+use oss_svr::config::{init_oss_config, update_oss_config, AppConfig};
 use robotech;
 use robotech::app::{wait_app_exit, AppWatcher};
 use robotech::dao::init_dao;

@@ -1,4 +1,4 @@
-use crate::app::{get_oss_config, OssConfig};
+use crate::config::{get_oss_config, OssConfig};
 use crate::dao::OssObjRefDao;
 use crate::dto::oss_bucket_dto::OssBucketQueryDto;
 use crate::dto::oss_obj_dto::{OssObjAddDto, OssObjModifyDto};

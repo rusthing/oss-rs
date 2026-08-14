@@ -1,4 +1,4 @@
-pub mod app;
+pub mod config;
 pub mod dao;
 pub mod dto;
 pub mod model;
