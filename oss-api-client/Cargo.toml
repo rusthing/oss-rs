@@ -12,7 +12,9 @@ repository = "https://github.com/rusthing/oss-rs"
 readme = "README.md"
 
 [dependencies]
-log = { workspace = true }
+anyhow = { workspace = true }
+tracing = { workspace = true }
+arc-swap = { workspace = true }
 reqwest = { workspace = true, features = ["multipart", "json", "stream"] }
 serde = { workspace = true, features = ["derive"] }
 serde_with = { workspace = true }

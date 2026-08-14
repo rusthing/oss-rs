@@ -3,10 +3,12 @@ use bytesize::ByteSize;
 use robotech::cfg::CfgError;
 use serde::{Deserialize, Serialize};
 use std::sync::{Arc, OnceLock};
+use tracing::info;
 
 static OSS_CONFIG: OnceLock<ArcSwap<OssConfig>> = OnceLock::new();
 
 pub fn init_oss_config(oss_config: OssConfig) -> Result<(), CfgError> {
+    info!("初始化oss的配置");
     OSS_CONFIG
         .set(ArcSwap::new(Arc::new(oss_config)))
         .map_err(|_| CfgError::Init("OSS config init failed".to_string()))

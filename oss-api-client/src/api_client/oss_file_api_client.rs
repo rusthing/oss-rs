@@ -1,4 +1,7 @@
-use robotech::api_client::{ApiClientError, ApiClient};
+use anyhow::anyhow;
+use reqwest::header::{HeaderMap, HeaderValue};
+use robotech::api_client::{ApiClient, ApiClientError};
+use robotech::cst::user_id_cst::USER_ID_HEADER_NAME;
 use robotech::ro::Ro;
 use std::fmt::Display;
 use std::ops::{Deref, DerefMut};
@@ -46,8 +49,14 @@ impl OssFileApiClient {
             .await
             .map_err(|e| ApiClientError::ReadFile(url.clone(), e))?
             .text("fileName", file_name.to_string());
+        let mut headers = HeaderMap::new();
+        headers.insert(
+            USER_ID_HEADER_NAME,
+            HeaderValue::from_str(&current_user_id.to_string().as_str())
+                .map_err(|e| anyhow!("current_user_id: {}", e))?,
+        );
 
-        self.multipart(&url, form, current_user_id).await
+        self.multipart(&url, form, Some(headers), None).await
     }
 
     /// # 上传文件内容到指定的存储桶
@@ -70,7 +79,13 @@ impl OssFileApiClient {
         let url = format!("/oss/file/upload/{}", bucket);
         let part = reqwest::multipart::Part::bytes(data).file_name(file_name.to_string());
         let form = reqwest::multipart::Form::new().part("file", part);
-        self.multipart(&url, form, current_user_id).await
+        let mut headers = HeaderMap::new();
+        headers.insert(
+            USER_ID_HEADER_NAME,
+            HeaderValue::from_str(&current_user_id.to_string().as_str())
+                .map_err(|e| anyhow!("current_user_id: {}", e))?,
+        );
+        self.multipart(&url, form, Some(headers), None).await
     }
 
     /// 下载文件
@@ -88,7 +103,13 @@ impl OssFileApiClient {
         current_user_id: u64,
     ) -> Result<Vec<u8>, ApiClientError> {
         let url = format!("/oss/file/download/{}", obj_id);
-        self.get_bytes(&url, current_user_id).await
+        let mut headers = HeaderMap::new();
+        headers.insert(
+            USER_ID_HEADER_NAME,
+            HeaderValue::from_str(&current_user_id.to_string().as_str())
+                .map_err(|e| anyhow!("current_user_id: {}", e))?,
+        );
+        self.get_bytes::<()>(&url, None, Some(headers), None).await
     }
 
     /// # 预览文件
@@ -106,6 +127,12 @@ impl OssFileApiClient {
         current_user_id: u64,
     ) -> Result<Vec<u8>, ApiClientError> {
         let url = format!("/oss/file/preview/{}", obj_id);
-        self.get_bytes(&url, current_user_id).await
+        let mut headers = HeaderMap::new();
+        headers.insert(
+            USER_ID_HEADER_NAME,
+            HeaderValue::from_str(&current_user_id.to_string().as_str())
+                .map_err(|e| anyhow!("current_user_id: {}", e))?,
+        );
+        self.get_bytes::<()>(&url, None, Some(headers), None).await
     }
 }
