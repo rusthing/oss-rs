@@ -6,8 +6,10 @@ use std::sync::{Arc, OnceLock};
 
 static OSS_CONFIG: OnceLock<ArcSwap<OssConfig>> = OnceLock::new();
 
-pub fn init_oss_config(oss_config: OssConfig) {
-    OSS_CONFIG.set(ArcSwap::new(Arc::new(oss_config))).unwrap();
+pub fn init_oss_config(oss_config: OssConfig) -> Result<(), CfgError> {
+    OSS_CONFIG
+        .set(ArcSwap::new(Arc::new(oss_config)))
+        .map_err(|_| CfgError::Init("OSS config init failed".to_string()))
 }
 
 pub fn get_oss_config() -> Result<Arc<OssConfig>, CfgError> {

@@ -1,4 +1,4 @@
-use crate::app::OssConfig;
+use crate::app::{get_oss_config, OssConfig};
 use crate::dao::OssObjRefDao;
 use crate::dto::oss_bucket_dto::OssBucketQueryDto;
 use crate::dto::oss_obj_dto::{OssObjAddDto, OssObjModifyDto};
@@ -57,12 +57,13 @@ impl OssFileSvc {
         bucket: &str,
         mut multipart: Multipart,
         current_user_id: u64,
-        oss_config: &OssConfig,
         db: Option<&C>,
     ) -> Result<Ro<OssObjRefVo>, SvcError>
     where
         C: ConnectionTrait,
     {
+        let oss_config = get_oss_config()?;
+
         // 获取存储桶
         let one_bucket = OssBucketSvc::get_by_query_dto(
             OssBucketQueryDto::builder()
@@ -196,7 +197,7 @@ impl OssFileSvc {
                             &file_size_provided,
                             field,
                             &new_file_path,
-                            oss_config,
+                            oss_config.as_ref(),
                         )
                         .await?;
 
@@ -274,7 +275,6 @@ impl OssFileSvc {
         headers: HeaderMap,
         obj_ref_id: u64,
         mut ext: Option<String>,
-        oss_config: &OssConfig,
         db: Option<&C>,
     ) -> Result<
         (
@@ -291,6 +291,8 @@ impl OssFileSvc {
     where
         C: ConnectionTrait,
     {
+        let oss_config = get_oss_config()?;
+
         // 解析Range头：格式为 "bytes=start-end" 或 "bytes=start-"
         let (start, mut end) = match headers.get(header::RANGE) {
             Some(range) => Self::parse_range(range)?,

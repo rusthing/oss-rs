@@ -1,6 +1,4 @@
 use anyhow::anyhow;
-use arc_swap::access::Access;
-use arc_swap::{ArcSwap, ArcSwapAny};
 use clap::Parser;
 use idworker::init_id_worker;
 use oss_svr::app::{init_oss_config, update_oss_config, AppConfig};
@@ -85,8 +83,8 @@ async fn main() -> anyhow::Result<()> {
     let app_watcher: AppWatcher<AppConfig> = AppWatcher::new(
         config_file,
         log_watcher.config_changed_tx.clone(),
-        move |app_config| async move {
-            update_oss_config(app_config.oss)?;
+        move |app_config: Arc<AppConfig>| async move {
+            update_oss_config(app_config.oss.clone())?;
             apply_app_config(app_config, port, None)
                 .await
                 .expect("配置无法应用");
@@ -96,11 +94,11 @@ async fn main() -> anyhow::Result<()> {
     )
     .await?;
 
-    init_oss_config(app_watcher.app_config.oss)?;
+    init_oss_config(app_watcher.app_config.oss.clone())?;
 
     // 应用配置
     // let app_config = app_watcher.app_config.load().clone();
-    apply_app_config(app_watcher.app_config, port, old_pid).await?;
+    apply_app_config(app_watcher.app_config.clone(), port, old_pid).await?;
 
     // 监听系统信号与等待退出
     let signal_receiver = signal_manager.watch_signal()?;
@@ -150,8 +148,7 @@ pub async fn apply_app_config(
         db: db_conn_config,
         id_worker: id_worker_config,
         ..
-    } = AppConfig::clone(app_config.load());
-    // set_app_config(app_config)?;
+    } = AppConfig::clone(&app_config);
 
     // 升级数据库版本...
     let db_url = db_conn_config.url.as_str();
@@ -164,7 +161,7 @@ pub async fn apply_app_config(
     init_db_conn(db_conn_config.clone()).await?;
 
     // 启动Web服务器
-    start_web_server(app_config, web_server_config, port, old_pid).await?;
+    start_web_server(web_server_config, port, old_pid).await?;
 
     Ok(())
 }
