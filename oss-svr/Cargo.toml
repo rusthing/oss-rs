@@ -35,7 +35,7 @@ o2o = { workspace = true }
 validator = { workspace = true, features = ["derive"] }
 strum = { workspace = true, features = ["derive"] }
 utoipa = { workspace = true, features = ["axum_extras"] }
-utoipa-swagger-ui = { workspace = true, features = ["axum"] }
+utoipa-swagger-ui = { workspace = true, features = ["axum", "vendored"] }
 #utoipauto = { workspace = true }
 #notify-debouncer-mini = { workspace = true }
 sha2 = { workspace = true }

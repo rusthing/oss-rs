@@ -8,7 +8,7 @@ use tracing::info;
 static OSS_API_CLIENT: OnceLock<ArcSwap<OssApiClient>> = OnceLock::new();
 
 pub struct OssApiClient {
-    pub oss_file_api_client: OssFileApiClient,
+    pub file_client: OssFileApiClient,
 }
 
 /// 初始化OssFileApi
@@ -49,7 +49,7 @@ fn new_oss_api_client_from_config(api_config: HashMap<String, ApiClientConfig>) 
     };
     let api_client_config = api_config.get("oss").unwrap_or(&default_config).clone();
     OssApiClient {
-        oss_file_api_client: OssFileApiClient {
+        file_client: OssFileApiClient {
             api_client: ApiClient { api_client_config },
         },
     }
