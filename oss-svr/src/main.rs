@@ -12,7 +12,7 @@ use robotech::macros::{db_migrate, log_call};
 use robotech::signal::SignalManager;
 use robotech::web::{start_web_server, stop_web_service};
 use std::sync::Arc;
-use tracing::debug;
+use tracing::info;
 
 /// oss - 对象存储服务
 ///
@@ -88,7 +88,7 @@ async fn main() -> anyhow::Result<()> {
             apply_app_config(app_config, port, None)
                 .await
                 .expect("配置无法应用");
-            debug!("重新加载配置成功");
+            info!("重新加载配置成功");
             Ok(())
         },
     )
@@ -97,7 +97,6 @@ async fn main() -> anyhow::Result<()> {
     init_oss_config(app_watcher.app_config.oss.clone())?;
 
     // 应用配置
-    // let app_config = app_watcher.app_config.load().clone();
     apply_app_config(app_watcher.app_config.clone(), port, old_pid).await?;
 
     // 监听系统信号与等待退出
@@ -142,7 +141,7 @@ pub async fn apply_app_config(
     port: Option<u16>,
     old_pid: Option<u32>,
 ) -> anyhow::Result<()> {
-    debug!("应用App配置...");
+    info!("应用App配置...");
     let AppConfig {
         web_server: web_server_config,
         db: db_conn_config,
