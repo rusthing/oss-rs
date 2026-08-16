@@ -29,7 +29,7 @@ pub async fn del_cascade(
     headers: HeaderMap,
 ) -> Result<Json<Ro<OssBucketVo>>, CtrlError> {
     // 从header中解析当前用户ID，如果没有或解析失败则抛出ApiError
-    let current_user_id = get_current_user_id(&headers)?;
+    get_current_user_id(&headers)?;
     let ro = OssBucketSvc::del_cascade::<DatabaseTransaction>(id, None).await?;
     Ok(Json(ro))
 }
