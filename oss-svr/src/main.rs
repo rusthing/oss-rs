@@ -83,7 +83,7 @@ async fn main() -> anyhow::Result<()> {
     let app_watcher: AppWatcher<AppConfig> = AppWatcher::new(
         config_file,
         log_watcher.config_changed_tx.clone(),
-        move |app_config: Arc<AppConfig>| async move {
+        move |app_config: Arc<AppConfig>, _| async move {
             update_oss_config(app_config.oss.clone())?;
             apply_app_config(app_config, port, None)
                 .await
