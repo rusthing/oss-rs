@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2026/3/16 17:26:07                           */
+/* Created on:     2026/8/22 17:05:30                           */
 /*==============================================================*/
 
 
@@ -29,7 +29,7 @@ create table oss_obj
 (
    _id                  bigint not null  comment 'ID',
    is_completed         bit(1) not null  comment '是否完成',
-   path                 varchar(100) not null  comment '路径
+   path                 varchar(255) not null  comment '路径
              存储文件的路径',
    size                 bigint  comment '大小',
    hash                 varchar(64)  comment 'Hash',
@@ -66,9 +66,9 @@ create table oss_obj_ref
 
 alter table oss_obj_ref comment '对象引用';
 
-alter table oss_obj_ref add constraint fk_obj_id__from__oss_obj foreign key (obj_id)
-      references oss_obj (_id) on delete restrict on update restrict;
-
 alter table oss_obj_ref add constraint fk_bucket_id__from__oss_bucket foreign key (bucket_id)
       references oss_bucket (_id) on delete restrict on update restrict;
+
+alter table oss_obj_ref add constraint fk_obj_id__from__oss_obj foreign key (obj_id)
+      references oss_obj (_id) on delete restrict on update restrict;
 
