@@ -18,7 +18,7 @@
 
 == 新增数据库版本
 
-. 进入xxx-svr的项目目录，执行下面的命令
+. 进入xxx-svr的项目目录
 . 配置连接数据库的环境变量，示例如下:
 +
 ..env
@@ -29,8 +29,6 @@ DATABASE_URL=postgres://ossrs:ossrs@127.0.0.1/ossrs
 +
 . 执行新增数据库版本
 +
-终端进入xxx-svr目录下
-+
 [source,bash]
 ----
 sqlx migrate add <版本名称> --source migrations/[mysql或pgsql]]
@@ -38,7 +36,7 @@ sqlx migrate add <版本名称> --source migrations/[mysql或pgsql]]
 +
 [NOTE]
 ====
-版本名称: 例如 `create-table`、`alert-table`、`init-data`、`update-data`
+版本名称: 例如 `create-table`、`alter-table`、`init-data`、`update-data`
 ====
 . 上面的命令会在`migrations/[mysql或pgsql]`目录下生成一个文件，文件名格式为 `<版本号>_<版本名称>.sql`，例如 `20220101000000_create-table.sql`
 . 在生成的文件中编写SQL语句，并保存
