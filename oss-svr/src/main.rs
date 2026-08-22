@@ -1,7 +1,7 @@
 use anyhow::anyhow;
 use clap::Parser;
 use idworker::setup_id_worker;
-use oss_svr::config::{init_oss_config, update_oss_config, AppConfig};
+use oss_svr::config::{setup_oss_config, AppConfig};
 use robotech;
 use robotech::app::{wait_app_exit, AppWatcher};
 use robotech::dao::init_dao;
@@ -11,6 +11,7 @@ use robotech::log::LogWatcher;
 use robotech::macros::{db_migrate, log_call};
 use robotech::signal::SignalManager;
 use robotech::web::{start_web_server, stop_web_service};
+use std::collections::HashMap;
 use std::sync::Arc;
 use tracing::info;
 
@@ -83,8 +84,13 @@ async fn main() -> anyhow::Result<()> {
     let app_watcher: AppWatcher<AppConfig> = AppWatcher::new(
         config_file,
         log_watcher.config_changed_tx.clone(),
-        move |app_config: Arc<AppConfig>, _| async move {
-            update_oss_config(app_config.oss.clone())?;
+        move |app_config: Arc<AppConfig>, changed| async move {
+            let changed = Some(changed);
+            // 更新ID生成器...
+            setup_id_worker(app_config.id_worker.clone(), &changed)?;
+            // 更新oss配置...
+            setup_oss_config(app_config.oss.clone(), &changed);
+
             apply_app_config(app_config, port, None)
                 .await
                 .expect("配置无法应用");
@@ -94,7 +100,11 @@ async fn main() -> anyhow::Result<()> {
     )
     .await?;
 
-    init_oss_config(app_watcher.app_config.oss.clone())?;
+    let changed = None;
+    // 初始化ID生成器...
+    setup_id_worker(app_watcher.app_config.id_worker.clone(), &changed)?;
+    // 初始化oss配置
+    setup_oss_config(app_watcher.app_config.oss.clone(), &changed);
 
     // 应用配置
     apply_app_config(app_watcher.app_config.clone(), port, old_pid).await?;
@@ -145,16 +155,12 @@ pub async fn apply_app_config(
     let AppConfig {
         web_server: web_server_config,
         db: db_conn_config,
-        id_worker: id_worker_config,
         ..
     } = AppConfig::clone(&app_config);
 
     // 升级数据库版本...
     let db_url = db_conn_config.url.as_str();
     db_migrate!(db_url);
-
-    // 初始化ID生成器...
-    setup_id_worker(id_worker_config.clone())?;
 
     // 初始化数据库连接
     init_db_conn(db_conn_config.clone()).await?;

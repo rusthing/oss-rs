@@ -1,33 +1,28 @@
-use arc_swap::ArcSwap;
+use arc_swap::ArcSwapOption;
 use bytesize::ByteSize;
+use config::Value;
 use robotech::cfg::CfgError;
 use serde::{Deserialize, Serialize};
-use std::sync::{Arc, OnceLock};
+use std::collections::HashMap;
+use std::sync::Arc;
 use tracing::info;
 
-static OSS_CONFIG: OnceLock<ArcSwap<OssConfig>> = OnceLock::new();
-
-pub fn init_oss_config(oss_config: OssConfig) -> Result<(), CfgError> {
-    info!("初始化oss的配置");
-    OSS_CONFIG
-        .set(ArcSwap::new(Arc::new(oss_config)))
-        .map_err(|_| CfgError::Init("OSS config init failed".to_string()))
-}
+static OSS_CONFIG: ArcSwapOption<OssConfig> = ArcSwapOption::const_empty();
 
 pub fn get_oss_config() -> Result<Arc<OssConfig>, CfgError> {
-    Ok(OSS_CONFIG
-        .get()
-        .ok_or(CfgError::NotInit("OSS config not initialized".to_string()))?
+    OSS_CONFIG
         .load_full()
-        .clone())
+        .ok_or(CfgError::NotInit("OSS config not initialized".to_string()))
 }
 
-pub fn update_oss_config(oss_config: OssConfig) -> Result<(), CfgError> {
-    if let Some(swap) = OSS_CONFIG.get() {
-        swap.store(Arc::new(oss_config));
-        Ok(())
-    } else {
-        Err(CfgError::NotInit("OSS config not initialized".to_string()))
+pub fn setup_oss_config(oss_config: OssConfig, changed: &Option<HashMap<String, Value>>) {
+    info!("setup oss config...");
+    if changed
+        .as_ref()
+        .map(|changed| changed.contains_key("oss"))
+        .unwrap_or(true)
+    {
+        OSS_CONFIG.store(Some(Arc::new(oss_config)));
     }
 }
 
