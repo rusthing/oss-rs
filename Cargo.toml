@@ -37,7 +37,7 @@ notify-debouncer-mini = "0.7.0"
 sha2 = "0.11.0"
 hex = "0.4.3"
 
-idworker = "1.1.2"
+idworker = "1.2.0"
 wheel-rs = "1.9.4"
 robotech = "1.11.0"
 robotech-macros = "1.11.0"

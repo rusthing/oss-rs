@@ -13,7 +13,6 @@ use axum::extract::multipart::Field;
 use axum::extract::Multipart;
 use axum::http::{header, HeaderMap, HeaderValue};
 use chrono::{Local, TimeZone};
-use idworker::get_id_worker;
 use robotech::dao::begin_transaction;
 use robotech::env::{EnvError, APP_ENV};
 use robotech::macros::db_unwrap;
@@ -124,7 +123,7 @@ impl OssFileSvc {
                         (true, obj_vo.id, obj_vo.path)
                     } else {
                         // 如果未上传过该文件，则新增对象，并返回新对象ID和新文件的存放路径
-                        let obj_id = get_id_worker()?.next_id()?;
+                        let obj_id = idworker::next_id()?;
                         // 根据当前时间，创建yyyy/MM/dd/HH的目录，并将文件存入此目录中
                         let datetime = Local.timestamp_opt((now / 1000) as i64, 0).unwrap();
 
@@ -166,7 +165,7 @@ impl OssFileSvc {
                     };
 
                     // 新增对象引用
-                    let obj_ref_id = get_id_worker()?.next_id()?;
+                    let obj_ref_id = idworker::next_id()?;
                     let (obj_ref_name, preview_url) = if Self::is_previewable(&ext)
                         && let Some(ext) = &ext
                     {

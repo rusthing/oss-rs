@@ -1,6 +1,6 @@
 use anyhow::anyhow;
 use clap::Parser;
-use idworker::init_id_worker;
+use idworker::setup_id_worker;
 use oss_svr::config::{init_oss_config, update_oss_config, AppConfig};
 use robotech;
 use robotech::app::{wait_app_exit, AppWatcher};
@@ -154,7 +154,7 @@ pub async fn apply_app_config(
     db_migrate!(db_url);
 
     // 初始化ID生成器...
-    init_id_worker(id_worker_config.clone())?;
+    setup_id_worker(id_worker_config.clone())?;
 
     // 初始化数据库连接
     init_db_conn(db_conn_config.clone()).await?;
