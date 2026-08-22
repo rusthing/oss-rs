@@ -3,6 +3,7 @@
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel, Serialize, Deserialize, Default)]
 #[sea_orm(table_name = "oss_bucket")]
 pub struct Model {
@@ -19,18 +20,8 @@ pub struct Model {
     pub updator_id: i64,
     #[sea_orm(column_name = "_update_timestamp")]
     pub update_timestamp: i64,
-}
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
-    #[sea_orm(has_many = "super::oss_obj_ref::Entity")]
-    OssObjRef,
-}
-
-impl Related<super::oss_obj_ref::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::OssObjRef.def()
-    }
+    #[sea_orm(has_many)]
+    pub oss_obj_refs: HasMany<super::oss_obj_ref::Entity>,
 }
 
 impl ActiveModelBehavior for ActiveModel {}

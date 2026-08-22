@@ -3,6 +3,7 @@
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
+#[sea_orm::model]
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel, Serialize, Deserialize, Default)]
 #[sea_orm(table_name = "oss_obj_ref")]
 pub struct Model {
@@ -23,38 +24,22 @@ pub struct Model {
     #[sea_orm(unique)]
     pub download_url: String,
     pub preview_url: Option<String>,
-}
-
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {
     #[sea_orm(
-        belongs_to = "super::oss_bucket::Entity",
-        from = "Column::BucketId",
-        to = "super::oss_bucket::Column::Id",
+        belongs_to,
+        from = "bucket_id",
+        to = "id",
         on_update = "Restrict",
         on_delete = "Restrict"
     )]
-    OssBucket,
+    pub oss_bucket: BelongsTo<super::oss_bucket::Entity>,
     #[sea_orm(
-        belongs_to = "super::oss_obj::Entity",
-        from = "Column::ObjId",
-        to = "super::oss_obj::Column::Id",
+        belongs_to,
+        from = "obj_id",
+        to = "id",
         on_update = "Restrict",
         on_delete = "Restrict"
     )]
-    OssObj,
-}
-
-impl Related<super::oss_bucket::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::OssBucket.def()
-    }
-}
-
-impl Related<super::oss_obj::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::OssObj.def()
-    }
+    pub oss_obj: BelongsTo<super::oss_obj::Entity>,
 }
 
 impl ActiveModelBehavior for ActiveModel {}
