@@ -158,7 +158,7 @@ pub async fn apply_app_config(
     } = AppConfig::clone(&app_config);
 
     // 升级数据库版本...
-    let db_url = db_conn_config.url.as_str();
+    let db_url = db_conn_config.get_url();
     db_migrate!(db_url);
 
     // 初始化数据库连接

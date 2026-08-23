@@ -12,7 +12,6 @@ pub struct AppConfig {
     #[serde(default = "OssConfig::default")]
     pub oss: OssConfig,
     /// db
-    #[serde(default = "DbConnConfig::default")]
     pub db: DbConnConfig,
     /// Web服务器
     #[serde(default = "WebServerConfig::default")]
@@ -20,15 +19,4 @@ pub struct AppConfig {
     /// id_worker
     #[serde(default = "IdWorkerConfig::default")]
     pub id_worker: IdWorkerConfig,
-}
-
-impl Default for AppConfig {
-    fn default() -> Self {
-        Self {
-            oss: OssConfig::default(),
-            db: DbConnConfig::default(),
-            web_server: WebServerConfig::default(),
-            id_worker: IdWorkerConfig::default(),
-        }
-    }
 }
