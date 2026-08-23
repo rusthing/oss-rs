@@ -5,7 +5,7 @@ use oss_svr::config::{setup_oss_config, AppConfig};
 use robotech;
 use robotech::app::{wait_app_exit, AppWatcher};
 use robotech::dao::init_dao;
-use robotech::db::init_db_conn;
+use robotech::db::setup_db_conn;
 use robotech::env::init_env;
 use robotech::log::LogWatcher;
 use robotech::macros::{db_migrate, log_call};
@@ -89,7 +89,10 @@ async fn main() -> anyhow::Result<()> {
             setup_id_worker(app_config.id_worker.clone(), &changed)?;
             // 更新oss配置...
             setup_oss_config(app_config.oss.clone(), &changed);
+            // 更新数据库连接...
+            setup_db_conn(app_config.db.clone(), &changed).await?;
 
+            // 应用配置
             apply_app_config(app_config, port, None)
                 .await
                 .expect("配置无法应用");
@@ -104,6 +107,8 @@ async fn main() -> anyhow::Result<()> {
     setup_id_worker(app_watcher.app_config.id_worker.clone(), &changed)?;
     // 初始化oss配置
     setup_oss_config(app_watcher.app_config.oss.clone(), &changed);
+    // 初始化数据库连接
+    setup_db_conn(app_watcher.app_config.db.clone(), &changed).await?;
 
     // 应用配置
     apply_app_config(app_watcher.app_config.clone(), port, old_pid).await?;
@@ -160,9 +165,6 @@ pub async fn apply_app_config(
     // 升级数据库版本...
     let db_url = db_conn_config.get_url();
     db_migrate!(db_url);
-
-    // 初始化数据库连接
-    init_db_conn(db_conn_config.clone()).await?;
 
     // 启动Web服务器
     start_web_server(web_server_config, port, old_pid).await?;
