@@ -11,7 +11,6 @@ use robotech::log::LogWatcher;
 use robotech::macros::{db_migrate, log_call};
 use robotech::signal::SignalManager;
 use robotech::web::{start_web_server, stop_web_service};
-use std::collections::HashMap;
 use std::sync::Arc;
 use tracing::info;
 
