@@ -1,4 +1,4 @@
-use crate::model::oss_obj_ref::{Column as OssObjRefColumn, Entity as OssObjRefEntity};
+use crate::mo::oss_obj_ref::{Column as OssObjRefColumn, Entity as OssObjRefEntity};
 use robotech::macros::dao;
 use sea_orm::{ColumnTrait, QuerySelect, QueryTrait};
 

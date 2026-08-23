@@ -1,4 +1,4 @@
-use crate::model::{oss_bucket, oss_obj};
+use crate::mo::{oss_bucket, oss_obj};
 use robotech::macros::dao;
 
 /// 对象引用

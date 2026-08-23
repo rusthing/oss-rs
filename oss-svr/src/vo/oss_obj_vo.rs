@@ -1,4 +1,4 @@
-use crate::model::oss_obj::Model;
+use crate::mo::oss_obj::Model;
 use robotech::macros::vo;
 
 #[vo]
