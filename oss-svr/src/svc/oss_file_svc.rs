@@ -18,6 +18,7 @@ use robotech::env::{EnvError, APP_ENV};
 use robotech::macros::db_unwrap;
 use robotech::ro::Ro;
 use robotech::svc::SvcError;
+use sea_orm::prelude::BelongsTo;
 use sea_orm::ConnectionTrait;
 use sha2::Digest;
 use std::io::SeekFrom;
@@ -299,9 +300,17 @@ impl OssFileSvc {
             None => (None, None),
         };
 
-        let one = OssObjRefDao::get_by_id_also_related(obj_ref_id, db).await?;
-        let (obj_ref_model, _, obj_model) =
-            one.ok_or(SvcError::NotFound(format!("id: {}", obj_ref_id)))?;
+        let one = OssObjRefDao::get_by_id_with_related(obj_ref_id, db).await?;
+        let obj_ref_model = one.ok_or(SvcError::NotFound(format!("id: {}", obj_ref_id)))?;
+        let obj_model = if let BelongsTo::Loaded(obj_model) = obj_ref_model.oss_obj {
+            obj_model
+        } else {
+            return Err(SvcError::Runtime(anyhow!(
+                "oss_obj not found for obj_ref_id: {}",
+                obj_ref_id
+            )));
+        };
+
         // 如果有扩展名，扩展名不对也不行
         if &ext != &obj_ref_model.ext {
             return Err(SvcError::NotFound(format!("id: {}", obj_ref_id)));
