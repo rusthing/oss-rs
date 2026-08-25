@@ -7,19 +7,15 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel, Serialize, Deserialize, Default)]
 #[sea_orm(table_name = "oss_bucket")]
 pub struct Model {
-    #[sea_orm(column_name = "_id", primary_key, auto_increment = false, unique)]
+    #[sea_orm(primary_key, auto_increment = false, unique)]
     pub id: i64,
     #[sea_orm(unique)]
     pub name: String,
     pub remark: Option<String>,
-    #[sea_orm(column_name = "_creator_id")]
     pub creator_id: i64,
-    #[sea_orm(column_name = "_create_timestamp")]
-    pub create_timestamp: i64,
-    #[sea_orm(column_name = "_updator_id")]
+    pub create_ts: i64,
     pub updator_id: i64,
-    #[sea_orm(column_name = "_update_timestamp")]
-    pub update_timestamp: i64,
+    pub update_ts: i64,
     #[sea_orm(has_many)]
     pub oss_obj_refs: HasMany<super::oss_obj_ref::Entity>,
 }
