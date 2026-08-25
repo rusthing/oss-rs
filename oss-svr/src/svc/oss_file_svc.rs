@@ -181,8 +181,8 @@ impl OssFileSvc {
                     let oss_obj_ref_add_dto = OssObjRefAddDto::builder()
                         .id(obj_ref_id)
                         .name(file_name.to_string())
-                        .bucket_id(one_bucket.id)
-                        .obj_id(obj_id)
+                        .bucket_id(*one_bucket.id)
+                        .obj_id(*obj_id)
                         .ext(ext)
                         .download_url(download_url)
                         .preview_url(preview_url)
@@ -217,7 +217,7 @@ impl OssFileSvc {
                             OssObjRefSvc::modify(
                                 OssObjRefModifyDto::builder()
                                     .id(obj_ref_id)
-                                    .obj_id(oss_obj_vo.id)
+                                    .obj_id(*oss_obj_vo.id)
                                     ._current_user_id(current_user_id)
                                     .build(),
                                 Some(db),
@@ -228,7 +228,7 @@ impl OssFileSvc {
                             let is_completed = true;
                             OssObjSvc::modify(
                                 OssObjModifyDto::builder()
-                                    .id(obj_id)
+                                    .id(*obj_id)
                                     .hash(Some(hash_computed))
                                     .size(Some(file_size_computed))
                                     .is_completed(is_completed)
@@ -300,7 +300,7 @@ impl OssFileSvc {
             None => (None, None),
         };
 
-        let one = OssObjRefDao::get_by_id_with_related(obj_ref_id, db).await?;
+        let one = OssObjRefDao::get_ex_by_id(obj_ref_id, db).await?;
         let obj_ref_model = one.ok_or(SvcError::NotFound(format!("id: {}", obj_ref_id)))?;
         let obj_model = if let BelongsTo::Loaded(obj_model) = obj_ref_model.oss_obj {
             obj_model

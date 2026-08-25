@@ -1,4 +1,3 @@
-use crate::mo::oss_obj::Model;
 use robotech::macros::vo;
 
 #[vo]
@@ -16,9 +15,9 @@ pub struct OssObjVo {
     /// 创建者ID
     pub creator_id: u64,
     /// 创建时间戳
-    pub create_timestamp: u64,
+    pub create_ts: u64,
     /// 更新者ID
     pub updator_id: u64,
     /// 更新时间戳
-    pub update_timestamp: u64,
+    pub update_ts: u64,
 }

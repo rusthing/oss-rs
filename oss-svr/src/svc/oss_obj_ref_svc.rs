@@ -27,7 +27,7 @@ impl OssObjRefSvc {
         let ro = Self::del_by_id(id, Some(db)).await?;
         if let Some(extra) = ro.extra.clone() {
             // 删除对象, 如果对象没有其他引用则会顺利删除，否则会失败
-            OssObjSvc::del_with_file(extra.obj_id, Some(db)).await.ok();
+            OssObjSvc::del_with_file(*extra.obj_id, Some(db)).await.ok();
         }
         Ok(ro)
     }
