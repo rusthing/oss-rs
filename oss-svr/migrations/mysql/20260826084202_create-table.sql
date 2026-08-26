@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2026/8/25 15:58:48                           */
+/* Created on:     2026/8/26 8:42:02                            */
 /*==============================================================*/
 
 
@@ -17,7 +17,7 @@ create table oss_bucket
     updator_id           bigint not null  comment '修改人的用户ID',
     update_ts            bigint not null  comment '修改时间戳',
     primary key (id),
-    key AK_NAME (name)
+    unique key AK_NAME (name)
 );
 
 alter table oss_bucket comment '桶';
@@ -38,8 +38,8 @@ create table oss_obj
     updator_id           bigint not null  comment '修改人的用户ID',
     update_ts            bigint not null  comment '修改时间戳',
     primary key (id),
-    key AK_PATH (path),
-    key AK_SIZE_AND_HASH (size, hash)
+    unique key AK_PATH (path),
+    unique key AK_SIZE_AND_HASH (size, hash)
 );
 
 alter table oss_obj comment '对象';
@@ -61,7 +61,7 @@ create table oss_obj_ref
     updator_id           bigint not null  comment '修改人的用户ID',
     update_ts            bigint not null  comment '修改时间戳',
     primary key (id),
-    key AK_URL (download_url)
+    unique key AK_URL (download_url)
 );
 
 alter table oss_obj_ref comment '对象引用';
