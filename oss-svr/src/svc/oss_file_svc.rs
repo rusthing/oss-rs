@@ -6,7 +6,7 @@ use crate::dto::oss_obj_ref_dto::{OssObjRefAddDto, OssObjRefModifyDto};
 use crate::svc::OssBucketSvc;
 use crate::svc::OssObjRefSvc;
 use crate::svc::OssObjSvc;
-use crate::vo::OssObjRefVo;
+use crate::vo::{OssObjRefExVo, OssObjRefVo};
 use anyhow::anyhow;
 use axum::body::Body;
 use axum::extract::multipart::Field;
@@ -18,7 +18,6 @@ use robotech::env::{EnvError, APP_ENV};
 use robotech::macros::db_unwrap;
 use robotech::ro::Ro;
 use robotech::svc::SvcError;
-use sea_orm::prelude::BelongsTo;
 use sea_orm::ConnectionTrait;
 use sha2::Digest;
 use std::io::SeekFrom;
@@ -300,25 +299,19 @@ impl OssFileSvc {
             None => (None, None),
         };
 
-        let one = OssObjRefDao::get_ex_by_id(obj_ref_id, db).await?;
-        let obj_ref_model = one.ok_or(SvcError::NotFound(format!("id: {}", obj_ref_id)))?;
-        let obj_model = if let BelongsTo::Loaded(obj_model) = obj_ref_model.oss_obj {
-            obj_model
-        } else {
-            return Err(SvcError::Runtime(anyhow!(
-                "oss_obj not found for obj_ref_id: {}",
-                obj_ref_id
-            )));
-        };
+        let obj_ref_vo: OssObjRefExVo = OssObjRefDao::get_ex_by_id(obj_ref_id, db)
+            .await?
+            .map(|m| m.into())
+            .ok_or(SvcError::NotFound(format!("id: {}", obj_ref_id)))?;
 
         // 如果有扩展名，扩展名不对也不行
-        if &ext != &obj_ref_model.ext {
+        if &ext != &obj_ref_vo.ext {
             return Err(SvcError::NotFound(format!("id: {}", obj_ref_id)));
         }
-        ext = obj_ref_model.ext;
+        ext = obj_ref_vo.ext;
 
         // 读取文件指定范围内容
-        let mut file = File::open(&obj_model.path).await?;
+        let mut file = File::open(&obj_ref_vo.oss_obj.path).await?;
         let file_size = file.metadata().await?.len();
         let (chunk_size, body) = if let Some(start_pos) = start {
             if start_pos > file_size - 1 {
@@ -351,7 +344,7 @@ impl OssFileSvc {
         };
 
         Ok((
-            obj_ref_model.name,
+            obj_ref_vo.name,
             ext,
             file_size,
             chunk_size,

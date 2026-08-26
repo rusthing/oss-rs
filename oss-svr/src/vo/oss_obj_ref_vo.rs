@@ -1,4 +1,6 @@
+use crate::vo::{OssBucketExVo, OssObjExVo};
 use robotech::macros::vo;
+
 
 #[vo]
 pub struct OssObjRefVo {
@@ -24,4 +26,9 @@ pub struct OssObjRefVo {
     pub updator_id: u64,
     /// 更新时间戳
     pub update_ts: u64,
+
+    /// 存储桶
+    pub oss_bucket: OssBucketVo,
+    /// 对象
+    pub oss_obj: OssObjVo,
 }
