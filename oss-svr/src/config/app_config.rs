@@ -15,7 +15,7 @@ pub struct AppConfig {
     pub db: DbConnConfig,
     /// Web服务器
     #[serde(default = "WebServerConfig::default")]
-    pub web_server: WebServerConfig,
+    pub web: WebServerConfig,
     /// id_worker
     #[serde(default = "IdWorkerConfig::default")]
     pub id_worker: IdWorkerConfig,

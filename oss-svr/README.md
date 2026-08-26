@@ -214,10 +214,10 @@ url = "postgres://ossrs:ossrs@pgsql:5432/ossrs"
 - PostgreSQL 12+
 - MySQL 8.0+
 
-#### Web 服务器配置段 `[web-server]`
+#### Web 服务器配置段 `[web]`
 
 ```toml
-[web-server]
+[web]
 log-enabled = true                     # 是否启用请求日志
 bind = "127.0.0.1"                     # 绑定地址（支持字符串或数组）
 port = 9840                            # 监听端口
@@ -248,7 +248,7 @@ ip-black-list = [
 ]
 
 # HTTPS 配置
-[web-server.https]
+[web.https]
 enabled = false                        # 是否启用 HTTPS
 cert = "certs/cert.pem"                # SSL 证书路径
 key = "certs/key.pem"                  # SSL 私钥路径

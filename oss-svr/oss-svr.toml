@@ -11,7 +11,7 @@ download-buffer-size = "2MiB"
 url = "postgres://ossrs:ossrs@pgsql:5432/ossrs"
 #url = "mysql://ossrs:ossrs@mysql:3306/ossrs"
 
-[web-server]
+[web]
 log-enabled = true
 bind = "127.0.0.1"
 #bind = ["127.0.0.1", "192.168.1.232"]
@@ -40,7 +40,7 @@ ip-black-list = [
     "192.168.31.102/32"
 ]
 
-[web-server.https]
+[web.https]
 enabled = false
 cert = "certs/cert.pem"
 key = "certs/key.pem"
