@@ -7,6 +7,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use tracing::info;
 
+static KEY: &str = "oss";
 static OSS_CONFIG: ArcSwapOption<OssConfig> = ArcSwapOption::const_empty();
 
 pub fn get_oss_config() -> Result<Arc<OssConfig>, CfgError> {
@@ -19,7 +20,7 @@ pub fn setup_oss_config(oss_config: OssConfig, changed: &Option<HashMap<String, 
     info!("setup oss config...");
     if changed
         .as_ref()
-        .map(|changed| changed.contains_key("oss"))
+        .map(|changed| changed.contains_key(KEY))
         .unwrap_or(true)
     {
         OSS_CONFIG.store(Some(Arc::new(oss_config)));

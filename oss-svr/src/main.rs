@@ -130,7 +130,7 @@ async fn setup(
     let db_url = app_config.db.get_url();
     db_migrate!(db_url);
 
-    // 初始化或更新Web服务器
+    // 初始化或更新Web服务器...
     setup_web_server(app_config.web.clone(), port, old_pid, &changed).await?;
 
     Ok(())
