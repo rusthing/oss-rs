@@ -68,7 +68,7 @@ async fn main() -> anyhow::Result<()> {
     // 解析命令行参数
     let Args {
         signal,
-        config_file,
+        config_file: config_file_path,
         port,
     } = Args::parse();
 
@@ -83,7 +83,7 @@ async fn main() -> anyhow::Result<()> {
     let (mut signal_manager, old_pid) = SignalManager::new(signal)?;
 
     let app_watcher: AppWatcher<AppConfig> = AppWatcher::new(
-        config_file,
+        config_file_path,
         log_watcher.config_changed_tx.clone(),
         move |app_config: Arc<AppConfig>, changed| async move {
             let changed = Some(changed);
