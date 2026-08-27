@@ -7,7 +7,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use tracing::info;
 
-static KEY: &str = "api-client";
+const KEY: &str = "api-client";
 static OSS_API_CLIENT: ArcSwapOption<OssApiClient> = ArcSwapOption::const_empty();
 
 pub struct OssApiClient {
