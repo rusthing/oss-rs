@@ -6,6 +6,7 @@ use robotech::cfg::CfgError;
 use std::collections::HashMap;
 use std::sync::Arc;
 use tracing::info;
+use wheel_rs::config_utils::has_config_changed;
 
 const KEY: &str = "api";
 static OSS_API_CLIENT: ArcSwapOption<OssApiClient> = ArcSwapOption::const_empty();
@@ -27,7 +28,7 @@ pub fn setup_oss_api_client(
     info!("setup oss api client...");
     if changed
         .as_ref()
-        .map(|changed| changed.contains_key(KEY))
+        .map(|changed| has_config_changed(KEY, changed))
         .unwrap_or(true)
     {
         let oss_api_client = new_oss_api_client_from_config(api_config);

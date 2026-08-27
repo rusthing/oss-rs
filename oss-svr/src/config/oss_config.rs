@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::Arc;
 use tracing::info;
+use wheel_rs::config_utils::has_config_changed;
 
 const KEY: &str = "oss";
 static OSS_CONFIG: ArcSwapOption<OssConfig> = ArcSwapOption::const_empty();
@@ -20,7 +21,7 @@ pub fn setup_oss_config(oss_config: OssConfig, changed: &Option<HashMap<String, 
     info!("setup oss config...");
     if changed
         .as_ref()
-        .map(|changed| changed.contains_key(KEY))
+        .map(|changed| has_config_changed(KEY, changed))
         .unwrap_or(true)
     {
         OSS_CONFIG.store(Some(Arc::new(oss_config)));
