@@ -9,7 +9,7 @@ use robotech::dao::init_dao;
 use robotech::db::setup_db_conn;
 use robotech::env::init_env;
 use robotech::log::LogWatcher;
-use robotech::macros::db_migrate;
+use robotech::macros::{db_migrate, log_call};
 use robotech::signal::SignalManager;
 use robotech::web::{setup_web_server, stop_web_service};
 use std::collections::HashMap;
@@ -113,6 +113,7 @@ async fn main() -> anyhow::Result<()> {
 /// * `changed` - 一个可选的HashMap，用于存储配置中发生改变的键值对
 /// * `port` - 一个可选的u16值，指定Web服务器监听的端口。如果未指定，则使用配置文件中的设置或默认值。
 /// * `old_pid` - 一个可选的i32值，代表旧进程ID，用于在重启时清理资源等操作。
+#[log_call]
 async fn setup(
     app_config: &Arc<AppConfig>,
     changed: &Option<HashMap<String, Value>>,

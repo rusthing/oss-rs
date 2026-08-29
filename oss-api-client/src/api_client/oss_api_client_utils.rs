@@ -24,7 +24,7 @@ pub fn setup_oss_api_client(
     api_config: HashMap<String, ApiClientConfig>,
     changed: &Option<HashMap<String, Value>>,
 ) {
-    info!("setup oss api client...");
+    info!("setup oss api client...: {api_config:?}");
     if changed
         .as_ref()
         .map(|changed| has_config_changed(API_CLIENT_CONFIG_KEY, changed))

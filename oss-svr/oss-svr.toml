@@ -1,5 +1,11 @@
+profile = "dev"
+
 [log]
 level = "debug"
+
+[micro-svc.consul]
+base-url = "http://consul:8500"
+config.file-format = "toml"
 
 [oss]
 file-dir-format = "%Y/%m/%d"

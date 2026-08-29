@@ -18,7 +18,7 @@ pub fn get_oss_config() -> Result<Arc<OssConfig>, CfgError> {
 }
 
 pub fn setup_oss_config(oss_config: OssConfig, changed: &Option<HashMap<String, Value>>) {
-    info!("setup oss config...");
+    info!("setup oss config...: {oss_config:?}");
     if changed
         .as_ref()
         .map(|changed| has_config_changed(OSS_CONFIG_KEY, changed))
