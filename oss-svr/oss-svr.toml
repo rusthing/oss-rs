@@ -2,6 +2,12 @@ profile = "dev"
 
 [log]
 level = "debug"
+[log.modules]
+"nacos_sdk" = "info"
+"h2::codec" = "info"
+"h2::proto" = "info"
+"tower::buffer" = "info"
+"hyper_util::client" = "info"
 
 #[micro-svc.consul]
 #base-url = "http://consul:8500"
