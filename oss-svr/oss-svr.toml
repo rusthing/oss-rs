@@ -3,8 +3,12 @@ profile = "dev"
 [log]
 level = "debug"
 
-[micro-svc.consul]
-base-url = "http://consul:8500"
+#[micro-svc.consul]
+#base-url = "http://consul:8500"
+#config.file-format = "toml"
+
+[micro-svc.etcd]
+base-url = "http://etcd:2379"
 config.file-format = "toml"
 
 [oss]
