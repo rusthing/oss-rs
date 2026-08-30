@@ -20,6 +20,7 @@ level = "debug"
 [micro-svc.nacos]
 base-url = "nacos:8848"
 config.file-format = "toml"
+config.common-configs = "log.toml"
 
 [oss]
 file-dir-format = "%Y/%m/%d"
