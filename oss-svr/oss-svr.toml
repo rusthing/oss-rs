@@ -12,15 +12,18 @@ level = "debug"
 #[micro-svc.consul]
 #base-url = "http://consul:8500"
 #config.file-format = "toml"
+#config.common-configs = "log.toml"
 
 #[micro-svc.etcd]
 #base-url = "http://etcd:2379"
 #config.file-format = "toml"
+#config.common-configs = "log.toml"
 
 [micro-svc.nacos]
 base-url = "nacos:8848"
 config.file-format = "toml"
 config.common-configs = "log.toml"
+[micro-svc.nacos.registry]
 
 [oss]
 file-dir-format = "%Y/%m/%d"
