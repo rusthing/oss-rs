@@ -10,7 +10,7 @@ use robotech::db::setup_db_conn;
 use robotech::env::init_env;
 use robotech::log::LogWatcher;
 use robotech::macros::{db_migrate, log_call};
-use robotech::micro_svc::{deregister, register};
+use robotech::micro_svc::{deregister, register, reregister};
 use robotech::signal::SignalManager;
 use robotech::web::{setup_web_server, stop_web_service};
 use std::collections::HashMap;
@@ -91,7 +91,7 @@ async fn main() -> anyhow::Result<()> {
             setup(&app_config, &changed, port, old_pid).await?;
 
             // 端口可能变了，重新注册（内部判断端口是否真的变了，变了会先注销再注册）
-            register().await?;
+            reregister().await?;
 
             info!("重新加载配置成功");
             Ok(())
