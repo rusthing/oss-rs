@@ -10,7 +10,7 @@ use robotech::db::setup_db_conn;
 use robotech::env::init_env;
 use robotech::log::LogWatcher;
 use robotech::macros::{db_migrate, log_call};
-use robotech::micro_svc::{deregister, register, reregister};
+use robotech::micro_svc::{deregister_micro_svc, register_micro_svc, reregister_micro_svc};
 use robotech::signal::SignalManager;
 use robotech::web::{setup_web_server, stop_web_service};
 use std::collections::HashMap;
@@ -91,7 +91,7 @@ async fn main() -> anyhow::Result<()> {
             setup(&app_config, &changed, port, old_pid).await?;
 
             // 端口可能变了，重新注册（内部判断端口是否真的变了，变了会先注销再注册）
-            reregister().await?;
+            reregister_micro_svc().await;
 
             info!("重新加载配置成功");
             Ok(())
@@ -103,12 +103,13 @@ async fn main() -> anyhow::Result<()> {
     setup(&app_watcher.app_config, &changed, port, old_pid).await?;
 
     // 注册服务到注册中心
-    register().await?;
+    register_micro_svc().await;
 
     // 监听系统信号与等待退出
     let signal_receiver = signal_manager.watch_signal()?;
     Ok(wait_app_exit(signal_receiver, || async move {
-        deregister().await?;
+        // 从注册中心注销服务
+        deregister_micro_svc().await;
         stop_web_service().await.expect("无法停止旧的Web服务");
         Ok(())
     })

@@ -9,21 +9,23 @@ level = "debug"
 "tower::buffer" = "info"
 "hyper_util::client" = "info"
 
-#[micro-svc.consul]
-#base-url = "http://consul:8500"
-#config.file-format = "toml"
-#config.common-configs = "log.toml"
+[micro-svc.consul]
+base-url = "http://consul:8500"
+config.file-format = "toml"
+config.common-configs = "log.toml"
+[micro-svc.consul.registry]
 
 #[micro-svc.etcd]
 #base-url = "http://etcd:2379"
 #config.file-format = "toml"
 #config.common-configs = "log.toml"
+#[micro-svc.etcd.registry]
 
-[micro-svc.nacos]
-base-url = "nacos:8848"
-config.file-format = "toml"
-config.common-configs = "log.toml"
-[micro-svc.nacos.registry]
+#[micro-svc.nacos]
+#base-url = "nacos:8848"
+#config.file-format = "toml"
+#config.common-configs = "log.toml"
+#[micro-svc.nacos.registry]
 
 [oss]
 file-dir-format = "%Y/%m/%d"
@@ -37,7 +39,7 @@ url = "postgres://ossrs:ossrs@pgsql:5432/ossrs"
 
 [web]
 log-enabled = true
-bind = "127.0.0.1"
+#bind = "127.0.0.1"
 #bind = ["127.0.0.1", "192.168.1.232"]
 #port = 9840
 #port = 0
@@ -60,6 +62,7 @@ local-only-urns = [
 ip-white-list = [
     "127.0.0.1/32",
     "192.168.31.0/24",
+    "192.168.3.0/24",
 ]
 ip-black-list = [
     "192.168.31.102/32"
