@@ -9,17 +9,17 @@ level = "debug"
 "tower::buffer" = "info"
 "hyper_util::client" = "info"
 
-[micro-svc.consul]
-base-url = "http://consul:8500"
-config.file-format = "toml"
-config.common-configs = "log.toml"
-[micro-svc.consul.registry]
-
-#[micro-svc.etcd]
-#base-url = "http://etcd:2379"
+#[micro-svc.consul]
+#base-url = "http://consul:8500"
 #config.file-format = "toml"
 #config.common-configs = "log.toml"
-#[micro-svc.etcd.registry]
+#[micro-svc.consul.registry]
+
+[micro-svc.etcd]
+base-url = "http://etcd:2379"
+config.file-format = "toml"
+config.common-configs = "log.toml"
+[micro-svc.etcd.registry]
 
 #[micro-svc.nacos]
 #base-url = "nacos:8848"
