@@ -90,9 +90,6 @@ async fn main() -> anyhow::Result<()> {
             let changed = Some(changed);
             setup(&app_config, &changed, port, old_pid).await?;
 
-            // 注册服务到注册中心
-            register_micro_svc().await;
-
             info!("重新加载配置成功");
             Ok(())
         },
@@ -109,7 +106,7 @@ async fn main() -> anyhow::Result<()> {
     let signal_receiver = signal_manager.watch_signal()?;
     Ok(wait_app_exit(signal_receiver, || async move {
         // 从注册中心注销服务
-        drop_hub_client();
+        drop_hub_client().await;
         stop_web_service().await.expect("无法停止旧的Web服务");
         Ok(())
     })
