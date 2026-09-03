@@ -10,7 +10,7 @@ use robotech::db::setup_db_conn;
 use robotech::env::init_env;
 use robotech::log::LogWatcher;
 use robotech::macros::{db_migrate, log_call};
-use robotech::micro_svc::{deregister_micro_svc, register_micro_svc};
+use robotech::micro_svc::{drop_hub_client, register_micro_svc};
 use robotech::signal::SignalManager;
 use robotech::web::{setup_web_server, stop_web_service};
 use std::collections::HashMap;
@@ -109,7 +109,7 @@ async fn main() -> anyhow::Result<()> {
     let signal_receiver = signal_manager.watch_signal()?;
     Ok(wait_app_exit(signal_receiver, || async move {
         // 从注册中心注销服务
-        deregister_micro_svc().await;
+        drop_hub_client();
         stop_web_service().await.expect("无法停止旧的Web服务");
         Ok(())
     })
