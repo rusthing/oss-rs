@@ -126,16 +126,16 @@ async fn setup(
     port: Option<u16>,
     old_pid: Option<u32>,
 ) -> Result<(), anyhow::Error> {
+    // 升级数据库版本...
+    let db_url = app_config.db.get_url();
+    db_migrate!(db_url);
+
     // 初始化或更新ID生成器...
     setup_id_worker(app_config.id_worker.clone(), &changed)?;
     // 初始化或更新oss配置...
     setup_oss_config(app_config.oss.clone(), &changed);
     // 初始化或更新数据库连接...
     setup_db_conn(app_config.db.clone(), &changed).await?;
-
-    // 升级数据库版本...
-    let db_url = app_config.db.get_url();
-    db_migrate!(db_url);
 
     // 初始化或更新Web服务器...
     setup_web_server(app_config.web.clone(), port, old_pid, &changed).await?;
