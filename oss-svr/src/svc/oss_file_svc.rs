@@ -102,13 +102,17 @@ impl OssFileSvc {
                     let obj_vo = if let (Some(hash_provided), Some(file_size_provided)) =
                         (&hash_provided, &file_size_provided)
                     {
-                        OssObjSvc::get_by_hash_and_size(
+                        match OssObjSvc::get_by_hash_and_size(
                             &hash_provided,
                             &file_size_provided,
                             Some(db),
                         )
-                        .await?
-                        .extra
+                        .await
+                        {
+                            Ok(ro) => ro.extra,
+                            Err(SvcError::NotFound(_)) => None,
+                            Err(e) => return Err(e),
+                        }
                     } else {
                         None
                     };
