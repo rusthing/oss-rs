@@ -1,41 +1,20 @@
 use anyhow::anyhow;
 use reqwest::header::{HeaderMap, HeaderValue};
-use robotech::api_client::{ApiClient, ApiClientError};
+use robotech::api_client::ApiClientError;
 use robotech::cst::user_id_cst::USER_ID_HEADER_NAME;
+use robotech::micro_svc::FeignClient;
 use robotech::ro::Ro;
 use std::fmt::Display;
-use std::ops::{Deref, DerefMut};
-use std::string::ToString;
 
-/// OSS FILE API
-#[derive(Debug)]
 pub struct OssFileApiClient {
-    pub api_client: ApiClient,
-}
-
-impl Deref for OssFileApiClient {
-    type Target = ApiClient;
-
-    fn deref(&self) -> &Self::Target {
-        &self.api_client
-    }
-}
-impl DerefMut for OssFileApiClient {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.api_client
-    }
+    pub feign_client: FeignClient,
 }
 
 impl OssFileApiClient {
-    /// # 上传文件到指定的存储桶
-    ///
-    /// ## 参数
-    /// * `bucket` - 存储桶名称
-    /// * `file_path` - 要上传的本地文件路径
-    /// * `file_name` - 上传后的文件名
-    ///
-    /// ## 返回值
-    /// 返回上传结果
+    pub fn new(feign_client: FeignClient) -> Self {
+        Self { feign_client }
+    }
+
     pub async fn upload_file(
         &self,
         bucket: &str,
@@ -56,19 +35,11 @@ impl OssFileApiClient {
                 .map_err(|e| anyhow!("current_user_id: {}", e))?,
         );
 
-        self.multipart(&url, form, Some(headers), None).await
+        self.feign_client
+            .multipart::<String>(&url, form, Some(headers))
+            .await
     }
 
-    /// # 上传文件内容到指定的存储桶
-    ///
-    /// ## 参数
-    /// * `bucket` - 存储桶名称
-    /// * `file_path` - 要上传的本地文件路径
-    /// * `file_name` - 上传后的文件名
-    /// * `data` - 文件内容
-    ///
-    /// ## 返回值
-    /// 返回上传结果
     pub async fn upload_file_content(
         &self,
         bucket: &str,
@@ -85,18 +56,11 @@ impl OssFileApiClient {
             HeaderValue::from_str(&current_user_id.to_string().as_str())
                 .map_err(|e| anyhow!("current_user_id: {}", e))?,
         );
-        self.multipart(&url, form, Some(headers), None).await
+        self.feign_client
+            .multipart::<String>(&url, form, Some(headers))
+            .await
     }
 
-    /// 下载文件
-    ///
-    /// # Arguments
-    ///
-    /// * `obj_id` - 对象ID
-    ///
-    /// # Returns
-    ///
-    /// 返回下载的文件内容
     pub async fn download_file(
         &self,
         obj_id: impl Display,
@@ -109,18 +73,11 @@ impl OssFileApiClient {
             HeaderValue::from_str(&current_user_id.to_string().as_str())
                 .map_err(|e| anyhow!("current_user_id: {}", e))?,
         );
-        self.get_bytes::<()>(&url, None, Some(headers), None).await
+        self.feign_client
+            .get_bytes::<()>(&url, None, Some(headers))
+            .await
     }
 
-    /// # 预览文件
-    ///
-    /// ## Arguments
-    ///
-    /// * `obj_id` - 对象ID
-    ///
-    /// ## Returns
-    ///
-    /// 返回预览的文件内容
     pub async fn preview_file(
         &self,
         obj_id: impl Display,
@@ -133,6 +90,8 @@ impl OssFileApiClient {
             HeaderValue::from_str(&current_user_id.to_string().as_str())
                 .map_err(|e| anyhow!("current_user_id: {}", e))?,
         );
-        self.get_bytes::<()>(&url, None, Some(headers), None).await
+        self.feign_client
+            .get_bytes::<()>(&url, None, Some(headers))
+            .await
     }
 }
