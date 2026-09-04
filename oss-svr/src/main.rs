@@ -89,7 +89,6 @@ async fn main() -> anyhow::Result<()> {
         move |app_config: Arc<AppConfig>, changed| async move {
             let changed = Some(changed);
             setup(&app_config, &changed, port, old_pid).await?;
-
             info!("重新加载配置成功");
             Ok(())
         },
