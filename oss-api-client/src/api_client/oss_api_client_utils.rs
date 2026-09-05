@@ -1,9 +1,7 @@
 use crate::api_client::oss_file_api_client::OssFileApiClient;
 use arc_swap::ArcSwapOption;
 use config::Value;
-use robotech::api_client::{
-    ApiClientConfig, ApiClientUtils, SimpleApiClient, API_CLIENT_CONFIG_KEY,
-};
+use robotech::api_client::{ApiClientConfig, SimpleApiClient, API_CLIENT_CONFIG_KEY};
 use robotech::cfg::CfgError;
 use robotech::micro_svc::FeignApiClient;
 use std::collections::HashMap;

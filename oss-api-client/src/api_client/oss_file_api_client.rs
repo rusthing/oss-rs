@@ -49,7 +49,7 @@ impl OssFileApiClient {
         );
 
         match &self.backend {
-            ClientBackend::Feign(c) => c.multipart::<String>(&url, form, Some(&headers)).await,
+            ClientBackend::Feign(c) => c.multipart(&url, form, Some(&headers)).await,
             ClientBackend::Static(c) => c.multipart(&url, form, Some(&headers)).await,
         }
     }
@@ -71,7 +71,7 @@ impl OssFileApiClient {
                 .map_err(|e| anyhow!("current_user_id: {}", e))?,
         );
         match &self.backend {
-            ClientBackend::Feign(c) => c.multipart::<String>(&url, form, Some(&headers)).await,
+            ClientBackend::Feign(c) => c.multipart(&url, form, Some(&headers)).await,
             ClientBackend::Static(c) => c.multipart(&url, form, Some(&headers)).await,
         }
     }
