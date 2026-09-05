@@ -28,9 +28,10 @@ pub async fn setup_oss_api_client(
     changed: &Option<HashMap<String, Value>>,
 ) -> Result<(), CfgError> {
     info!("setup oss api client...: {apis_config:?} {changed:?}");
+    let key_prefix = format!("{}.{}", API_CLIENT_CONFIG_KEY, OSS_API_CLIENT_CONFIG_KEY);
     if changed
         .as_ref()
-        .map(|changed| has_config_changed(API_CLIENT_CONFIG_KEY, changed))
+        .map(|changed| has_config_changed(&key_prefix, changed))
         .unwrap_or(true)
     {
         let mut oss_api_client: Option<OssFileApiClient> = None;
