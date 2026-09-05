@@ -1,18 +1,32 @@
 use anyhow::anyhow;
 use reqwest::header::{HeaderMap, HeaderValue};
+use robotech::api_client::ApiClient;
 use robotech::api_client::ApiClientError;
 use robotech::cst::user_id_cst::USER_ID_HEADER_NAME;
 use robotech::micro_svc::FeignClient;
 use robotech::ro::Ro;
 use std::fmt::Display;
 
+enum ClientBackend {
+    Feign(FeignClient),
+    Static(ApiClient),
+}
+
 pub struct OssFileApiClient {
-    pub feign_client: FeignClient,
+    backend: ClientBackend,
 }
 
 impl OssFileApiClient {
-    pub fn new(feign_client: FeignClient) -> Self {
-        Self { feign_client }
+    pub fn new_feign(client: FeignClient) -> Self {
+        Self {
+            backend: ClientBackend::Feign(client),
+        }
+    }
+
+    pub fn new_static(client: ApiClient) -> Self {
+        Self {
+            backend: ClientBackend::Static(client),
+        }
     }
 
     pub async fn upload_file(
@@ -35,9 +49,14 @@ impl OssFileApiClient {
                 .map_err(|e| anyhow!("current_user_id: {}", e))?,
         );
 
-        self.feign_client
-            .multipart::<String>(&url, form, Some(headers))
-            .await
+        match &self.backend {
+            ClientBackend::Feign(c) => {
+                c.multipart::<String>(&url, form, Some(headers)).await
+            }
+            ClientBackend::Static(c) => {
+                c.multipart(&url, form, Some(headers), None).await
+            }
+        }
     }
 
     pub async fn upload_file_content(
@@ -56,9 +75,14 @@ impl OssFileApiClient {
             HeaderValue::from_str(&current_user_id.to_string().as_str())
                 .map_err(|e| anyhow!("current_user_id: {}", e))?,
         );
-        self.feign_client
-            .multipart::<String>(&url, form, Some(headers))
-            .await
+        match &self.backend {
+            ClientBackend::Feign(c) => {
+                c.multipart::<String>(&url, form, Some(headers)).await
+            }
+            ClientBackend::Static(c) => {
+                c.multipart(&url, form, Some(headers), None).await
+            }
+        }
     }
 
     pub async fn download_file(
@@ -73,9 +97,14 @@ impl OssFileApiClient {
             HeaderValue::from_str(&current_user_id.to_string().as_str())
                 .map_err(|e| anyhow!("current_user_id: {}", e))?,
         );
-        self.feign_client
-            .get_bytes::<()>(&url, None, Some(headers))
-            .await
+        match &self.backend {
+            ClientBackend::Feign(c) => {
+                c.get_bytes::<()>(&url, None, Some(headers)).await
+            }
+            ClientBackend::Static(c) => {
+                c.get_bytes::<()>(&url, None, Some(headers), None).await
+            }
+        }
     }
 
     pub async fn preview_file(
@@ -90,8 +119,13 @@ impl OssFileApiClient {
             HeaderValue::from_str(&current_user_id.to_string().as_str())
                 .map_err(|e| anyhow!("current_user_id: {}", e))?,
         );
-        self.feign_client
-            .get_bytes::<()>(&url, None, Some(headers))
-            .await
+        match &self.backend {
+            ClientBackend::Feign(c) => {
+                c.get_bytes::<()>(&url, None, Some(headers)).await
+            }
+            ClientBackend::Static(c) => {
+                c.get_bytes::<()>(&url, None, Some(headers), None).await
+            }
+        }
     }
 }

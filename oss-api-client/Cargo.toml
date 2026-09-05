@@ -1,6 +1,6 @@
 [package]
 name = "oss-api-client"
-version = "1.4.0"
+version = "1.5.0"
 edition = "2024"
 authors = ["zbz"]
 license = "MIT"
@@ -23,4 +23,4 @@ serde_json = { workspace = true }
 utoipa = { workspace = true, features = ["axum_extras"] }
 
 wheel-rs = { workspace = true }
-robotech = { workspace = true, features = ["api-client", "macros", "registry-center", "config-center"] }
+robotech = { workspace = true, features = ["feign", "macros", "registry-center"] }

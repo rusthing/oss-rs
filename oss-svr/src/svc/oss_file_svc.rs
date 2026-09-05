@@ -64,14 +64,15 @@ impl OssFileSvc {
         let oss_config = get_oss_config()?;
 
         // 获取存储桶
-        let one_bucket = OssBucketSvc::get_by_query_dto(
+        let one_bucket = match OssBucketSvc::get_by_query_dto(
             OssBucketQueryDto::builder()
                 .name(bucket.to_string())
                 .build(),
             Some(db),
         )
-        .await?;
-        let one_bucket = match one_bucket.extra {
+        .await?
+        .extra
+        {
             Some(bucket) => bucket,
             None => return Ok(Ro::warn(format!("未找到存储桶<{}>", bucket))),
         };
@@ -102,17 +103,13 @@ impl OssFileSvc {
                     let obj_vo = if let (Some(hash_provided), Some(file_size_provided)) =
                         (&hash_provided, &file_size_provided)
                     {
-                        match OssObjSvc::get_by_hash_and_size(
+                        OssObjSvc::get_by_hash_and_size(
                             &hash_provided,
                             &file_size_provided,
                             Some(db),
                         )
-                        .await
-                        {
-                            Ok(ro) => ro.extra,
-                            Err(SvcError::NotFound(_)) => None,
-                            Err(e) => return Err(e),
-                        }
+                        .await?
+                        .extra
                     } else {
                         None
                     };
@@ -212,6 +209,7 @@ impl OssFileSvc {
                         )
                         .await?
                         .extra;
+
                         if let Some(oss_obj_vo) = oss_obj_vo {
                             warn!(
                                 "在上传完成后发现文件已存在，删除上传文件，引用的对象指向已存在的对象"
