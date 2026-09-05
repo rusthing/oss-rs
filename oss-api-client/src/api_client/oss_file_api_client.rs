@@ -1,15 +1,14 @@
 use anyhow::anyhow;
 use reqwest::header::{HeaderMap, HeaderValue};
-use robotech::api_client::ApiClient;
-use robotech::api_client::ApiClientError;
+use robotech::api_client::{ApiClientError, SimpleApiClient};
 use robotech::cst::user_id_cst::USER_ID_HEADER_NAME;
-use robotech::micro_svc::FeignClient;
+use robotech::micro_svc::FeignApiClient;
 use robotech::ro::Ro;
 use std::fmt::Display;
 
 enum ClientBackend {
-    Feign(FeignClient),
-    Static(ApiClient),
+    Feign(FeignApiClient),
+    Static(SimpleApiClient),
 }
 
 pub struct OssFileApiClient {
@@ -17,13 +16,13 @@ pub struct OssFileApiClient {
 }
 
 impl OssFileApiClient {
-    pub fn new_feign(client: FeignClient) -> Self {
+    pub fn new_feign(client: FeignApiClient) -> Self {
         Self {
             backend: ClientBackend::Feign(client),
         }
     }
 
-    pub fn new_static(client: ApiClient) -> Self {
+    pub fn new_static(client: SimpleApiClient) -> Self {
         Self {
             backend: ClientBackend::Static(client),
         }
@@ -50,12 +49,8 @@ impl OssFileApiClient {
         );
 
         match &self.backend {
-            ClientBackend::Feign(c) => {
-                c.multipart::<String>(&url, form, Some(headers)).await
-            }
-            ClientBackend::Static(c) => {
-                c.multipart(&url, form, Some(headers), None).await
-            }
+            ClientBackend::Feign(c) => c.multipart::<String>(&url, form, Some(&headers)).await,
+            ClientBackend::Static(c) => c.multipart(&url, form, Some(&headers)).await,
         }
     }
 
@@ -76,12 +71,8 @@ impl OssFileApiClient {
                 .map_err(|e| anyhow!("current_user_id: {}", e))?,
         );
         match &self.backend {
-            ClientBackend::Feign(c) => {
-                c.multipart::<String>(&url, form, Some(headers)).await
-            }
-            ClientBackend::Static(c) => {
-                c.multipart(&url, form, Some(headers), None).await
-            }
+            ClientBackend::Feign(c) => c.multipart::<String>(&url, form, Some(&headers)).await,
+            ClientBackend::Static(c) => c.multipart(&url, form, Some(&headers)).await,
         }
     }
 
@@ -98,12 +89,8 @@ impl OssFileApiClient {
                 .map_err(|e| anyhow!("current_user_id: {}", e))?,
         );
         match &self.backend {
-            ClientBackend::Feign(c) => {
-                c.get_bytes::<()>(&url, None, Some(headers)).await
-            }
-            ClientBackend::Static(c) => {
-                c.get_bytes::<()>(&url, None, Some(headers), None).await
-            }
+            ClientBackend::Feign(c) => c.get_bytes::<()>(&url, None, Some(&headers)).await,
+            ClientBackend::Static(c) => c.get_bytes::<()>(&url, None, Some(&headers)).await,
         }
     }
 
@@ -120,12 +107,8 @@ impl OssFileApiClient {
                 .map_err(|e| anyhow!("current_user_id: {}", e))?,
         );
         match &self.backend {
-            ClientBackend::Feign(c) => {
-                c.get_bytes::<()>(&url, None, Some(headers)).await
-            }
-            ClientBackend::Static(c) => {
-                c.get_bytes::<()>(&url, None, Some(headers), None).await
-            }
+            ClientBackend::Feign(c) => c.get_bytes::<()>(&url, None, Some(&headers)).await,
+            ClientBackend::Static(c) => c.get_bytes::<()>(&url, None, Some(&headers)).await,
         }
     }
 }

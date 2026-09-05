@@ -43,8 +43,8 @@ wheel-rs = "1.10.0"
 robotech = "1.14.0"
 robotech-macros = "1.14.0"
 
-#[patch.crates-io]
-##idworker = { path = "../idworker" }
-##wheel-rs = { path = "../wheel-rs" }
-#robotech = { path = "../robotech-rs/robotech" }
-#robotech-macros = { path = "../robotech-rs/robotech-macros" }
+[patch.crates-io]
+#idworker = { path = "../idworker" }
+#wheel-rs = { path = "../wheel-rs" }
+robotech = { path = "../robotech-rs/robotech" }
+robotech-macros = { path = "../robotech-rs/robotech-macros" }
