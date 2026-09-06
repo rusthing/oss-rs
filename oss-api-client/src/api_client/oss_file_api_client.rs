@@ -7,12 +7,12 @@ use robotech::ro::Ro;
 use std::fmt::Display;
 
 pub struct OssFileApiClient {
-    backend: FeignApiClient,
+    client: FeignApiClient,
 }
 
 impl OssFileApiClient {
     pub fn new(client: FeignApiClient) -> Self {
-        Self { backend: client }
+        Self { client }
     }
 
     pub async fn upload_file(
@@ -35,7 +35,7 @@ impl OssFileApiClient {
                 .map_err(|e| anyhow!("current_user_id: {}", e))?,
         );
 
-        self.backend.multipart(&url, form, Some(&headers)).await
+        self.client.multipart(&url, form, Some(&headers)).await
     }
 
     pub async fn upload_file_content(
@@ -54,7 +54,7 @@ impl OssFileApiClient {
             HeaderValue::from_str(&current_user_id.to_string().as_str())
                 .map_err(|e| anyhow!("current_user_id: {}", e))?,
         );
-        self.backend.multipart(&url, form, Some(&headers)).await
+        self.client.multipart(&url, form, Some(&headers)).await
     }
 
     pub async fn download_file(
@@ -69,7 +69,7 @@ impl OssFileApiClient {
             HeaderValue::from_str(&current_user_id.to_string().as_str())
                 .map_err(|e| anyhow!("current_user_id: {}", e))?,
         );
-        self.backend
+        self.client
             .get_bytes::<()>(&url, None, Some(&headers))
             .await
     }
@@ -86,7 +86,7 @@ impl OssFileApiClient {
             HeaderValue::from_str(&current_user_id.to_string().as_str())
                 .map_err(|e| anyhow!("current_user_id: {}", e))?,
         );
-        self.backend
+        self.client
             .get_bytes::<()>(&url, None, Some(&headers))
             .await
     }

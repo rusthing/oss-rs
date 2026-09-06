@@ -36,20 +36,13 @@ pub async fn setup_oss_api_client(
         let mut oss_api_client: Option<OssFileApiClient> = None;
         for (key, api_client_config) in apis_config {
             if key == OSS_API_CLIENT_CONFIG_KEY {
-                if let Some(ref feign_svc) = api_client_config.svc_name {
-                    info!("feign mode: using service discovery for '{}'", feign_svc);
-                    oss_api_client = Some(OssFileApiClient::new(
-                        FeignApiClient::new_feign(feign_svc).await,
-                    ));
-                } else {
-                    let base_url = api_client_config
-                        .base_url
-                        .ok_or(CfgError::NotInit("base_url not initialized".to_string()))?;
-                    info!("static mode: using base_url '{base_url}' for '{key}'",);
-                    oss_api_client = Some(OssFileApiClient::new(
-                        FeignApiClient::new_static(base_url, api_client_config.auth),
-                    ));
-                }
+                info!(
+                    "oss api client config: svc_name={:?}, base_url={:?}",
+                    api_client_config.svc_name, api_client_config.base_url
+                );
+                oss_api_client = Some(OssFileApiClient::new(
+                    FeignApiClient::new(api_client_config).await,
+                ));
             }
         }
         let oss_api_client = oss_api_client.ok_or(CfgError::NotInit(
