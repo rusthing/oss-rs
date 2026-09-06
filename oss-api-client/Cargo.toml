@@ -24,3 +24,4 @@ utoipa = { workspace = true, features = ["axum_extras"] }
 
 wheel-rs = { workspace = true }
 robotech = { workspace = true, features = ["feign", "macros", "registry-center"] }
+oss-api = { path = "../oss-api" }

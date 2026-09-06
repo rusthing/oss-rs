@@ -44,7 +44,7 @@ sqlx migrate add <版本名称> --source migrations/[mysql或pgsql]]
 
 == 生成sea-orm的Model
 
-进入xxx-svr的项目目录，执行下面的命令
+进入oss-api的项目目录，执行下面的命令
 
 [source,bash]
 ----
@@ -55,5 +55,5 @@ sea-orm-cli generate entity --entity-format dense --model-extra-derives Default 
 - with-serde: 是否生成 serde 的代码，both 表示生成正反序列化的代码，还有 `deserialize` 和 `serialize` 可以选择
 - ignore-tables: 忽略的表，多个表用逗号分隔
 - database-url: 数据库连接字符串
-- o: 输出目录，模型文件将生成到`src/model`目录下
+- o: 输出目录，模型文件将生成到`src/mo`目录下
 

@@ -1,10 +1,6 @@
-use serde::Serialize;
-use serde_with::skip_serializing_none;
-use utoipa::ToSchema;
+use robotech::macros::vo;
 
-#[skip_serializing_none] // 忽略空字段(好像必须放在#[derive(o2o, Serialize)]的上方才能起效)
-#[derive(ToSchema, Debug, Serialize, Clone)]
-#[serde(rename_all = "camelCase")]
+#[vo]
 pub struct OssObjVo {
     /// ID
     pub id: u64,
