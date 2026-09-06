@@ -36,10 +36,7 @@ pub async fn setup_oss_api_client(
         let mut oss_api_client: Option<OssFileApiClient> = None;
         for (key, api_client_config) in apis_config {
             if key == OSS_API_CLIENT_CONFIG_KEY {
-                info!(
-                    "oss api client config: svc_name={:?}, base_url={:?}",
-                    api_client_config.svc_name, api_client_config.base_url
-                );
+                info!("oss api client config: {:?}", api_client_config);
                 oss_api_client = Some(OssFileApiClient::new(
                     FeignApiClient::new(api_client_config).await,
                 ));
