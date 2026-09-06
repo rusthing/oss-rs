@@ -1,7 +1,7 @@
 use crate::api_client::oss_file_api_client::OssFileApiClient;
 use arc_swap::ArcSwapOption;
 use config::Value;
-use robotech::api_client::{ApiClientConfig, SimpleApiClient, API_CLIENT_CONFIG_KEY};
+use robotech::api_client::{ApiClientConfig, API_CLIENT_CONFIG_KEY};
 use robotech::cfg::CfgError;
 use robotech::micro_svc::FeignApiClient;
 use std::collections::HashMap;
@@ -38,18 +38,17 @@ pub async fn setup_oss_api_client(
             if key == OSS_API_CLIENT_CONFIG_KEY {
                 if let Some(ref feign_svc) = api_client_config.svc_name {
                     info!("feign mode: using service discovery for '{}'", feign_svc);
-                    oss_api_client = Some(OssFileApiClient::new_feign(
-                        FeignApiClient::new(feign_svc).await,
+                    oss_api_client = Some(OssFileApiClient::new(
+                        FeignApiClient::new_feign(feign_svc).await,
                     ));
                 } else {
                     let base_url = api_client_config
                         .base_url
                         .ok_or(CfgError::NotInit("base_url not initialized".to_string()))?;
                     info!("static mode: using base_url '{base_url}' for '{key}'",);
-                    oss_api_client = Some(OssFileApiClient::new_static(SimpleApiClient::new(
-                        base_url,
-                        api_client_config.auth,
-                    )));
+                    oss_api_client = Some(OssFileApiClient::new(
+                        FeignApiClient::new_static(base_url, api_client_config.auth),
+                    ));
                 }
             }
         }
