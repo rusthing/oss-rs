@@ -1,6 +1,6 @@
 [package]
 name = "oss-api-client"
-version = "1.5.0"
+version = "1.6.0"
 edition = "2024"
 authors = ["zbz"]
 license = "MIT"
@@ -24,4 +24,4 @@ utoipa = { workspace = true, features = ["axum_extras"] }
 
 wheel-rs = { workspace = true }
 robotech = { workspace = true, features = ["feign", "macros", "registry-center"] }
-oss-api = { path = "../oss-api" }
+oss-api = { workspace = true }
