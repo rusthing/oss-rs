@@ -18,20 +18,15 @@
 
 == 新增数据库版本
 
-. 进入xxx-svr的项目目录
-. 配置连接数据库的环境变量，示例如下:
-+
-..env
-[source,ini]
-----
-DATABASE_URL=postgres://ossrs:ossrs@127.0.0.1/ossrs
-----
-+
+. 进入oss-svr的项目目录
 . 执行新增数据库版本
 +
 [source,bash]
 ----
-sqlx migrate add <版本名称> --source migrations/[mysql或pgsql]]
+# pgsql
+sqlx migrate add <版本名称> --source migrations/pgsql
+# mysql
+# sqlx migrate add <版本名称> --source migrations/mysql
 ----
 +
 [NOTE]
