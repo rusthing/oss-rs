@@ -20,6 +20,7 @@ pub struct Model {
     #[sea_orm(unique)]
     pub download_url: String,
     pub preview_url: Option<String>,
+    pub enabled: bool,
     #[sea_orm(
         belongs_to,
         from = "bucket_id",

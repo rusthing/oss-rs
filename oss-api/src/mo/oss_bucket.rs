@@ -16,6 +16,7 @@ pub struct Model {
     pub create_ts: i64,
     pub updator_id: i64,
     pub update_ts: i64,
+    pub enabled: bool,
     #[sea_orm(has_many)]
     pub oss_obj_refs: HasMany<super::oss_obj_ref::Entity>,
 }
