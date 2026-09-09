@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2026/8/26 8:42:02                            */
+/* Created on:     2026/9/9 12:31:27                            */
 /*==============================================================*/
 
 
@@ -12,6 +12,7 @@ create table oss_bucket
    id                   bigint not null  comment 'ID',
    name                 varchar(50) not null  comment '名称',
    remark               varchar(50)  comment '备注',
+   enabled              bool not null default true  comment '启用',
    creator_id           bigint not null  comment '创建人的用户ID',
    create_ts            bigint not null  comment '建立时间戳',
    updator_id           bigint not null  comment '修改人的用户ID',
@@ -56,6 +57,7 @@ create table oss_obj_ref
    ext                  varchar(10)  comment '文件扩展名',
    download_url         varchar(200) not null  comment '下载URL',
    preview_url          varchar(200)  comment '预览URL',
+   enabled              bool not null default true  comment '启用',
    creator_id           bigint not null  comment '创建人的用户ID',
    create_ts            bigint not null  comment '建立时间戳',
    updator_id           bigint not null  comment '修改人的用户ID',

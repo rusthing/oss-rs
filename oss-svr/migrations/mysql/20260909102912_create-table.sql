@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2026/8/26 8:42:02                            */
+/* Created on:     2026/9/9 10:29:12                            */
 /*==============================================================*/
 
 
@@ -9,9 +9,10 @@
 /*==============================================================*/
 create table oss_bucket
 (
-    id                   bigint not null  comment 'ID',
+    id                   bigint not null  comment '桶ID',
     name                 varchar(50) not null  comment '名称',
     remark               varchar(50)  comment '备注',
+    enabled              bit(1) not null default true  comment '启用',
     creator_id           bigint not null  comment '创建人的用户ID',
     create_ts            bigint not null  comment '建立时间戳',
     updator_id           bigint not null  comment '修改人的用户ID',
@@ -27,8 +28,8 @@ alter table oss_bucket comment '桶';
 /*==============================================================*/
 create table oss_obj
 (
-    id                   bigint not null  comment 'ID',
-    is_completed         bool not null  comment '是否完成',
+    id                   bigint not null  comment '对象ID',
+    is_completed         bit(1) not null  comment '是否完成',
     path                 varchar(255) not null  comment '路径
              存储文件的路径',
     size                 bigint  comment '大小',
@@ -49,13 +50,14 @@ alter table oss_obj comment '对象';
 /*==============================================================*/
 create table oss_obj_ref
 (
-    id                   bigint not null  comment 'ID',
+    id                   bigint not null  comment '对象引用ID',
     obj_id               bigint not null  comment '对象ID',
     bucket_id            bigint not null  comment '桶ID',
     name                 varchar(100) not null  comment '名称(上传时的文件原名，带后缀名)',
     ext                  varchar(10)  comment '文件扩展名',
     download_url         varchar(200) not null  comment '下载URL',
     preview_url          varchar(200)  comment '预览URL',
+    enabled              bit(1) not null default true  comment '启用',
     creator_id           bigint not null  comment '创建人的用户ID',
     create_ts            bigint not null  comment '建立时间戳',
     updator_id           bigint not null  comment '修改人的用户ID',

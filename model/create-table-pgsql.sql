@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      PostgreSQL 9.x                               */
-/* Created on:     2026/8/25 16:00:18                           */
+/* Created on:     2026/9/9 12:32:18                            */
 /*==============================================================*/
 
 
@@ -11,6 +11,7 @@ create table oss_bucket (
    id                   INT8                 not null,
    name                 VARCHAR(50)          not null,
    remark               VARCHAR(50)          null,
+   enabled              BOOL                 not null default true,
    creator_id           INT8                 not null,
    create_ts            INT8                 not null,
    updator_id           INT8                 not null,
@@ -30,6 +31,9 @@ comment on column oss_bucket.name is
 
 comment on column oss_bucket.remark is
 '备注';
+
+comment on column oss_bucket.enabled is
+'启用';
 
 comment on column oss_bucket.creator_id is
 '创建人的用户ID';
@@ -117,6 +121,7 @@ create table oss_obj_ref (
    ext                  VARCHAR(10)          null,
    download_url         VARCHAR(200)         not null,
    preview_url          VARCHAR(200)         null,
+   enabled              BOOL                 not null default true,
    creator_id           INT8                 not null,
    create_ts            INT8                 not null,
    updator_id           INT8                 not null,
@@ -148,6 +153,9 @@ comment on column oss_obj_ref.download_url is
 
 comment on column oss_obj_ref.preview_url is
 '预览URL';
+
+comment on column oss_obj_ref.enabled is
+'启用';
 
 comment on column oss_obj_ref.creator_id is
 '创建人的用户ID';
