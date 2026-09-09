@@ -8,6 +8,8 @@ pub struct OssBucketVo {
     pub name: String,
     /// 备注
     pub remark: Option<String>,
+    /// 启用
+    pub enabled: bool,
     /// 创建者ID
     pub creator_id: u64,
     /// 创建时间

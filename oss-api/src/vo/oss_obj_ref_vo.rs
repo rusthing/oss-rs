@@ -17,6 +17,8 @@ pub struct OssObjRefVo {
     pub download_url: String,
     /// 预览URL
     pub preview_url: Option<String>,
+    /// 启用
+    pub enabled: bool,
     /// 创建者ID
     pub creator_id: u64,
     /// 创建时间戳

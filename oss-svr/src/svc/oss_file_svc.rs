@@ -77,6 +77,10 @@ impl OssFileSvc {
             None => return Ok(Ro::warn(format!("未找到存储桶<{}>", bucket))),
         };
 
+        if !one_bucket.enabled {
+            return Ok(Ro::warn(format!("存储桶<{}>已禁用", bucket)));
+        }
+
         let mut hash_provided = None;
         let mut file_size_provided = None;
         // XXX 注意: 前端上传文件时，file参数必须放在最后
@@ -305,6 +309,10 @@ impl OssFileSvc {
             .await?
             .map(|m| m.into())
             .ok_or(SvcError::NotFound(format!("id: {}", obj_ref_id)))?;
+
+        if !obj_ref_vo.enabled {
+            return Err(SvcError::NotFound(format!("对象引用已禁用, id: {}", obj_ref_id)));
+        }
 
         // 如果有扩展名，扩展名不对也不行
         if &ext != &obj_ref_vo.ext {

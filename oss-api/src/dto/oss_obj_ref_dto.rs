@@ -14,4 +14,6 @@ pub struct OssObjRefDto {
     pub download_url: String,
     /// 预览URL
     pub preview_url: Option<String>,
+    /// 启用
+    pub enabled: bool,
 }
