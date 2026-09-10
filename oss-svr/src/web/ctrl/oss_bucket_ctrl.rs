@@ -25,7 +25,7 @@ struct OssBucketCtrl;
 #[debug_handler]
 #[log_call]
 pub async fn del_cascade(
-    Path(id): Path<u64>,
+    Path(id): Path<U64>,
     headers: HeaderMap,
 ) -> Result<Json<Ro<OssBucketVo>>, CtrlError> {
     // 从header中解析当前用户ID，如果没有或解析失败则抛出ApiError

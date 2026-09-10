@@ -13,10 +13,10 @@ use axum::extract::multipart::Field;
 use axum::extract::Multipart;
 use axum::http::{header, HeaderMap, HeaderValue};
 use chrono::{Local, TimeZone};
+use robotech::api::{Ro, U64};
 use robotech::dao::begin_transaction;
 use robotech::env::{EnvError, APP_ENV};
 use robotech::macros::db_unwrap;
-use robotech::ro::Ro;
 use robotech::svc::SvcError;
 use sea_orm::ConnectionTrait;
 use sha2::Digest;
@@ -55,7 +55,7 @@ impl OssFileSvc {
     pub async fn upload<C>(
         bucket: &str,
         mut multipart: Multipart,
-        current_user_id: u64,
+        current_user_id: U64,
         db: Option<&C>,
     ) -> Result<Ro<OssObjRefVo>, SvcError>
     where
@@ -107,6 +107,7 @@ impl OssFileSvc {
                     let obj_vo = if let (Some(hash_provided), Some(file_size_provided)) =
                         (&hash_provided, &file_size_provided)
                     {
+                        let file_size_provided: U64 = file_size_provided.clone().into();
                         OssObjSvc::get_by_hash_and_size(
                             &hash_provided,
                             &file_size_provided,
@@ -154,10 +155,10 @@ impl OssFileSvc {
                         // 新增对象
                         let is_completed = false;
                         let oss_obj_add_dto = OssObjAddDto::builder()
-                            .id(obj_id)
+                            .id(obj_id.into())
                             .path(new_file_path.to_string())
                             .is_completed(is_completed)
-                            ._current_user_id(current_user_id)
+                            ._current_user_id(current_user_id.into())
                             .build();
 
                         debug!("新增对象: {:?}", oss_obj_add_dto);
@@ -183,14 +184,14 @@ impl OssFileSvc {
                     };
                     let download_url = format!("/oss/file/download/{}", obj_ref_name);
                     let oss_obj_ref_add_dto = OssObjRefAddDto::builder()
-                        .id(obj_ref_id)
+                        .id(obj_ref_id.into())
                         .name(file_name.to_string())
-                        .bucket_id(*one_bucket.id)
-                        .obj_id(*obj_id)
+                        .bucket_id(one_bucket.id.into())
+                        .obj_id(obj_id.into())
                         .ext(ext)
                         .download_url(download_url)
                         .preview_url(preview_url)
-                        ._current_user_id(current_user_id)
+                        ._current_user_id(current_user_id.into())
                         .build();
                     debug!("新增对象引用: {:?}", oss_obj_ref_add_dto);
                     let obj_ref_ro = OssObjRefSvc::add(oss_obj_ref_add_dto, Some(db)).await?;
@@ -208,7 +209,7 @@ impl OssFileSvc {
                         // 写完文件时最后再检查一次文件大小和hash是否已经存在
                         let oss_obj_vo = OssObjSvc::get_by_hash_and_size(
                             &hash_computed,
-                            &file_size_computed,
+                            &file_size_computed.into(),
                             Some(db),
                         )
                         .await?
@@ -221,9 +222,9 @@ impl OssFileSvc {
                             fs::remove_file(new_file_path).await?;
                             OssObjRefSvc::modify(
                                 OssObjRefModifyDto::builder()
-                                    .id(obj_ref_id)
-                                    .obj_id(*oss_obj_vo.id)
-                                    ._current_user_id(current_user_id)
+                                    .id(obj_ref_id.into())
+                                    .obj_id(oss_obj_vo.id.into())
+                                    ._current_user_id(current_user_id.into())
                                     .build(),
                                 Some(db),
                             )
@@ -233,11 +234,11 @@ impl OssFileSvc {
                             let is_completed = true;
                             OssObjSvc::modify(
                                 OssObjModifyDto::builder()
-                                    .id(*obj_id)
+                                    .id(obj_id.into())
                                     .hash(Some(hash_computed))
-                                    .size(Some(file_size_computed))
+                                    .size(Some(file_size_computed.into()))
                                     .is_completed(is_completed)
-                                    ._current_user_id(current_user_id)
+                                    ._current_user_id(current_user_id.into())
                                     .build(),
                                 Some(db),
                             )
@@ -305,13 +306,16 @@ impl OssFileSvc {
             None => (None, None),
         };
 
-        let obj_ref_vo: OssObjRefExVo = OssObjRefDao::get_ex_by_id(obj_ref_id, db)
+        let obj_ref_vo: OssObjRefExVo = OssObjRefDao::get_ex_by_id(obj_ref_id.into(), db)
             .await?
             .map(|m| m.into())
             .ok_or(SvcError::NotFound(format!("id: {}", obj_ref_id)))?;
 
         if !obj_ref_vo.enabled {
-            return Err(SvcError::NotFound(format!("对象引用已禁用, id: {}", obj_ref_id)));
+            return Err(SvcError::NotFound(format!(
+                "对象引用已禁用, id: {}",
+                obj_ref_id
+            )));
         }
 
         // 如果有扩展名，扩展名不对也不行

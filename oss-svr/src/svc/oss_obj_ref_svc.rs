@@ -18,7 +18,7 @@ impl OssObjRefSvc {
     #[db_unwrap(transaction_required)]
     #[log_call]
     pub async fn del_with_obj<C>(
-        id: u64,
+        id: U64,
         #[skip_log] db: Option<&C>,
     ) -> Result<Ro<OssObjRefVo>, SvcError>
     where
@@ -27,7 +27,9 @@ impl OssObjRefSvc {
         let ro = Self::del_by_id(id, Some(db)).await?;
         if let Some(extra) = ro.extra.clone() {
             // 删除对象, 如果对象没有其他引用则会顺利删除，否则会失败
-            OssObjSvc::del_with_file(*extra.obj_id, Some(db)).await.ok();
+            OssObjSvc::del_with_file(extra.obj_id.clone(), Some(db))
+                .await
+                .ok();
         }
         Ok(ro)
     }
@@ -46,7 +48,7 @@ impl OssObjRefSvc {
     #[db_unwrap(transaction_required)]
     #[log_call]
     pub async fn del_by_bucket_id<C>(
-        bucket_id: u64,
+        bucket_id: U64,
         #[skip_log] db: Option<&C>,
     ) -> Result<Ro<()>, SvcError>
     where

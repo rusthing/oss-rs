@@ -1,7 +1,7 @@
-use anyhow::{Context, anyhow};
-use tracing::warn;
+use anyhow::{anyhow, Context};
 use robotech::macros::svc;
 use std::{fs, io};
+use tracing::warn;
 
 #[svc]
 pub struct OssObjSvc;
@@ -22,13 +22,13 @@ impl OssObjSvc {
     #[db_unwrap(transaction_required)]
     #[log_call]
     pub async fn del_with_file<C>(
-        id: u64,
+        id: U64,
         #[skip_log] db: Option<&C>,
     ) -> Result<Ro<OssObjVo>, SvcError>
     where
         C: ConnectionTrait,
     {
-        let ro = Self::del_by_id(id, Some(db)).await?;
+        let ro = Self::del_by_id(id.into(), Some(db)).await?;
         if let Some(extra) = ro.extra.clone() {
             let path = extra.path;
             // 删除文件
@@ -65,7 +65,7 @@ impl OssObjSvc {
     {
         let result = OssObjDao::find_orphaned(db).await?;
         for item in result.into_iter() {
-            Self::del_with_file(item.id as u64, Some(db)).await?;
+            Self::del_with_file(item.id.into(), Some(db)).await?;
         }
 
         Ok(Ro::success("删除孤立数据成功".to_string()))
@@ -87,7 +87,7 @@ impl OssObjSvc {
     #[log_call]
     pub async fn get_by_hash_and_size<C>(
         hash: &str,
-        size: &u64,
+        size: &U64,
         #[skip_log] db: Option<&C>,
     ) -> Result<Ro<OssObjVo>, SvcError>
     where

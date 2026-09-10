@@ -21,7 +21,7 @@ impl OssBucketSvc {
     #[db_unwrap(transaction_required)]
     #[log_call]
     pub async fn del_cascade<C>(
-        id: u64,
+        id: U64,
         #[skip_log] db: Option<&C>,
     ) -> Result<Ro<OssBucketVo>, SvcError>
     where

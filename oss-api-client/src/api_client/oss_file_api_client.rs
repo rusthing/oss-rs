@@ -3,7 +3,7 @@ use reqwest::header::{HeaderMap, HeaderValue};
 use robotech::api_client::ApiClientError;
 use robotech::cst::user_id_cst::USER_ID_HEADER_NAME;
 use robotech::micro_svc::FeignApiClient;
-use robotech::ro::Ro;
+use robotech::api::Ro;
 use std::fmt::Display;
 
 pub struct OssFileApiClient {
