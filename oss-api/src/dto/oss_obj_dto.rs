@@ -9,5 +9,5 @@ pub struct OssObjDto {
     /// Hash
     pub hash: Option<String>,
     /// 是否完成
-    pub is_completed: bool,
+    pub completed: bool,
 }

@@ -82,10 +82,10 @@ UpdateColumnStatistics=Yes
 DeploymentMode=REP
 
 [FolderOptions\Physical Objects\Database Generation]
-GenScriptName=create-table-pgsql.sql
-GenScriptName0=000-create-table-pgsql.sql
+GenScriptName=20260911142256_alert-table.sql
+GenScriptName0=000-20260911142256_alert-table.sql
 GenScriptName1=crebas.sql
-GenScriptName2=create-table-pgsql.sql
+GenScriptName2=20260911142256_alert-table.sql
 GenScriptName3=create.sql
 GenScriptName4=crebas
 GenScriptName5=

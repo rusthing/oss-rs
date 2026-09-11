@@ -11,7 +11,7 @@ pub struct OssObjVo {
     /// 文件Hash
     pub hash: Option<String>,
     /// 是否完成
-    pub is_completed: bool,
+    pub completed: bool,
     /// 创建者ID
     pub creator_id: u64,
     /// 创建时间戳

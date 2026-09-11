@@ -153,11 +153,11 @@ impl OssFileSvc {
                             .to_string();
 
                         // 新增对象
-                        let is_completed = false;
+                        let completed = false;
                         let oss_obj_add_dto = OssObjAddDto::builder()
                             .id(obj_id.into())
                             .path(new_file_path.to_string())
-                            .is_completed(is_completed)
+                            .completed(completed)
                             ._current_user_id(current_user_id.into())
                             .build();
 
@@ -231,13 +231,13 @@ impl OssFileSvc {
                             .await?;
                         } else {
                             // 文件已上传完成，修改对象信息的hash、文件大小、是否完成
-                            let is_completed = true;
+                            let completed = true;
                             OssObjSvc::modify(
                                 OssObjModifyDto::builder()
                                     .id(obj_id.into())
                                     .hash(Some(hash_computed))
                                     .size(Some(file_size_computed.into()))
-                                    .is_completed(is_completed)
+                                    .completed(completed)
                                     ._current_user_id(current_user_id.into())
                                     .build(),
                                 Some(db),

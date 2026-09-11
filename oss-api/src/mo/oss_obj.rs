@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false, unique)]
     pub id: i64,
-    pub is_completed: bool,
+    pub completed: bool,
     #[sea_orm(unique)]
     pub path: String,
     #[sea_orm(unique_key = "ak_size_and_hash_oss_obj")]
