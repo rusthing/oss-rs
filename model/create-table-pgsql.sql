@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      PostgreSQL 9.x                               */
-/* Created on:     2026/9/9 12:32:18                            */
+/* Created on:     2026/9/11 14:22:56                           */
 /*==============================================================*/
 
 
@@ -39,7 +39,7 @@ comment on column oss_bucket.creator_id is
 '创建人的用户ID';
 
 comment on column oss_bucket.create_ts is
-'建立时间戳';
+'创建时间戳';
 
 comment on column oss_bucket.updator_id is
 '修改人的用户ID';
@@ -59,7 +59,7 @@ id
 /*==============================================================*/
 create table oss_obj (
    id                   INT8                 not null,
-   is_completed         BOOL                 not null,
+   completed            BOOL                 not null,
    path                 VARCHAR(255)         not null,
    size                 INT8                 null,
    hash                 VARCHAR(64)          null,
@@ -78,7 +78,7 @@ comment on table oss_obj is
 comment on column oss_obj.id is
 'ID';
 
-comment on column oss_obj.is_completed is
+comment on column oss_obj.completed is
 '是否完成';
 
 comment on column oss_obj.path is
@@ -95,7 +95,7 @@ comment on column oss_obj.creator_id is
 '创建人的用户ID';
 
 comment on column oss_obj.create_ts is
-'建立时间戳';
+'创建时间戳';
 
 comment on column oss_obj.updator_id is
 '修改人的用户ID';
@@ -161,7 +161,7 @@ comment on column oss_obj_ref.creator_id is
 '创建人的用户ID';
 
 comment on column oss_obj_ref.create_ts is
-'建立时间戳';
+'创建时间戳';
 
 comment on column oss_obj_ref.updator_id is
 '修改人的用户ID';

@@ -46,7 +46,7 @@ robotech-macros = "1.16.0"
 oss-api = "1.7.1"
 
 [patch.crates-io]
-##idworker = { path = "../idworker" }
+#idworker = { path = "../idworker" }
 wheel-rs = { path = "../wheel-rs" }
 robotech = { path = "../robotech-rs/robotech" }
 robotech-macros = { path = "../robotech-rs/robotech-macros" }
