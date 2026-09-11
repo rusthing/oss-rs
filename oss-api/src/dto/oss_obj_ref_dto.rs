@@ -15,5 +15,6 @@ pub struct OssObjRefDto {
     /// 预览URL
     pub preview_url: Option<String>,
     /// 启用
+    #[db_default]
     pub enabled: bool,
 }

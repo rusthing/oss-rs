@@ -7,5 +7,6 @@ pub struct OssBucketDto {
     /// 备注
     pub remark: Option<String>,
     /// 启用
+    #[db_default]
     pub enabled: bool,
 }
