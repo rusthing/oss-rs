@@ -12,7 +12,7 @@ use axum::body::Body;
 use axum::extract::multipart::Field;
 use axum::extract::Multipart;
 use axum::http::{header, HeaderMap, HeaderValue};
-use chrono::{Local, TimeZone};
+use chrono::{TimeZone, Utc};
 use robotech::api::{Ro, U64};
 use robotech::dao::begin_transaction;
 use robotech::env::{EnvError, APP_ENV};
@@ -131,9 +131,11 @@ impl OssFileSvc {
                         // 如果未上传过该文件，则新增对象，并返回新对象ID和新文件的存放路径
                         let obj_id = idworker::next_id()?;
                         // 根据当前时间，创建yyyy/MM/dd/HH的目录，并将文件存入此目录中
-                        let datetime = Local.timestamp_opt((now / 1000) as i64, 0).unwrap();
+                        let local_datetime = Utc.timestamp_millis_opt(now as i64).unwrap();
 
-                        let date_path = datetime.format(&oss_config.file_dir_format).to_string();
+                        let date_path = local_datetime
+                            .format(&oss_config.file_dir_format)
+                            .to_string();
 
                         let storage_dir = APP_ENV
                             .get()
