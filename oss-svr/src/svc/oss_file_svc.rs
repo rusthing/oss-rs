@@ -12,7 +12,7 @@ use axum::body::Body;
 use axum::extract::multipart::Field;
 use axum::extract::Multipart;
 use axum::http::{header, HeaderMap, HeaderValue};
-use chrono::{TimeZone, Utc};
+use chrono::{Local, Utc};
 use robotech::api::{Ro, U64};
 use robotech::dao::begin_transaction;
 use robotech::env::{EnvError, APP_ENV};
@@ -27,7 +27,6 @@ use tokio::io::{AsyncReadExt, AsyncSeekExt, AsyncWriteExt};
 use tokio_util::io::ReaderStream;
 use tracing::{debug, info, trace, warn};
 use wheel_rs::file_utils::get_file_ext;
-use wheel_rs::time_utils::now_ts;
 
 pub struct OssFileSvc;
 
@@ -119,7 +118,7 @@ impl OssFileSvc {
                         None
                     };
 
-                    let now = now_ts()?;
+                    let now = Utc::now();
                     let ext = get_file_ext(file_name);
 
                     // 判断对象是否存在
@@ -131,8 +130,7 @@ impl OssFileSvc {
                         // 如果未上传过该文件，则新增对象，并返回新对象ID和新文件的存放路径
                         let obj_id = idworker::next_id()?;
                         // 根据当前时间，创建yyyy/MM/dd/HH的目录，并将文件存入此目录中
-                        let local_datetime = Utc.timestamp_millis_opt(now as i64).unwrap();
-
+                        let local_datetime = now.with_timezone(&Local);
                         let date_path = local_datetime
                             .format(&oss_config.file_dir_format)
                             .to_string();
