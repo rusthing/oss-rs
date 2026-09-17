@@ -27,6 +27,7 @@ use tokio::io::{AsyncReadExt, AsyncSeekExt, AsyncWriteExt};
 use tokio_util::io::ReaderStream;
 use tracing::{debug, info, trace, warn};
 use wheel_rs::file_utils::get_file_ext;
+use wheel_rs::time_utils::now_ms;
 
 pub struct OssFileSvc;
 
@@ -80,6 +81,7 @@ impl OssFileSvc {
             return Ok(Ro::warn(format!("存储桶<{}>已禁用", bucket)));
         }
 
+        let now_ms = now_ms();
         let mut hash_provided = None;
         let mut file_size_provided = None;
         // XXX 注意: 前端上传文件时，file参数必须放在最后
@@ -159,6 +161,7 @@ impl OssFileSvc {
                             .path(new_file_path.to_string())
                             .completed(completed)
                             ._current_user_id(current_user_id.into())
+                            ._current_ts(now_ms.into())
                             .build();
 
                         debug!("新增对象: {:?}", oss_obj_add_dto);
@@ -192,6 +195,7 @@ impl OssFileSvc {
                         .download_url(download_url)
                         .preview_url(preview_url)
                         ._current_user_id(current_user_id.into())
+                        ._current_ts(now_ms.into())
                         .build();
                     debug!("新增对象引用: {:?}", oss_obj_ref_add_dto);
                     let obj_ref_ro = OssObjRefSvc::add(oss_obj_ref_add_dto, Some(db)).await?;
@@ -225,6 +229,7 @@ impl OssFileSvc {
                                     .id(obj_ref_id.into())
                                     .obj_id(oss_obj_vo.id.into())
                                     ._current_user_id(current_user_id.into())
+                                    ._current_ts(now_ms.into())
                                     .build(),
                                 Some(db),
                             )
@@ -239,6 +244,7 @@ impl OssFileSvc {
                                     .size(Some(file_size_computed.into()))
                                     .completed(completed)
                                     ._current_user_id(current_user_id.into())
+                                    ._current_ts(now_ms.into())
                                     .build(),
                                 Some(db),
                             )
