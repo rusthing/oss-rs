@@ -8,9 +8,9 @@
 ALTER TABLE oss_obj RENAME COLUMN is_completed TO completed;
 
 -- 2. 时间戳字段注释统一：建立时间戳 -> 创建时间戳
-COMMENT ON COLUMN oss_bucket.create_ms IS '创建时间戳';
-COMMENT ON COLUMN oss_obj.create_ms IS '创建时间戳';
-COMMENT ON COLUMN oss_obj_ref.create_ms IS '创建时间戳';
+COMMENT ON COLUMN oss_bucket.create_ts IS '创建时间戳';
+COMMENT ON COLUMN oss_obj.create_ts IS '创建时间戳';
+COMMENT ON COLUMN oss_obj_ref.create_ts IS '创建时间戳';
 
 -- 说明：oss_obj.completed 的注释「是否完成」文本未变，RENAME 后注释自动跟随，
 -- 无需额外更新。
