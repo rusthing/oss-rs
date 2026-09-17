@@ -13,9 +13,9 @@ create table oss_bucket (
    remark               VARCHAR(50)          null,
    enabled              BOOL                 not null default true,
    creator_id           INT8                 not null,
-   create_ts            INT8                 not null,
+   create_ms            INT8                 not null,
    updator_id           INT8                 not null,
-   update_ts            INT8                 not null,
+   update_ms            INT8                 not null,
    constraint PK_OSS_BUCKET primary key (id),
    constraint AK_NAME_OSS_BUCKET unique (name)
 );
@@ -38,13 +38,13 @@ comment on column oss_bucket.enabled is
 comment on column oss_bucket.creator_id is
 '创建人的用户ID';
 
-comment on column oss_bucket.create_ts is
+comment on column oss_bucket.create_ms is
 '创建时间戳';
 
 comment on column oss_bucket.updator_id is
 '修改人的用户ID';
 
-comment on column oss_bucket.update_ts is
+comment on column oss_bucket.update_ms is
 '修改时间戳';
 
 /*==============================================================*/
@@ -64,9 +64,9 @@ create table oss_obj (
    size                 INT8                 null,
    hash                 VARCHAR(64)          null,
    creator_id           INT8                 not null,
-   create_ts            INT8                 not null,
+   create_ms            INT8                 not null,
    updator_id           INT8                 not null,
-   update_ts            INT8                 not null,
+   update_ms            INT8                 not null,
    constraint PK_OSS_OBJ primary key (id),
    constraint AK_PATH_OSS_OBJ unique (path),
    constraint AK_SIZE_AND_HASH_OSS_OBJ unique (size, hash)
@@ -94,13 +94,13 @@ comment on column oss_obj.hash is
 comment on column oss_obj.creator_id is
 '创建人的用户ID';
 
-comment on column oss_obj.create_ts is
+comment on column oss_obj.create_ms is
 '创建时间戳';
 
 comment on column oss_obj.updator_id is
 '修改人的用户ID';
 
-comment on column oss_obj.update_ts is
+comment on column oss_obj.update_ms is
 '修改时间戳';
 
 /*==============================================================*/
@@ -123,9 +123,9 @@ create table oss_obj_ref (
    preview_url          VARCHAR(200)         null,
    enabled              BOOL                 not null default true,
    creator_id           INT8                 not null,
-   create_ts            INT8                 not null,
+   create_ms            INT8                 not null,
    updator_id           INT8                 not null,
-   update_ts            INT8                 not null,
+   update_ms            INT8                 not null,
    constraint PK_OSS_OBJ_REF primary key (id),
    constraint AK_URL_OSS_OBJ_REF unique (download_url)
 );
@@ -160,13 +160,13 @@ comment on column oss_obj_ref.enabled is
 comment on column oss_obj_ref.creator_id is
 '创建人的用户ID';
 
-comment on column oss_obj_ref.create_ts is
+comment on column oss_obj_ref.create_ms is
 '创建时间戳';
 
 comment on column oss_obj_ref.updator_id is
 '修改人的用户ID';
 
-comment on column oss_obj_ref.update_ts is
+comment on column oss_obj_ref.update_ms is
 '修改时间戳';
 
 /*==============================================================*/

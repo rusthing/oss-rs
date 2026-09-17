@@ -13,9 +13,9 @@ pub struct Model {
     pub name: String,
     pub remark: Option<String>,
     pub creator_id: i64,
-    pub create_ts: i64,
+    pub create_ms: i64,
     pub updator_id: i64,
-    pub update_ts: i64,
+    pub update_ms: i64,
     pub enabled: bool,
     #[sea_orm(has_many)]
     pub oss_obj_refs: HasMany<super::oss_obj_ref::Entity>,

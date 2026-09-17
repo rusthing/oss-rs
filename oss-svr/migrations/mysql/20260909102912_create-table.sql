@@ -14,9 +14,9 @@ create table oss_bucket
     remark               varchar(50)  comment '备注',
     enabled              bit(1) not null default true  comment '启用',
     creator_id           bigint not null  comment '创建人的用户ID',
-    create_ts            bigint not null  comment '建立时间戳',
+    create_ms            bigint not null  comment '建立时间戳',
     updator_id           bigint not null  comment '修改人的用户ID',
-    update_ts            bigint not null  comment '修改时间戳',
+    update_ms            bigint not null  comment '修改时间戳',
     primary key (id),
     unique key AK_NAME (name)
 );
@@ -35,9 +35,9 @@ create table oss_obj
     size                 bigint  comment '大小',
     hash                 varchar(64)  comment 'Hash',
     creator_id           bigint not null  comment '创建人的用户ID',
-    create_ts            bigint not null  comment '建立时间戳',
+    create_ms            bigint not null  comment '建立时间戳',
     updator_id           bigint not null  comment '修改人的用户ID',
-    update_ts            bigint not null  comment '修改时间戳',
+    update_ms            bigint not null  comment '修改时间戳',
     primary key (id),
     unique key AK_PATH (path),
     unique key AK_SIZE_AND_HASH (size, hash)
@@ -59,9 +59,9 @@ create table oss_obj_ref
     preview_url          varchar(200)  comment '预览URL',
     enabled              bit(1) not null default true  comment '启用',
     creator_id           bigint not null  comment '创建人的用户ID',
-    create_ts            bigint not null  comment '建立时间戳',
+    create_ms            bigint not null  comment '建立时间戳',
     updator_id           bigint not null  comment '修改人的用户ID',
-    update_ts            bigint not null  comment '修改时间戳',
+    update_ms            bigint not null  comment '修改时间戳',
     primary key (id),
     unique key AK_URL (download_url)
 );
