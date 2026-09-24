@@ -21,11 +21,11 @@ async fn setup(
     let db_url = app_config.db.get_url();
     db_migrate!(db_url);
 
-    setup_id_worker(app_config.id_worker.clone(), &changed)?;
-    setup_oss_config(app_config.oss.clone(), &changed);
-    setup_db_conn(app_config.db.clone(), &changed).await?;
+    setup_id_worker(app_config.id_worker.clone(), changed)?;
+    setup_oss_config(app_config.oss.clone(), changed);
+    setup_db_conn(app_config.db.clone(), changed).await?;
 
-    setup_web_server(app_config.web.clone(), port, old_pid, &changed).await?;
+    setup_web_server(app_config.web.clone(), port, old_pid, changed).await?;
 
     Ok(())
 }
