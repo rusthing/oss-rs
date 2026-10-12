@@ -17,6 +17,10 @@ pub fn get_oss_config() -> Result<Arc<OssConfig>, CfgError> {
         .ok_or(CfgError::NotInit("OSS config not initialized".to_string()))
 }
 
+pub fn set_oss_config(config: &OssConfig) {
+    OSS_CONFIG.store(Some(Arc::new(config.clone())));
+}
+
 pub fn setup_oss_config(oss_config: OssConfig, changed: &Option<HashMap<String, Value>>) {
     info!("setup oss config...: {oss_config:?}");
     if changed
@@ -24,7 +28,7 @@ pub fn setup_oss_config(oss_config: OssConfig, changed: &Option<HashMap<String, 
         .map(|changed| has_config_changed(OSS_CONFIG_KEY, changed))
         .unwrap_or(true)
     {
-        OSS_CONFIG.store(Some(Arc::new(oss_config)));
+        set_oss_config(&oss_config);
     }
 }
 
