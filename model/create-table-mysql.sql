@@ -13,10 +13,10 @@ create table oss_bucket
    name                 varchar(50) not null  comment '名称',
    remark               varchar(50)  comment '备注',
    enabled              bit(1) not null default true  comment '启用',
-   creator_id           bigint not null  comment '创建人的用户ID',
+   creater_id           bigint not null  comment '创建者ID',
    create_ms            bigint not null  comment '创建时间戳',
-   updator_id           bigint not null  comment '修改人的用户ID',
-   update_ms            bigint not null  comment '修改时间戳',
+   updater_id           bigint not null  comment '更新者ID',
+   update_ms            bigint not null  comment '更新时间戳',
    primary key (id),
    unique key AK_NAME (name)
 );
@@ -34,10 +34,10 @@ create table oss_obj
              存储文件的路径',
    size                 bigint  comment '大小',
    hash                 varchar(64)  comment 'Hash',
-   creator_id           bigint not null  comment '创建人的用户ID',
+   creater_id           bigint not null  comment '创建者ID',
    create_ms            bigint not null  comment '创建时间戳',
-   updator_id           bigint not null  comment '修改人的用户ID',
-   update_ms            bigint not null  comment '修改时间戳',
+   updater_id           bigint not null  comment '更新者ID',
+   update_ms            bigint not null  comment '更新时间戳',
    primary key (id),
    unique key AK_PATH (path),
    unique key AK_SIZE_AND_HASH (size, hash)
@@ -58,10 +58,10 @@ create table oss_obj_ref
    download_url         varchar(200) not null  comment '下载URL',
    preview_url          varchar(200)  comment '预览URL',
    enabled              bit(1) not null default true  comment '启用',
-   creator_id           bigint not null  comment '创建人的用户ID',
+   creater_id           bigint not null  comment '创建者ID',
    create_ms            bigint not null  comment '创建时间戳',
-   updator_id           bigint not null  comment '修改人的用户ID',
-   update_ms            bigint not null  comment '修改时间戳',
+   updater_id           bigint not null  comment '更新者ID',
+   update_ms            bigint not null  comment '更新时间戳',
    primary key (id),
    unique key AK_URL (download_url)
 );

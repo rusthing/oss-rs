@@ -4723,8 +4723,8 @@ DAT 1758091116</a:History>
 </o:Column>
 <o:Column Id="o21">
 <a:ObjectID>E7B68117-3F2B-47C2-ABBB-203BAC919B7E</a:ObjectID>
-<a:Name>创建人的用户ID</a:Name>
-<a:Code>creator_id</a:Code>
+<a:Name>创建者ID</a:Name>
+<a:Code>creater_id</a:Code>
 <a:CreationDate>1713619231</a:CreationDate>
 <a:Creator>zbz</a:Creator>
 <a:ModificationDate>1787644784</a:ModificationDate>
@@ -4753,8 +4753,8 @@ DAT 1713619231</a:History>
 </o:Column>
 <o:Column Id="o23">
 <a:ObjectID>D7541C58-5CD5-4CCB-995A-23E687B2082A</a:ObjectID>
-<a:Name>修改人的用户ID</a:Name>
-<a:Code>updator_id</a:Code>
+<a:Name>更新者ID</a:Name>
+<a:Code>updater_id</a:Code>
 <a:CreationDate>1715303900</a:CreationDate>
 <a:Creator>zbz</a:Creator>
 <a:ModificationDate>1787644784</a:ModificationDate>
@@ -4768,7 +4768,7 @@ DAT 1715303900</a:History>
 </o:Column>
 <o:Column Id="o24">
 <a:ObjectID>5FB131EC-83F4-4CD0-BB61-067E560B42EB</a:ObjectID>
-<a:Name>修改时间戳</a:Name>
+<a:Name>更新时间戳</a:Name>
 <a:Code>update_ms</a:Code>
 <a:CreationDate>1715303900</a:CreationDate>
 <a:Creator>zbz</a:Creator>
@@ -5077,8 +5077,8 @@ DAT 1788920976</a:History>
 </o:Column>
 <o:Column Id="o43">
 <a:ObjectID>9E85BBF6-5BEF-431E-B1BC-E265763F1BEF</a:ObjectID>
-<a:Name>创建人的用户ID</a:Name>
-<a:Code>creator_id</a:Code>
+<a:Name>创建者ID</a:Name>
+<a:Code>creater_id</a:Code>
 <a:CreationDate>1758767692</a:CreationDate>
 <a:Creator>zlby</a:Creator>
 <a:ModificationDate>1787644784</a:ModificationDate>
@@ -5107,8 +5107,8 @@ DAT 1758767692</a:History>
 </o:Column>
 <o:Column Id="o45">
 <a:ObjectID>5FF6FDD5-9503-4FA0-B888-8432B7135DC4</a:ObjectID>
-<a:Name>修改人的用户ID</a:Name>
-<a:Code>updator_id</a:Code>
+<a:Name>更新者ID</a:Name>
+<a:Code>updater_id</a:Code>
 <a:CreationDate>1758767692</a:CreationDate>
 <a:Creator>zlby</a:Creator>
 <a:ModificationDate>1787644784</a:ModificationDate>
@@ -5122,7 +5122,7 @@ DAT 1758767692</a:History>
 </o:Column>
 <o:Column Id="o46">
 <a:ObjectID>FB02C264-2978-43BE-93F4-185A555B1163</a:ObjectID>
-<a:Name>修改时间戳</a:Name>
+<a:Name>更新时间戳</a:Name>
 <a:Code>update_ms</a:Code>
 <a:CreationDate>1758767692</a:CreationDate>
 <a:Creator>zlby</a:Creator>
@@ -5368,8 +5368,8 @@ DAT 1788920976</a:History>
 </o:Column>
 <o:Column Id="o61">
 <a:ObjectID>1BC686D8-7FD3-45DF-99C1-749957BA7C5C</a:ObjectID>
-<a:Name>创建人的用户ID</a:Name>
-<a:Code>creator_id</a:Code>
+<a:Name>创建者ID</a:Name>
+<a:Code>creater_id</a:Code>
 <a:CreationDate>1759204528</a:CreationDate>
 <a:Creator>zbz</a:Creator>
 <a:ModificationDate>1787644784</a:ModificationDate>
@@ -5398,8 +5398,8 @@ DAT 1759204528</a:History>
 </o:Column>
 <o:Column Id="o63">
 <a:ObjectID>44AF5DBF-08DE-4795-9D96-B1593FDAF890</a:ObjectID>
-<a:Name>修改人的用户ID</a:Name>
-<a:Code>updator_id</a:Code>
+<a:Name>更新者ID</a:Name>
+<a:Code>updater_id</a:Code>
 <a:CreationDate>1759204528</a:CreationDate>
 <a:Creator>zbz</a:Creator>
 <a:ModificationDate>1787644784</a:ModificationDate>
@@ -5413,7 +5413,7 @@ DAT 1759204528</a:History>
 </o:Column>
 <o:Column Id="o64">
 <a:ObjectID>B0F2F57C-4DE6-4685-B4CE-F909EFA816F6</a:ObjectID>
-<a:Name>修改时间戳</a:Name>
+<a:Name>更新时间戳</a:Name>
 <a:Code>update_ms</a:Code>
 <a:CreationDate>1759204528</a:CreationDate>
 <a:Creator>zbz</a:Creator>

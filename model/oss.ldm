@@ -1760,8 +1760,8 @@ LABL 0 新宋体,8,N</a:FontList>
 </o:EntityAttribute>
 <o:EntityAttribute Id="o24">
 <a:ObjectID>7A71C135-C51C-4446-BED6-8F09F899DFF6</a:ObjectID>
-<a:Name>创建人的用户ID</a:Name>
-<a:Code>creator_id</a:Code>
+<a:Name>创建者ID</a:Name>
+<a:Code>creater_id</a:Code>
 <a:CreationDate>1759203722</a:CreationDate>
 <a:Creator>zbz</a:Creator>
 <a:ModificationDate>1787644558</a:ModificationDate>
@@ -1784,8 +1784,8 @@ LABL 0 新宋体,8,N</a:FontList>
 </o:EntityAttribute>
 <o:EntityAttribute Id="o26">
 <a:ObjectID>1426FD08-782D-4CB9-9D64-69B8443580B0</a:ObjectID>
-<a:Name>修改人的用户ID</a:Name>
-<a:Code>updator_id</a:Code>
+<a:Name>更新者ID</a:Name>
+<a:Code>updater_id</a:Code>
 <a:CreationDate>1759203722</a:CreationDate>
 <a:Creator>zbz</a:Creator>
 <a:ModificationDate>1787644558</a:ModificationDate>
@@ -1796,7 +1796,7 @@ LABL 0 新宋体,8,N</a:FontList>
 </o:EntityAttribute>
 <o:EntityAttribute Id="o27">
 <a:ObjectID>7655A131-4414-478F-82E0-340ABEF955F8</a:ObjectID>
-<a:Name>修改时间戳</a:Name>
+<a:Name>更新时间戳</a:Name>
 <a:Code>update_ms</a:Code>
 <a:CreationDate>1759203722</a:CreationDate>
 <a:Creator>zbz</a:Creator>
@@ -1953,8 +1953,8 @@ LABL 0 新宋体,8,N</a:FontList>
 </o:EntityAttribute>
 <o:EntityAttribute Id="o38">
 <a:ObjectID>F1ECA043-3EC9-46BC-9981-548369F96C54</a:ObjectID>
-<a:Name>创建人的用户ID</a:Name>
-<a:Code>creator_id</a:Code>
+<a:Name>创建者ID</a:Name>
+<a:Code>creater_id</a:Code>
 <a:CreationDate>1759203235</a:CreationDate>
 <a:Creator>zbz</a:Creator>
 <a:ModificationDate>1787644626</a:ModificationDate>
@@ -1977,8 +1977,8 @@ LABL 0 新宋体,8,N</a:FontList>
 </o:EntityAttribute>
 <o:EntityAttribute Id="o40">
 <a:ObjectID>6B3812F5-56BC-4C98-962D-CD568D69C22C</a:ObjectID>
-<a:Name>修改人的用户ID</a:Name>
-<a:Code>updator_id</a:Code>
+<a:Name>更新者ID</a:Name>
+<a:Code>updater_id</a:Code>
 <a:CreationDate>1759203235</a:CreationDate>
 <a:Creator>zbz</a:Creator>
 <a:ModificationDate>1787644626</a:ModificationDate>
@@ -1989,7 +1989,7 @@ LABL 0 新宋体,8,N</a:FontList>
 </o:EntityAttribute>
 <o:EntityAttribute Id="o41">
 <a:ObjectID>021E77E2-390A-4819-B3E4-A5AF21B079C2</a:ObjectID>
-<a:Name>修改时间戳</a:Name>
+<a:Name>更新时间戳</a:Name>
 <a:Code>update_ms</a:Code>
 <a:CreationDate>1758767331</a:CreationDate>
 <a:Creator>zlby</a:Creator>
@@ -2094,8 +2094,8 @@ LABL 0 新宋体,8,N</a:FontList>
 </o:EntityAttribute>
 <o:EntityAttribute Id="o48">
 <a:ObjectID>4ED95EDC-E4C8-4B71-A9CF-8DF0BE360EC6</a:ObjectID>
-<a:Name>创建人的用户ID</a:Name>
-<a:Code>creator_id</a:Code>
+<a:Name>创建者ID</a:Name>
+<a:Code>creater_id</a:Code>
 <a:CreationDate>1759204359</a:CreationDate>
 <a:Creator>zbz</a:Creator>
 <a:ModificationDate>1787644526</a:ModificationDate>
@@ -2118,8 +2118,8 @@ LABL 0 新宋体,8,N</a:FontList>
 </o:EntityAttribute>
 <o:EntityAttribute Id="o50">
 <a:ObjectID>F0505725-40D1-48FB-BC4D-CA026A3FC399</a:ObjectID>
-<a:Name>修改人的用户ID</a:Name>
-<a:Code>updator_id</a:Code>
+<a:Name>更新者ID</a:Name>
+<a:Code>updater_id</a:Code>
 <a:CreationDate>1759204359</a:CreationDate>
 <a:Creator>zbz</a:Creator>
 <a:ModificationDate>1787644526</a:ModificationDate>
@@ -2130,7 +2130,7 @@ LABL 0 新宋体,8,N</a:FontList>
 </o:EntityAttribute>
 <o:EntityAttribute Id="o51">
 <a:ObjectID>842F7437-23AB-433D-9A47-0AC317BA38FC</a:ObjectID>
-<a:Name>修改时间戳</a:Name>
+<a:Name>更新时间戳</a:Name>
 <a:Code>update_ms</a:Code>
 <a:CreationDate>1759204359</a:CreationDate>
 <a:Creator>zbz</a:Creator>

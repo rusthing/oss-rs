@@ -16,9 +16,9 @@ pub struct Model {
     pub size: Option<i64>,
     #[sea_orm(unique_key = "ak_size_and_hash_oss_obj")]
     pub hash: Option<String>,
-    pub creator_id: i64,
+    pub creater_id: i64,
     pub create_ms: i64,
-    pub updator_id: i64,
+    pub updater_id: i64,
     pub update_ms: i64,
     #[sea_orm(has_many)]
     pub oss_obj_refs: HasMany<super::oss_obj_ref::Entity>,
