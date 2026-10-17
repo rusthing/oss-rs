@@ -6,8 +6,8 @@ use robotech::macros::api_client;
 
 #[api_client]
 pub struct OssApiClient {
-    pub file_client: OssFileApiClient,
-    pub bucket_client: OssBucketApiClient,
-    pub obj_client: OssObjApiClient,
-    pub obj_ref_client: OssObjRefApiClient,
+    pub file: OssFileApiClient,
+    pub bucket: OssBucketApiClient,
+    pub obj: OssObjApiClient,
+    pub obj_ref: OssObjRefApiClient,
 }
