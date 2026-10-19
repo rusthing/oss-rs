@@ -87,11 +87,10 @@ download-buffer-size = "2MiB"          # 下载缓冲区大小
 
 [db]
 url = "postgres://ossrs:ossrs@127.0.0.1/ossrs"  # 数据库连接URL
-
-[id-worker]
-epoch = 1758108749211                  # ID生成器纪元时间
-node = 0                               # 0 = 自动从注册中心分配；>0 为显式指定（0 ~ 2^node-bits-1，node-bits 默认 4 即 0-15）
 ```
+
+> ID 生成器（雪花算法）不再需要配置：框架启动时自动从注册中心分配 `node`，
+> 其余参数走默认值。只有需要覆盖默认 epoch 或固定 `node` 时才加 `[id-worker]` 段。
 
 ## 环境要求
 
