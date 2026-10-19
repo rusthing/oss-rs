@@ -77,5 +77,4 @@ key = "certs/key.pem"
 
 [id-worker]
 epoch = 1758108749211
-machine-id = 1
-node-id = 1
+node = 1
