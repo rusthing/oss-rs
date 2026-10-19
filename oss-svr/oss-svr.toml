@@ -77,4 +77,5 @@ key = "certs/key.pem"
 
 [id-worker]
 epoch = 1758108749211
-node = 1
+# 0 = 自动从注册中心分配（同一服务的副本自动错开），>0 = 显式指定
+node = 0

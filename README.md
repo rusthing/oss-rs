@@ -90,7 +90,7 @@ url = "postgres://ossrs:ossrs@127.0.0.1/ossrs"  # 数据库连接URL
 
 [id-worker]
 epoch = 1758108749211                  # ID生成器纪元时间
-node = 1                               # 节点ID（0 ~ 2^node-bits-1，node-bits 默认 4 即 0-15）
+node = 0                               # 0 = 自动从注册中心分配；>0 为显式指定（0 ~ 2^node-bits-1，node-bits 默认 4 即 0-15）
 ```
 
 ## 环境要求

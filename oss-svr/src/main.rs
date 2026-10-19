@@ -1,7 +1,7 @@
 use anyhow::anyhow;
 use config::Value;
-use idworker::setup_id_worker;
 use oss_svr::config::{setup_oss_config, AppConfig};
+use robotech::app::setup_id_worker;
 use robotech::db::setup_db_conn;
 use robotech::macros::{bootstrap, db_migrate, log_call};
 use robotech::web::setup_web_server;
@@ -21,7 +21,7 @@ async fn setup(
     let db_url = app_config.db.get_url();
     db_migrate!(db_url);
 
-    setup_id_worker(app_config.id_worker.clone(), changed)?;
+    setup_id_worker(app_config.id_worker.clone(), changed).await?;
     setup_oss_config(app_config.oss.clone(), changed);
     setup_db_conn(app_config.db.clone(), changed).await?;
 
