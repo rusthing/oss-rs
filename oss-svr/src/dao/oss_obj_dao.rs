@@ -6,7 +6,6 @@ use sea_orm::{ColumnTrait, QuerySelect, QueryTrait};
     unique_keys: [
         ("path", "对象路径"),
         ("size,hash", "对象大小与Hash"),
-        ("url", "对象 URL"),
     ],
     like_columns: [
         Column::Path,
