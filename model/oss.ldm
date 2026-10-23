@@ -1834,7 +1834,7 @@ LABL 0 新宋体,8,N</a:FontList>
 <o:Identifier Id="o30">
 <a:ObjectID>F502C059-DE5E-4471-B7E5-67F10C546C42</a:ObjectID>
 <a:Name>URL</a:Name>
-<a:Code>URL</a:Code>
+<a:Code>download_url</a:Code>
 <a:CreationDate>1766646273</a:CreationDate>
 <a:Creator>zbz</a:Creator>
 <a:ModificationDate>1766646301</a:ModificationDate>

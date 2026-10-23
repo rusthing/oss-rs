@@ -63,7 +63,7 @@ create table oss_obj_ref
    updater_id           bigint not null  comment '更新者ID',
    update_ms            bigint not null  comment '更新时间戳',
    primary key (id),
-   unique key AK_URL (download_url)
+   unique key AK_DOWNLOAD_URL (download_url)
 );
 
 alter table oss_obj_ref comment '对象引用';

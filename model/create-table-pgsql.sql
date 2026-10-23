@@ -127,7 +127,7 @@ create table oss_obj_ref (
    updater_id           INT8                 not null,
    update_ms            INT8                 not null,
    constraint PK_OSS_OBJ_REF primary key (id),
-   constraint AK_URL_OSS_OBJ_REF unique (download_url)
+   constraint AK_DOWNLOAD_URL_OSS_OBJ_REF unique (download_url)
 );
 
 comment on table oss_obj_ref is
