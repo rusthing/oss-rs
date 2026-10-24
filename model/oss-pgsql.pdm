@@ -4685,7 +4685,8 @@ DAT 1758091116</a:History>
 <a:ModificationDate>1787390183</a:ModificationDate>
 <a:Modifier>张柏子</a:Modifier>
 <a:Comment>路径
-存储文件的路径</a:Comment>
+存储文件的路径
+@len 1..=255</a:Comment>
 <a:History>ORG {C2D4B21F-D7F1-4586-9171-5C5BE39A7A11}
 DAT 1713619231</a:History>
 <a:DataType>VARCHAR(255)</a:DataType>
@@ -4715,6 +4716,8 @@ DAT 1713619231</a:History>
 <a:Creator>zlby</a:Creator>
 <a:ModificationDate>1773474801</a:ModificationDate>
 <a:Modifier>zbz</a:Modifier>
+<a:Comment>Hash
+@len 0..=64</a:Comment>
 <a:History>ORG {D021F6F3-5E1B-4CBB-8AF4-F98A89D091E3}
 DAT 1758091116</a:History>
 <a:DataType>VARCHAR(64)</a:DataType>
@@ -5009,7 +5012,8 @@ DAT 1759204528</a:History>
 <a:Creator>zlby</a:Creator>
 <a:ModificationDate>1758767697</a:ModificationDate>
 <a:Modifier>zlby</a:Modifier>
-<a:Comment>名称(上传时的文件原名，带后缀名)</a:Comment>
+<a:Comment>名称(上传时的文件原名，带后缀名)
+@len 1..=100</a:Comment>
 <a:History>ORG {44DD3881-7056-48AC-A2BB-B5D746BF0152}
 DAT 1758767692</a:History>
 <a:DataType>VARCHAR(100)</a:DataType>
@@ -5025,6 +5029,8 @@ DAT 1758767692</a:History>
 <a:Creator>zbz</a:Creator>
 <a:ModificationDate>1773653187</a:ModificationDate>
 <a:Modifier>zbz</a:Modifier>
+<a:Comment>文件扩展名
+@len 0..=10</a:Comment>
 <a:History>ORG {8D97CD86-1311-42DE-94C5-F7F83A92FD19}
 DAT 1759204528</a:History>
 <a:DataType>VARCHAR(10)</a:DataType>
@@ -5039,6 +5045,8 @@ DAT 1759204528</a:History>
 <a:Creator>zbz</a:Creator>
 <a:ModificationDate>1773650804</a:ModificationDate>
 <a:Modifier>zbz</a:Modifier>
+<a:Comment>下载URL
+@len 1..=200</a:Comment>
 <a:History>ORG {22422230-353B-46C4-A3B9-13C94A4F654D}
 DAT 1766646429</a:History>
 <a:DataType>VARCHAR(200)</a:DataType>
@@ -5054,6 +5062,8 @@ DAT 1766646429</a:History>
 <a:Creator>zbz</a:Creator>
 <a:ModificationDate>1773650804</a:ModificationDate>
 <a:Modifier>zbz</a:Modifier>
+<a:Comment>预览URL
+@len 0..=200</a:Comment>
 <a:History>ORG {14E17520-D2A9-44FC-A28E-E576A985C3D3}
 DAT 1773650799</a:History>
 <a:DataType>VARCHAR(200)</a:DataType>
@@ -5330,6 +5340,8 @@ DAT 1759204528</a:History>
 <a:Creator>zbz</a:Creator>
 <a:ModificationDate>1759204533</a:ModificationDate>
 <a:Modifier>zbz</a:Modifier>
+<a:Comment>名称
+@len 1..=50</a:Comment>
 <a:History>ORG {96287907-7A6A-4C21-A1F7-9F2897419A97}
 DAT 1759204528</a:History>
 <a:DataType>VARCHAR(50)</a:DataType>
@@ -5345,6 +5357,8 @@ DAT 1759204528</a:History>
 <a:Creator>zbz</a:Creator>
 <a:ModificationDate>1760081846</a:ModificationDate>
 <a:Modifier>zbz</a:Modifier>
+<a:Comment>备注
+@len 0..=50</a:Comment>
 <a:History>ORG {10E765E8-6832-4DF0-9D28-7BA72EABDA5B}
 DAT 1760081842</a:History>
 <a:DataType>VARCHAR(50)</a:DataType>

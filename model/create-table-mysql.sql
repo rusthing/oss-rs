@@ -10,8 +10,10 @@
 create table oss_bucket
 (
    id                   bigint not null  comment 'ID',
-   name                 varchar(50) not null  comment '名称',
-   remark               varchar(50)  comment '备注',
+   name                 varchar(50) not null  comment '名称
+@len 1..=50',
+   remark               varchar(50)  comment '备注
+@len 0..=50',
    enabled              bit(1) not null default true  comment '启用',
    creater_id           bigint not null  comment '创建者ID',
    create_ms            bigint not null  comment '创建时间戳',
@@ -33,7 +35,8 @@ create table oss_obj
    path                 varchar(255) not null  comment '路径
              存储文件的路径',
    size                 bigint  comment '大小',
-   hash                 varchar(64)  comment 'Hash',
+   hash                 varchar(64)  comment 'Hash
+@len 0..=64',
    creater_id           bigint not null  comment '创建者ID',
    create_ms            bigint not null  comment '创建时间戳',
    updater_id           bigint not null  comment '更新者ID',
@@ -53,10 +56,14 @@ create table oss_obj_ref
    id                   bigint not null  comment 'ID',
    obj_id               bigint not null  comment '对象ID',
    bucket_id            bigint not null  comment '桶ID',
-   name                 varchar(100) not null  comment '名称(上传时的文件原名，带后缀名)',
-   ext                  varchar(10)  comment '文件扩展名',
-   download_url         varchar(200) not null  comment '下载URL',
-   preview_url          varchar(200)  comment '预览URL',
+   name                 varchar(100) not null  comment '名称(上传时的文件原名，带后缀名)
+@len 1..=100',
+   ext                  varchar(10)  comment '文件扩展名
+@len 0..=10',
+   download_url         varchar(200) not null  comment '下载URL
+@len 1..=200',
+   preview_url          varchar(200)  comment '预览URL
+@len 0..=200',
    enabled              bit(1) not null default true  comment '启用',
    creater_id           bigint not null  comment '创建者ID',
    create_ms            bigint not null  comment '创建时间戳',

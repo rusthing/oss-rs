@@ -27,10 +27,12 @@ comment on column oss_bucket.id is
 'ID';
 
 comment on column oss_bucket.name is
-'名称';
+'名称
+@len 1..=50';
 
 comment on column oss_bucket.remark is
-'备注';
+'备注
+@len 0..=50';
 
 comment on column oss_bucket.enabled is
 '启用';
@@ -83,13 +85,15 @@ comment on column oss_obj.completed is
 
 comment on column oss_obj.path is
 '路径
-存储文件的路径';
+存储文件的路径
+@len 1..=255';
 
 comment on column oss_obj.size is
 '大小';
 
 comment on column oss_obj.hash is
-'Hash';
+'Hash
+@len 0..=64';
 
 comment on column oss_obj.creater_id is
 '创建者ID';
@@ -143,16 +147,20 @@ comment on column oss_obj_ref.bucket_id is
 '桶ID';
 
 comment on column oss_obj_ref.name is
-'名称(上传时的文件原名，带后缀名)';
+'名称(上传时的文件原名，带后缀名)
+@len 1..=100';
 
 comment on column oss_obj_ref.ext is
-'文件扩展名';
+'文件扩展名
+@len 0..=10';
 
 comment on column oss_obj_ref.download_url is
-'下载URL';
+'下载URL
+@len 1..=200';
 
 comment on column oss_obj_ref.preview_url is
-'预览URL';
+'预览URL
+@len 0..=200';
 
 comment on column oss_obj_ref.enabled is
 '启用';

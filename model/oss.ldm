@@ -1729,7 +1729,8 @@ LABL 0 新宋体,8,N</a:FontList>
 <a:ModificationDate>1787380098</a:ModificationDate>
 <a:Modifier>张柏子</a:Modifier>
 <a:Comment>路径
-存储文件的路径</a:Comment>
+存储文件的路径
+@len 1..=255</a:Comment>
 <a:DataType>VA255</a:DataType>
 <a:Length>255</a:Length>
 <a:LogicalAttribute.Mandatory>1</a:LogicalAttribute.Mandatory>
@@ -1754,6 +1755,8 @@ LABL 0 新宋体,8,N</a:FontList>
 <a:Creator>zlby</a:Creator>
 <a:ModificationDate>1773474738</a:ModificationDate>
 <a:Modifier>zbz</a:Modifier>
+<a:Comment>Hash
+@len 0..=64</a:Comment>
 <a:DataType>VA64</a:DataType>
 <a:Length>64</a:Length>
 <a:GlobalObjectID/>
@@ -1895,7 +1898,8 @@ LABL 0 新宋体,8,N</a:FontList>
 <a:Creator>zlby</a:Creator>
 <a:ModificationDate>1758767489</a:ModificationDate>
 <a:Modifier>zlby</a:Modifier>
-<a:Comment>名称(上传时的文件原名，带后缀名)</a:Comment>
+<a:Comment>名称(上传时的文件原名，带后缀名)
+@len 1..=100</a:Comment>
 <a:DataType>VA100</a:DataType>
 <a:Length>100</a:Length>
 <a:LogicalAttribute.Mandatory>1</a:LogicalAttribute.Mandatory>
@@ -1909,6 +1913,8 @@ LABL 0 新宋体,8,N</a:FontList>
 <a:Creator>zbz</a:Creator>
 <a:ModificationDate>1773653147</a:ModificationDate>
 <a:Modifier>zbz</a:Modifier>
+<a:Comment>文件扩展名
+@len 0..=10</a:Comment>
 <a:DataType>VA10</a:DataType>
 <a:Length>10</a:Length>
 <a:GlobalObjectID/>
@@ -1921,6 +1927,8 @@ LABL 0 新宋体,8,N</a:FontList>
 <a:Creator>zbz</a:Creator>
 <a:ModificationDate>1773650703</a:ModificationDate>
 <a:Modifier>zbz</a:Modifier>
+<a:Comment>下载URL
+@len 1..=200</a:Comment>
 <a:DataType>VA200</a:DataType>
 <a:Length>200</a:Length>
 <a:LogicalAttribute.Mandatory>1</a:LogicalAttribute.Mandatory>
@@ -1934,6 +1942,8 @@ LABL 0 新宋体,8,N</a:FontList>
 <a:Creator>zbz</a:Creator>
 <a:ModificationDate>1773650739</a:ModificationDate>
 <a:Modifier>zbz</a:Modifier>
+<a:Comment>预览URL
+@len 0..=200</a:Comment>
 <a:DataType>VA200</a:DataType>
 <a:Length>200</a:Length>
 <a:GlobalObjectID/>
@@ -2062,6 +2072,8 @@ LABL 0 新宋体,8,N</a:FontList>
 <a:Creator>zbz</a:Creator>
 <a:ModificationDate>1759981504</a:ModificationDate>
 <a:Modifier>zbz</a:Modifier>
+<a:Comment>名称
+@len 1..=50</a:Comment>
 <a:DataType>VA50</a:DataType>
 <a:Length>50</a:Length>
 <a:LogicalAttribute.Mandatory>1</a:LogicalAttribute.Mandatory>
@@ -2075,6 +2087,8 @@ LABL 0 新宋体,8,N</a:FontList>
 <a:Creator>zbz</a:Creator>
 <a:ModificationDate>1760081831</a:ModificationDate>
 <a:Modifier>zbz</a:Modifier>
+<a:Comment>备注
+@len 0..=50</a:Comment>
 <a:DataType>VA50</a:DataType>
 <a:Length>50</a:Length>
 <a:GlobalObjectID/>
